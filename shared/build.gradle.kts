@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
+    kotlin("plugin.serialization").version("1.9.22")
+    id("app.cash.sqldelight").version("2.0.0-alpha05")
 }
 
 kotlin {
@@ -25,10 +27,16 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            //put your multiplatform dependencies here
+            implementation(libs.sqldelight.runtime)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+        }
+        androidMain.dependencies {
+            implementation(libs.sqldelight.android.driver)
+        }
+        iosMain.dependencies {
+            implementation(libs.sqldelight.native.driver)
         }
     }
 }
@@ -43,4 +51,16 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+}
+
+sqldelight {
+    databases {
+        create("Database") {
+            packageName.set("com.ajay.seenu.expensetracker.sqldelight")
+        }
+    }
+}
+
+task("testClasses").doLast {
+    println("This is a dummy testClasses task")
 }

@@ -1,5 +1,6 @@
 package com.ajay.seenu.expensetracker
 
+import app.cash.sqldelight.db.SqlDriver
 import platform.UIKit.UIDevice
 
 class IOSPlatform: Platform {
@@ -7,3 +8,9 @@ class IOSPlatform: Platform {
 }
 
 actual fun getPlatform(): Platform = IOSPlatform()
+
+//actual class DriverFactory {
+//    actual fun createDriver(): SqlDriver {
+//        return NativeSqliteDriver(Database.Schema, "test.db")
+//    }
+//}
