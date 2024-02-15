@@ -28,6 +28,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(libs.sqldelight.runtime)
+            implementation(libs.koin.core)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -55,8 +56,8 @@ android {
 
 sqldelight {
     databases {
-        create("Database") {
-            packageName.set("com.ajay.seenu.expensetracker.sqldelight")
+        create("ExpenseDatabase") {
+            packageName.set("com.ajay.seenu.expensetracker")
         }
     }
 }
