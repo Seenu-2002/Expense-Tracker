@@ -3,6 +3,7 @@ package com.ajay.seenu.expensetracker
 import app.cash.sqldelight.EnumColumnAdapter
 import app.cash.sqldelight.db.SqlDriver
 
+const val DATABASE_NAME = "expenseDatabase.db"
 expect class DriverFactory {
     fun createDriver(): SqlDriver
 }
