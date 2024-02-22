@@ -1,0 +1,44 @@
+import com.ajay.seenu.expensetracker.entity.Category;
+import com.ajay.seenu.expensetracker.entity.PaymentType;
+
+CREATE TABLE Income (
+    amount INTEGER NOT NULL,
+    category TEXT AS Category NOT NULL,
+    paymentType TEXT AS PaymentType NOT NULL
+);
+
+CREATE TABLE Expense (
+    amount INTEGER NOT NULL,
+    category TEXT AS Category NOT NULL,
+    paymentType TEXT AS PaymentType NOT NULL
+);
+
+INSERT INTO Income(amount, category, paymentType)
+VALUES (100, "SHOPPING", "CASH"),
+(200, "VEHICLE","CARD"),
+(80, "SHOPPING", "CASH"),
+(500, "SHOPPING", "CARD"),
+(100, "VEHICLE", "UPI");
+
+INSERT INTO Expense(amount, category, paymentType)
+VALUES (100, "SHOPPING", "CASH"),
+(200, "VEHICLE","CARD"),
+(80, "SHOPPING", "CASH"),
+(500, "SHOPPING", "CARD"),
+(100, "VEHICLE", "UPI");
+
+getAllIncome:
+SELECT *
+FROM Income;
+
+addIncome:
+INSERT INTO Income(amount, category, paymentType)
+VALUES (?, ?, ?);
+
+getAllExpenses:
+SELECT *
+FROM Income;
+
+addExpense:
+INSERT INTO Expense(amount, category, paymentType)
+VALUES (?, ?, ?);
