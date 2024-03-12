@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,11 +19,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ajay.seenu.expensetracker.DriverFactory
-import com.ajay.seenu.expensetracker.Income
-import com.ajay.seenu.expensetracker.IncomeDataSourceImpl
+import com.ajay.seenu.expensetracker.TransactionDataSourceImpl
+import com.ajay.seenu.expensetracker.TransactionDetail
 import com.ajay.seenu.expensetracker.createDatabase
 import com.ajay.seenu.expensetracker.entity.Category
 import com.ajay.seenu.expensetracker.entity.PaymentType
+import com.ajay.seenu.expensetracker.entity.TransactionType
 
 //@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -35,18 +37,26 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val viewModel: IncomeViewModel = viewModel(
-                        factory = IncomeViewModelFactory(
-                            IncomeRepository(
-                                IncomeDataSourceImpl(createDatabase(DriverFactory(context)))
+                    val viewModel: TransactionViewModel = viewModel(
+                        factory = TransactionViewModelFactory(
+                            TransactionRepository(
+                                TransactionDataSourceImpl(createDatabase(DriverFactory(context)))
                             )
                         )
                     )
-                    val incomes = viewModel.incomes
+                    val transactions = viewModel.transactions
                         .collectAsStateWithLifecycle(initialValue = listOf()).value
-                    GreetingView(incomes) {
-                        viewModel.addIncome(Income(20, Category.FOOD_AND_DRINKS, PaymentType.UPI))
-                    }
+                    GreetingView(transactions,
+                        onAdd = {
+                            viewModel.addTransaction(type = TransactionType.INCOME,
+                                amount = 20,
+                                category = Category.FOOD_AND_DRINKS,
+                                paymentType = PaymentType.UPI,
+                                null, null, null, null)
+                        },
+                        onDeleteAll = {
+                            viewModel.deleteAllTransactions()
+                        })
                 }
             }
         }
@@ -54,18 +64,25 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun GreetingView(incomes: List<Income>, onClick: () -> Unit) {
+fun GreetingView(transactions: List<TransactionDetail>,
+                 onAdd: () -> Unit,
+                 onDeleteAll: () -> Unit) {
     Column {
         LazyColumn(modifier = Modifier.weight(1f)) {
-            items(incomes) {
+            items(transactions) {
                 Column {
                     Text(text = it.amount.toString())
                     Text(text = it.category.toString())
                 }
             }
         }
-        Button(onClick = onClick) {
-            Text(text = "Add")
+        Row {
+            Button(onClick = onAdd) {
+                Text(text = "Add")
+            }
+            Button(onClick = onDeleteAll) {
+                Text(text = "Delete All")
+            }
         }
     }
 }
@@ -74,6 +91,9 @@ fun GreetingView(incomes: List<Income>, onClick: () -> Unit) {
 @Composable
 fun DefaultPreview() {
     MyApplicationTheme {
-        GreetingView(listOf(Income(100, Category.SHOPPING, PaymentType.CARD))){}
+        GreetingView(listOf(TransactionDetail(1,TransactionType.EXPENSE,100, Category.SHOPPING, PaymentType.CARD,
+            null, null, null, null)
+        ),
+            onAdd = {}, onDeleteAll = {})
     }
 }
