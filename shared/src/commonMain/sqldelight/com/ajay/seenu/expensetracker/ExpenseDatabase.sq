@@ -1,0 +1,47 @@
+import com.ajay.seenu.expensetracker.entity.Category;
+import com.ajay.seenu.expensetracker.entity.PaymentType;
+import com.ajay.seenu.expensetracker.entity.TransactionType;
+
+CREATE TABLE TransactionDetail (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    type TEXT AS TransactionType NOT NULL,
+    amount INTEGER NOT NULL,
+    category TEXT AS Category NOT NULL,
+    paymentType TEXT AS PaymentType NOT NULL,
+    note TEXT,
+    date TEXT,
+    payer TEXT,
+    place TEXT
+);
+
+INSERT INTO TransactionDetail(type, amount, category, paymentType)
+VALUES ("INCOME",100, "SHOPPING", "CASH"),
+("INCOME",200, "VEHICLE","CARD"),
+("EXPENSE",80, "SHOPPING", "CASH"),
+("INCOME",500, "SHOPPING", "CARD"),
+("EXPENSE",100, "VEHICLE", "UPI");
+
+getAllTransactions:
+SELECT *
+FROM TransactionDetail;
+
+getAllTransactionsByType:
+SELECT *
+FROM TransactionDetail WHERE type = ?;
+
+getTransaction:
+SELECT *
+FROM TransactionDetail WHERE id = ?;
+
+addTransaction:
+INSERT INTO TransactionDetail(type, amount, category, paymentType, note, date, payer, place)
+VALUES (?,?, ?, ?, ?, ?, ?, ?);
+
+deleteAllTransactions:
+DELETE FROM TransactionDetail;
+
+deleteAllTransactionsByType:
+DELETE FROM TransactionDetail WHERE type = ?;
+
+deleteTransaction:
+DELETE FROM TransactionDetail WHERE id = ?;

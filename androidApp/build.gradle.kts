@@ -55,11 +55,17 @@ dependencies {
     implementation(libs.compose.material3)
     implementation(libs.androidx.activity.compose)
     implementation(libs.compose.material)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     debugImplementation(libs.compose.ui.tooling)
 
     // Hilt dependencies
     implementation(libs.hilt)
+    implementation(libs.androidx.hilt.navigation.compose)
     kapt(libs.hilt.compiler)
+
+    // Koin dependencies
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose)
 
     // Compose Navigation dependencies
     implementation(libs.compose.navigation)
