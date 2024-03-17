@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
@@ -10,7 +12,7 @@ android {
     compileSdk = 34
     defaultConfig {
         applicationId = "com.ajay.seenu.expensetracker.android"
-        minSdk = 24
+        minSdk = 25
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -40,14 +42,28 @@ android {
     }
 }
 
+tasks.withType<KotlinCompile>().configureEach {
+    kotlinOptions {
+        freeCompilerArgs = freeCompilerArgs + "-Xcontext-receivers"
+    }
+}
+
 dependencies {
     implementation(projects.shared)
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.compose.material)
     debugImplementation(libs.compose.ui.tooling)
 
+    // Hilt dependencies
     implementation(libs.hilt)
     kapt(libs.hilt.compiler)
+
+    // Compose Navigation dependencies
+    implementation(libs.compose.navigation)
+
+    // Constraint layout
+    implementation(libs.compose.constraint.layout)
 }
