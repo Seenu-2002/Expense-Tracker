@@ -30,11 +30,23 @@ kotlin {
             implementation(libs.sqldelight.runtime)
             implementation(libs.koin.core)
         }
-        commonTest.dependencies {
-            implementation(libs.kotlin.test)
+        commonTest{
+            dependencies {
+                implementation(libs.kotlin.test)
+                implementation(libs.coroutines.test)
+            }
+            languageSettings.apply {
+                optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
+            }
         }
         androidMain.dependencies {
             implementation(libs.sqldelight.android.driver)
+        }
+        val androidUnitTest by getting {
+            dependencies {
+                implementation(libs.androidx.test.junit)
+                implementation(libs.sqlDelight.driver)
+            }
         }
         iosMain.dependencies {
             implementation(libs.sqldelight.native.driver)
@@ -52,6 +64,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+}
+dependencies {
+    implementation(libs.androidx.core.ktx)
 }
 
 sqldelight {

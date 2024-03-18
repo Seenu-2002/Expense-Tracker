@@ -1,13 +1,20 @@
 package com.ajay.seenu.expensetracker
 
+import app.cash.sqldelight.EnumColumnAdapter
+import app.cash.sqldelight.db.SqlDriver
 import com.ajay.seenu.expensetracker.entity.Category
 import com.ajay.seenu.expensetracker.entity.PaymentType
 import com.ajay.seenu.expensetracker.entity.TransactionType
 
 class TransactionDataSourceImpl(
-    private val database: ExpenseDatabase
+    private val driver: SqlDriver
 ): TransactionDataSource {
-    private val queries = database.expenseDatabaseQueries
+    private val queries = ExpenseDatabase(driver,
+        TransactionDetailAdapter = TransactionDetail.Adapter(
+            typeAdapter = EnumColumnAdapter(),
+            categoryAdapter = EnumColumnAdapter(),
+            paymentTypeAdapter = EnumColumnAdapter()
+        )).expenseDatabaseQueries
 
     override fun getAllTransactions(): List<TransactionDetail> {
         return queries.getAllTransactions().executeAsList()

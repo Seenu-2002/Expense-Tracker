@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
                     val viewModel: TransactionViewModel = viewModel(
                         factory = TransactionViewModelFactory(
                             TransactionRepository(
-                                TransactionDataSourceImpl(createDatabase(DriverFactory(context)))
+                                TransactionDataSourceImpl(DriverFactory(context).createDriver())
                             )
                         )
                     )
