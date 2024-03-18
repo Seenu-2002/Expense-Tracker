@@ -29,3 +29,9 @@ jobs:
 
       - name: Run tests
         run: ./gradlew test
+
+  no-dep-job:
+    runs-on: macOS-latest
+    steps:
+      - name: No dependencies job
+        run: echo "This job has no dependencies."
