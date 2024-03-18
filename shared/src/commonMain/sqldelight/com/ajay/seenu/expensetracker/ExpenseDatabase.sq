@@ -1,44 +1,47 @@
 import com.ajay.seenu.expensetracker.entity.Category;
 import com.ajay.seenu.expensetracker.entity.PaymentType;
+import com.ajay.seenu.expensetracker.entity.TransactionType;
 
-CREATE TABLE Income (
+CREATE TABLE TransactionDetail (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    type TEXT AS TransactionType NOT NULL,
     amount INTEGER NOT NULL,
     category TEXT AS Category NOT NULL,
-    paymentType TEXT AS PaymentType NOT NULL
+    paymentType TEXT AS PaymentType NOT NULL,
+    note TEXT,
+    date TEXT,
+    payer TEXT,
+    place TEXT
 );
 
-CREATE TABLE Expense (
-    amount INTEGER NOT NULL,
-    category TEXT AS Category NOT NULL,
-    paymentType TEXT AS PaymentType NOT NULL
-);
+INSERT INTO TransactionDetail(type, amount, category, paymentType)
+VALUES ("INCOME",100, "SHOPPING", "CASH"),
+("INCOME",200, "VEHICLE","CARD"),
+("EXPENSE",80, "SHOPPING", "CASH"),
+("INCOME",500, "SHOPPING", "CARD"),
+("EXPENSE",100, "VEHICLE", "UPI");
 
-INSERT INTO Income(amount, category, paymentType)
-VALUES (100, "SHOPPING", "CASH"),
-(200, "VEHICLE","CARD"),
-(80, "SHOPPING", "CASH"),
-(500, "SHOPPING", "CARD"),
-(100, "VEHICLE", "UPI");
-
-INSERT INTO Expense(amount, category, paymentType)
-VALUES (100, "SHOPPING", "CASH"),
-(200, "VEHICLE","CARD"),
-(80, "SHOPPING", "CASH"),
-(500, "SHOPPING", "CARD"),
-(100, "VEHICLE", "UPI");
-
-getAllIncome:
+getAllTransactions:
 SELECT *
-FROM Income;
+FROM TransactionDetail;
 
-addIncome:
-INSERT INTO Income(amount, category, paymentType)
-VALUES (?, ?, ?);
-
-getAllExpenses:
+getAllTransactionsByType:
 SELECT *
-FROM Income;
+FROM TransactionDetail WHERE type = ?;
 
-addExpense:
-INSERT INTO Expense(amount, category, paymentType)
-VALUES (?, ?, ?);
+getTransaction:
+SELECT *
+FROM TransactionDetail WHERE id = ?;
+
+addTransaction:
+INSERT INTO TransactionDetail(type, amount, category, paymentType, note, date, payer, place)
+VALUES (?,?, ?, ?, ?, ?, ?, ?);
+
+deleteAllTransactions:
+DELETE FROM TransactionDetail;
+
+deleteAllTransactionsByType:
+DELETE FROM TransactionDetail WHERE type = ?;
+
+deleteTransaction:
+DELETE FROM TransactionDetail WHERE id = ?;

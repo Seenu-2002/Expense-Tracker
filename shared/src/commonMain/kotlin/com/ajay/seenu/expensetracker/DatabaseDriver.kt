@@ -11,11 +11,8 @@ expect class DriverFactory {
 fun createDatabase(driverFactory: DriverFactory): ExpenseDatabase {
     val driver = driverFactory.createDriver()
     return ExpenseDatabase(driver,
-        IncomeAdapter = Income.Adapter(
-            categoryAdapter = EnumColumnAdapter(),
-            paymentTypeAdapter = EnumColumnAdapter()
-        ),
-        ExpenseAdapter = Expense.Adapter(
+        TransactionDetailAdapter = TransactionDetail.Adapter(
+            typeAdapter = EnumColumnAdapter(),
             categoryAdapter = EnumColumnAdapter(),
             paymentTypeAdapter = EnumColumnAdapter()
         ))
