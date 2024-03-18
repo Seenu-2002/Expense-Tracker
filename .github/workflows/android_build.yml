@@ -25,6 +25,7 @@ jobs:
       - name: Grant permissions for Gradle
         run: chmod +x ./gradlew
 
+
       - name: Run Gradle Wrapper
         run: ./gradlew wrapper
 
