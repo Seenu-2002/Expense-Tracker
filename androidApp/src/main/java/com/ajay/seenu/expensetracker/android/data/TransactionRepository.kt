@@ -1,4 +1,4 @@
-package com.ajay.seenu.expensetracker.android
+package com.ajay.seenu.expensetracker.android.data
 
 import com.ajay.seenu.expensetracker.TransactionDataSource
 import com.ajay.seenu.expensetracker.TransactionDetail
@@ -9,12 +9,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
+class TransactionRepository @Inject constructor(private val dataSource: TransactionDataSource) {
 
-class TransactionRepository(private val dataSource: TransactionDataSource) {
-
-    fun getAllTransactions(): Flow<List<TransactionDetail>> {
-        return listOf(dataSource.getAllTransactions()).asFlow()
+    fun getAllTransactions(): List<TransactionDetail> {
+        return dataSource.getAllTransactions()
     }
 
     fun getAllTransactionsByType(type: TransactionType): Flow<List<TransactionDetail>> {

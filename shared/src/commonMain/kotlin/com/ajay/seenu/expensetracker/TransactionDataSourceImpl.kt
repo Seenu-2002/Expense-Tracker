@@ -4,7 +4,8 @@ import com.ajay.seenu.expensetracker.entity.Category
 import com.ajay.seenu.expensetracker.entity.PaymentType
 import com.ajay.seenu.expensetracker.entity.TransactionType
 
-class TransactionDataSourceImpl(
+
+class TransactionDataSourceImpl constructor(
     private val database: ExpenseDatabase
 ): TransactionDataSource {
     private val queries = database.expenseDatabaseQueries

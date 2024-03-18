@@ -29,6 +29,7 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.OverviewScreenViewModel
@@ -38,10 +39,14 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun OverviewScreen(navController: NavController, viewModel: OverviewScreenViewModel = viewModel()) {
+fun OverviewScreen(navController: NavController, viewModel: OverviewScreenViewModel = hiltViewModel()) {
     val spendSoFar by viewModel.spendSoFar.collectAsState()
     val recentTransactions by viewModel.recentTransactions.collectAsState()
     val userName by viewModel.userName.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.getRecentTransactions()
+    }
 
     Scaffold(
         topBar = {

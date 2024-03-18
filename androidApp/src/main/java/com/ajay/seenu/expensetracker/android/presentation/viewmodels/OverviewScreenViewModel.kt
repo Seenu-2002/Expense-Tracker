@@ -2,12 +2,24 @@ package com.ajay.seenu.expensetracker.android.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ajay.seenu.expensetracker.TransactionDetail
+import com.ajay.seenu.expensetracker.android.data.TransactionRepository
+import com.ajay.seenu.expensetracker.android.domain.GetRecentTransactions
+import com.ajay.seenu.expensetracker.entity.TransactionType
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.koin.core.KoinApplication.Companion.init
+import org.koin.core.parameter.emptyParametersHolder
 import java.util.Date
+import javax.inject.Inject
 
-class OverviewScreenViewModel : ViewModel() {
+@HiltViewModel
+class OverviewScreenViewModel @Inject constructor(
+    private val repository: TransactionRepository
+) : ViewModel() {
 
     private val _spendSoFar: MutableStateFlow<String> = MutableStateFlow("Rs. 1000")
     val spendSoFar = _spendSoFar.asStateFlow()
@@ -19,65 +31,39 @@ class OverviewScreenViewModel : ViewModel() {
     private val _userName: MutableStateFlow<String> = MutableStateFlow("")
     val userName = _userName.asStateFlow()
 
+    @Inject
+    internal lateinit var getRecentTransactions: GetRecentTransactions
+
     init {
-        getRecentTransactions()
         viewModelScope.launch {
             _userName.emit("Seenivasan T")
         }
     }
 
-    private fun getRecentTransactions() {
+    fun getRecentTransactions() {
         viewModelScope.launch {
-            val list = arrayListOf(
-                Transaction(
-                    Transaction.Type.INCOME,
-                    "Test Transaction",
-                    100.0,
-                    "Netflix",
-                    Date()
-                ),
-                Transaction(
-                    Transaction.Type.INCOME,
-                    "Test Transaction",
-                    100.0,
-                    "Netflix",
-                    Date()
-                ),
-                Transaction(
-                    Transaction.Type.EXPENSE,
-                    "Test Transaction",
-                    100.0,
-                    "Netflix",
-                    Date()
-                ),
-                Transaction(
-                    Transaction.Type.INCOME,
-                    "Test Transaction",
-                    100.0,
-                    "Netflix",
-                    Date()
-                ),
-                Transaction(
-                    Transaction.Type.INCOME,
-                    "Test Transaction",
-                    100.0,
-                    "Netflix",
-                    Date()
-                ),
-                Transaction(
-                    Transaction.Type.EXPENSE,
-                    "Test Transaction",
-                    100.0,
-                    "Netflix",
-                    Date()
-                )
-            ).also { list ->
-                repeat(100) {
-                    list.add(list[it % list.size])
-                }
+            getRecentTransactions.invoke().collectLatest {
+                _recentTransactions.emit(it.map { it.transform() })
             }
-            _recentTransactions.emit(list)
         }
     }
 
+}
+
+// FIXME: Will be removed
+fun TransactionDetail.transform(): Transaction {
+    return Transaction(
+        this.type.transform(),
+        "",
+        amount.toDouble(),
+        category.name,
+        Date()
+    )
+}
+
+fun TransactionType.transform(): Transaction.Type {
+    return when (this) {
+        TransactionType.INCOME -> Transaction.Type.INCOME
+        TransactionType.EXPENSE -> Transaction.Type.EXPENSE
+    }
 }
