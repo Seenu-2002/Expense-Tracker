@@ -1,0 +1,50 @@
+import com.ajay.seenu.expensetracker.entity.Category;
+import com.ajay.seenu.expensetracker.entity.PaymentType;
+import com.ajay.seenu.expensetracker.entity.TransactionType;
+
+CREATE TABLE TransactionDetail (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    type TEXT AS TransactionType NOT NULL,
+    amount REAL NOT NULL,
+    category TEXT AS Category NOT NULL,
+    paymentType TEXT AS PaymentType NOT NULL,
+    date INTEGER NOT NULL,
+    note TEXT,
+    payer TEXT,
+    place TEXT
+);
+
+INSERT INTO TransactionDetail(type, amount, category, paymentType, date)
+VALUES ("INCOME", 100, "SHOPPING", "CASH", 1711295110000),
+("INCOME", 200, "VEHICLE","CARD", 1711295110000),
+("EXPENSE", 80, "SHOPPING", "CASH", 1711295110000),
+("INCOME", 500, "SHOPPING", "CARD", 1711295110000),
+("EXPENSE", 100, "VEHICLE", "UPI", 1711295110000);
+
+getAllTransactions:
+SELECT *
+FROM TransactionDetail;
+
+getAllTransactionsByType:
+SELECT *
+FROM TransactionDetail WHERE type = ?;
+
+getTransaction:
+SELECT *
+FROM TransactionDetail WHERE id = ?;
+
+addTransaction:
+INSERT INTO TransactionDetail(type, amount, category, paymentType, note, date, payer, place)
+VALUES (?,?, ?, ?, ?, ?, ?, ?);
+
+deleteAllTransactions:
+DELETE FROM TransactionDetail;
+
+deleteAllTransactionsByType:
+DELETE FROM TransactionDetail WHERE type = ?;
+
+deleteTransaction:
+DELETE FROM TransactionDetail WHERE id = ?;
+
+getSumOfAmountByType:
+SELECT SUM(amount) FROM TransactionDetail WHERE type = ?;
