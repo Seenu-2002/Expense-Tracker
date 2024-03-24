@@ -1,5 +1,6 @@
 package com.ajay.seenu.expensetracker.android.presentation.screeens
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,93 +36,66 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.OverviewScreenViewModel
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.Transaction
+import com.ajay.seenu.expensetracker.android.presentation.widgets.OverviewCard
+import com.ajay.seenu.expensetracker.android.presentation.widgets.TransactionPreviewRow
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun OverviewScreen(navController: NavController, viewModel: OverviewScreenViewModel = hiltViewModel()) {
-    val spendSoFar by viewModel.spendSoFar.collectAsState()
+fun OverviewScreen(
+    navController: NavController,
+    viewModel: OverviewScreenViewModel = hiltViewModel()
+) {
     val recentTransactions by viewModel.recentTransactions.collectAsState()
+    val overallData by viewModel.overallData.collectAsState()
     val userName by viewModel.userName.collectAsState()
 
     LaunchedEffect(Unit) {
+        viewModel.getOverallData()
         viewModel.getRecentTransactions()
     }
 
     Scaffold(
         topBar = {
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text(text = "Welcome, $userName", modifier = Modifier.padding(vertical = 12.dp), fontSize = 24.sp)
+                Text(
+                    text = "Welcome, $userName",
+                    modifier = Modifier.padding(vertical = 12.dp),
+                    fontSize = 24.sp
+                )
             }
         }
     ) { paddingValues ->
-        Column(modifier = Modifier.padding(paddingValues = paddingValues)) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(100.dp)
-                    .padding(8.dp)
-                    .background(shape = RoundedCornerShape(8.dp), color = Color(0xFFC8C8C8)),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(text = "Spent So Far", fontSize = 22.sp, fontWeight = FontWeight.Medium)
-                Text(text = spendSoFar)
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+        ) {
+            // FIXME: Have to be replaced with UIState instead of null check
+            overallData?.let { 
+                OverviewCard(modifier = Modifier.fillMaxWidth(), data = it)
             }
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
-                items(recentTransactions, itemContent = {
-                    TransactionRow(transaction = it)
-                })
+
+                recentTransactions.entries.forEach {
+                    stickyHeader {
+                        Text(
+                            modifier = Modifier
+                                .fillParentMaxWidth()
+                                .background(MaterialTheme.colorScheme.background)
+                                .padding(horizontal = 12.dp, vertical = 8.dp),
+                            text = it.key
+                        )
+                    }
+                    items(it.value, itemContent = {
+                        TransactionPreviewRow(Modifier.fillMaxWidth(), it)
+                    })
+                }
             }
         }
-    }
-}
-
-@Preview
-@Composable
-fun TransactionRow(
-    formatter: SimpleDateFormat = SimpleDateFormat("dd MMM, yyyy", Locale.ENGLISH),
-    transaction: Transaction = Transaction(
-        Transaction.Type.INCOME,
-        "Test Transaction",
-        100.0,
-        "Netflix",
-        Date(2423423L)
-    )
-) {
-    ConstraintLayout(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 12.dp, vertical = 8.dp)
-            .background(shape = RoundedCornerShape(8.dp), color = Color(0xFF29756F))
-            .padding(8.dp)
-    ) {
-        val (category, date, amount) = createRefs()
-        Text(
-            text = transaction.category,
-            color = Color.Red,
-            modifier = Modifier.constrainAs(category) {
-                top.linkTo(parent.top)
-                linkTo(start = parent.start, end = amount.start, bias = 0F)
-                bottom.linkTo(date.top)
-            })
-        Text(
-            text = formatter.format(transaction.date),
-            color = Color.White,
-            modifier = Modifier.constrainAs(date) {
-                top.linkTo(category.bottom)
-                linkTo(start = parent.start, end = amount.start, bias = 0F)
-                bottom.linkTo(parent.bottom)
-            })
-        Text(text = "Rs. ${transaction.amount}",
-            color = Color.White, modifier = Modifier.constrainAs(amount) {
-                top.linkTo(parent.top)
-                end.linkTo(parent.end, 8.dp)
-                bottom.linkTo(parent.bottom)
-            })
     }
 }

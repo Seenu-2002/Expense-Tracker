@@ -9,14 +9,15 @@ interface TransactionDataSource {
     fun getAllTransactionsByType(type: TransactionType): List<TransactionDetail>
     fun getTransaction(id: Long): TransactionDetail
     fun addTransaction(type: TransactionType,
-                       amount: Long,
+                       amount: Double,
                        category: Category,
                        paymentType: PaymentType,
+                       date: Long,
                        note: String?,
-                       date: String?,
                        payer: String?,
                        place: String?)
     fun deleteAllTransactions()
     fun deleteAllTransactionsByType(type: TransactionType)
     fun deleteTransaction(id: Long)
+    fun getSumOfAmountByType(type: TransactionType): Double
 }

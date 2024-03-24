@@ -1,4 +1,4 @@
-package com.ajay.seenu.expensetracker.android.domain
+package com.ajay.seenu.expensetracker.android.domain.usecases
 
 import com.ajay.seenu.expensetracker.TransactionDetail
 import com.ajay.seenu.expensetracker.android.data.TransactionRepository
@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import javax.inject.Inject
 
-class GetRecentTransactions @Inject constructor(
+class GetRecentTransactionsUseCase @Inject constructor(
     private val repository: TransactionRepository
 ) {
 

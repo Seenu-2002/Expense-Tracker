@@ -29,6 +29,7 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.sqldelight.runtime)
             implementation(libs.koin.core)
+            implementation(libs.kotlinx.datetime)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

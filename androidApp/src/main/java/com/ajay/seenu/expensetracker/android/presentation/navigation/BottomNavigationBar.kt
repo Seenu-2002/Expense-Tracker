@@ -11,6 +11,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
@@ -21,6 +22,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -57,7 +59,8 @@ fun BottomNavigationBar(onAddTransactionClicked: () -> Unit) {
     val navController = rememberNavController()
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize(),
         bottomBar = {
             NavigationBar() {
                 getBottomNavigationItems().forEachIndexed { index, navigationItem ->
@@ -88,7 +91,6 @@ fun BottomNavigationBar(onAddTransactionClicked: () -> Unit) {
         },
         floatingActionButtonPosition = FabPosition.End,
         floatingActionButton = {
-
             AnimatedVisibility(
                 visible = isFABVisible,
                 enter = scaleIn(animationSpec = tween(100)),
@@ -97,7 +99,7 @@ fun BottomNavigationBar(onAddTransactionClicked: () -> Unit) {
                 FloatingActionButton(
                     onClick = onAddTransactionClicked,
                     shape = CircleShape,
-                    contentColor = Color.Black
+                    contentColor = Color.White
                 ) {
                     Icon(imageVector = Icons.Filled.Add, contentDescription = "Add transaction")
                 }

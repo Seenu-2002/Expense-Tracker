@@ -22,14 +22,16 @@ class TransactionDataSourceImpl constructor(
         return queries.getTransaction(id).executeAsOne()
     }
 
-    override fun addTransaction(type: TransactionType,
-                                amount: Long,
-                                category: Category,
-                                paymentType: PaymentType,
-                                note: String?,
-                                date: String?,
-                                payer: String?,
-                                place: String?) {
+    override fun addTransaction(
+        type: TransactionType,
+        amount: Double,
+        category: Category,
+        paymentType: PaymentType,
+        date: Long,
+        note: String?,
+        payer: String?,
+        place: String?
+    ) {
         queries.addTransaction(
             type = type,
             amount = amount,
@@ -51,5 +53,9 @@ class TransactionDataSourceImpl constructor(
 
     override fun deleteTransaction(id: Long) {
         queries.deleteTransaction(id)
+    }
+
+    override fun getSumOfAmountByType(type: TransactionType): Double {
+        return queries.getSumOfAmountByType(type).executeAsOne().SUM ?: 0.0
     }
 }

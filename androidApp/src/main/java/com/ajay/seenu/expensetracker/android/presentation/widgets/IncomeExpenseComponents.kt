@@ -182,6 +182,7 @@ fun AddTransactionForm(
         Button(
             onClick = {
                 val newTransaction = Transaction(
+                    "",
                     transactionType,
                     description,
                     amount.toDoubleOrNull() ?: 0.0,

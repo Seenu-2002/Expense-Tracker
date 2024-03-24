@@ -2,6 +2,7 @@ package com.ajay.seenu.expensetracker.android.data
 
 import com.ajay.seenu.expensetracker.TransactionDataSource
 import com.ajay.seenu.expensetracker.TransactionDetail
+import com.ajay.seenu.expensetracker.android.presentation.widgets.OverallData
 import com.ajay.seenu.expensetracker.entity.Category
 import com.ajay.seenu.expensetracker.entity.PaymentType
 import com.ajay.seenu.expensetracker.entity.TransactionType
@@ -25,23 +26,27 @@ class TransactionRepository @Inject constructor(private val dataSource: Transact
         return dataSource.getTransaction(id)
     }
 
-    suspend fun addTransaction(type: TransactionType,
-                               amount: Long,
-                               category: Category,
-                               paymentType: PaymentType,
-                               note: String?,
-                               date: String?,
-                               payer: String?,
-                               place: String?) {
+    suspend fun addTransaction(
+        type: TransactionType,
+        amount: Double,
+        category: Category,
+        paymentType: PaymentType,
+        date: Long,
+        note: String?,
+        payer: String?,
+        place: String?
+    ) {
         withContext(Dispatchers.IO) {
-            dataSource.addTransaction(type = type,
+            dataSource.addTransaction(
+                type = type,
                 amount = amount,
                 category = category,
                 paymentType = paymentType,
-                note = note,
                 date = date,
+                note = note,
                 payer = payer,
-                place = place)
+                place = place
+            )
         }
     }
 
@@ -62,19 +67,10 @@ class TransactionRepository @Inject constructor(private val dataSource: Transact
             dataSource.deleteTransaction(id)
         }
     }
+
+    fun getOverallData(): OverallData {
+        val income = dataSource.getSumOfAmountByType(TransactionType.INCOME)
+        val expense = dataSource.getSumOfAmountByType(TransactionType.EXPENSE)
+        return OverallData(income = income, expense = expense)
+    }
 }
-
-
-//@Module
-//@DisableInstallInCheck
-//class SimpleModule {
-//    @Provides
-//    fun providerIncomeDataSource(context: Context): IncomeDataSource {
-//        return IncomeDataSourceImpl(createDatabase(DriverFactory(context)))
-//    }
-//
-//    @Provides
-//    fun provideIncomeRepository(dataSource: IncomeDataSource): IncomeRepository {
-//        return IncomeRepository(dataSource)
-//    }
-//}

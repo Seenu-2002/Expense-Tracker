@@ -72,4 +72,7 @@ dependencies {
 
     // Constraint layout
     implementation(libs.compose.constraint.layout)
+
+    // Kotlinx DateTime
+    implementation(libs.kotlinx.datetime)
 }

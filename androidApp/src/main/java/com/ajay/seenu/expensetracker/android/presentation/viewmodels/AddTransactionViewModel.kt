@@ -21,7 +21,8 @@ class AddTransactionViewModel : ViewModel() {
 }
 
 // FIXME: Move to separate package
-class Transaction(
+class Transaction constructor(
+    val title: String,
     val type: Type,
     val description: String,
     val amount: Double,

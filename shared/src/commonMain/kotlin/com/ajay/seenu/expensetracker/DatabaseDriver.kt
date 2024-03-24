@@ -1,7 +1,9 @@
 package com.ajay.seenu.expensetracker
 
+import app.cash.sqldelight.ColumnAdapter
 import app.cash.sqldelight.EnumColumnAdapter
 import app.cash.sqldelight.db.SqlDriver
+import kotlinx.datetime.LocalDate
 
 const val DATABASE_NAME = "expenseDatabase.db"
 expect class DriverFactory {
