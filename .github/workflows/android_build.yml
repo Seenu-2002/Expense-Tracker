@@ -22,7 +22,9 @@ jobs:
         with:
           distribution: 'adopt'
           java-version: '17'
-
+      - name: Find dir
+        run: ls
+        
       - name: Run Gradle Wrapper
         run: gradle wrapper
 
