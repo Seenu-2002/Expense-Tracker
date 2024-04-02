@@ -75,4 +75,7 @@ dependencies {
 
     // Kotlinx DateTime
     implementation(libs.kotlinx.datetime)
+
+    // Compose bottom sheet
+    implementation(libs.compose.bottomsheet)
 }

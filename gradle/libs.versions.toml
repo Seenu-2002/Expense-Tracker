@@ -16,6 +16,7 @@ lifecycleRuntimeCompose = "2.6.2"
 sqldelight = "2.0.0-alpha05"
 kotlin-serialization = "1.9.22"
 kotlinx-datetime = "0.4.1"
+compose-bottomsheet = "1.2.1"
 
 [libraries]
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
@@ -39,6 +40,7 @@ compose-navigation = { module = "androidx.navigation:navigation-compose", versio
 compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "compose-material" }
 compose-constraint-layout = { group = "androidx.constraintlayout", name = "constraintlayout-compose", version.ref = "compose-constraint-layout-version" }
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime" }
+compose-bottomsheet = { group = "androidx.compose.material3", name = "material3", version.ref = "compose-bottomsheet" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

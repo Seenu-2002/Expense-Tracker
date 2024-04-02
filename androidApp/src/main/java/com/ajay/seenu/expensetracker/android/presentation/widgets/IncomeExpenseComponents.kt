@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
@@ -15,6 +16,7 @@ import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -212,28 +214,32 @@ fun TransactionTypeSelector(
         horizontalArrangement = Arrangement.Center
     ) {
         val (expenseBackground, incomeBackground) = if (transactionType == Transaction.Type.INCOME) {
-            Color.Transparent to Color.Green
+            Color.Transparent to MaterialTheme.colorScheme.primary
         } else {
-            Color.Green to Color.Transparent
+            MaterialTheme.colorScheme.primary to Color.Transparent
         }
 
         Text(
-            text = "Income",
             modifier = Modifier
                 .fillMaxWidth(.5F)
+                .background(color = incomeBackground, shape = RoundedCornerShape(2.dp))
                 .padding(end = 4.dp)
-                .background(color = incomeBackground)
+                .padding(vertical = 4.dp)
                 .clickable { onClick.invoke(Transaction.Type.INCOME) },
-            textAlign = TextAlign.Center
+            text = "Income",
+            textAlign = TextAlign.Center,
+            color = Color.White
         )
         Text(
             text = "Expense",
             modifier = Modifier
                 .fillMaxWidth()
+                .background(color = expenseBackground, shape = RoundedCornerShape(2.dp))
                 .padding(start = 4.dp)
-                .background(color = expenseBackground)
+                .padding(vertical = 4.dp)
                 .clickable { onClick.invoke(Transaction.Type.EXPENSE) },
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            color = Color.White
         )
     }
 }

@@ -2,6 +2,7 @@ package com.ajay.seenu.expensetracker.android.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ajay.seenu.expensetracker.entity.Category
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -11,6 +12,9 @@ class AddTransactionViewModel : ViewModel() {
 
     private val _transaction: MutableStateFlow<Transaction?> = MutableStateFlow(null)
     val transaction = _transaction.asStateFlow()
+
+    private val _categories: MutableStateFlow<List<Category>> = MutableStateFlow(Category.entries)
+    val categories = _categories.asStateFlow()
 
     fun addTransaction(transaction: Transaction) {
         viewModelScope.launch {

@@ -1,28 +1,18 @@
 package com.ajay.seenu.expensetracker.android.presentation.navigation
 
-import android.os.Bundle
-import android.widget.OverScroller
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.EaseInOutElastic
-import androidx.compose.animation.core.EaseOut
-import androidx.compose.animation.core.EaseOutElastic
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -35,20 +25,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.navigation.NavController
-import androidx.navigation.NavDestination
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.ajay.seenu.expensetracker.android.presentation.screeens.AppTransactionScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.OverviewScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.TestComposeScreen
-import com.ajay.seenu.expensetracker.android.presentation.widgets.AddTransactionForm
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomNavigationBar(onAddTransactionClicked: () -> Unit) {
+fun MainScreen(onAddTransactionClicked: () -> Unit) {
     var navigationSelectedItem by remember {
         mutableIntStateOf(0)
     }

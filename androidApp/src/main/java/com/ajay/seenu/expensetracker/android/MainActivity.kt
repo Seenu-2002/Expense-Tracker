@@ -11,8 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.ajay.seenu.expensetracker.android.presentation.navigation.BottomNavigationBar
-import com.ajay.seenu.expensetracker.android.presentation.screeens.AppTransactionScreen
+import com.ajay.seenu.expensetracker.android.presentation.navigation.MainScreen
+import com.ajay.seenu.expensetracker.android.presentation.screeens.AddTransactionScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -34,12 +34,12 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize()
                     ) {
                         composable("default") {
-                            BottomNavigationBar {
+                            MainScreen {
                                 navController.navigate("add_transaction")
                             }
                         }
                         composable("add_transaction") {
-                            AppTransactionScreen(navController)
+                            AddTransactionScreen(navController)
                         }
                     }
                 }
