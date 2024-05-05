@@ -1,20 +1,12 @@
 package com.ajay.seenu.expensetracker
 
-import com.ajay.seenu.expensetracker.Category
 import com.ajay.seenu.expensetracker.entity.PaymentType
 import com.ajay.seenu.expensetracker.entity.TransactionType
-import org.koin.core.logger.Logger
-
 
 class TransactionDataSourceImpl constructor(
     private val database: ExpenseDatabase
 ): TransactionDataSource {
-    private val queries = ExpenseDatabase(driver,
-        TransactionDetailAdapter = TransactionDetail.Adapter(
-            typeAdapter = EnumColumnAdapter(),
-            categoryAdapter = EnumColumnAdapter(),
-            paymentTypeAdapter = EnumColumnAdapter()
-        )).expenseDatabaseQueries
+    private val queries = database.expenseDatabaseQueries
 
     override fun getAllTransactions(pageNo: Int, count: Int): PaginationData<List<TransactionDetail>> {
         if (pageNo == 0) {
