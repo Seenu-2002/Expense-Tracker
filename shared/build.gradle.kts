@@ -30,6 +30,8 @@ kotlin {
             implementation(libs.sqldelight.runtime)
             implementation(libs.koin.core)
             implementation(libs.kotlinx.datetime)
+            implementation(libs.sqldelight.extensions.paging)
+            implementation(libs.sqldelight.extensions.coroutines)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

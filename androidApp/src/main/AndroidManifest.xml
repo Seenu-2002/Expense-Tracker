@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
-        android:name=".ExpenseApplication"
+        android:name=".presentation.application.ExpenseApplication"
         android:allowBackup="false"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"

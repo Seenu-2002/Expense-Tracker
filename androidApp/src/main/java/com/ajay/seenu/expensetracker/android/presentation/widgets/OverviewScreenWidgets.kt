@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
@@ -30,7 +31,8 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.Text
-import com.ajay.seenu.expensetracker.android.presentation.viewmodels.Transaction
+import com.ajay.seenu.expensetracker.android.domain.data.Transaction
+import com.ajay.seenu.expensetracker.entity.PaymentType
 import java.util.Date
 import java.util.Locale
 
@@ -51,7 +53,7 @@ fun OverviewCard(
 
     val expensePercentageRaw = data.expense / data.income
     val expensePercentageLabel =
-        String.format(Locale.ENGLISH, "%.2f", expensePercentageRaw * 100) + "%"
+        String.format(Locale.ENGLISH, "%.2f", expensePercentageRaw * 100) + " % "
 
     ConstraintLayout(modifier = modifier) {
         val (expense, income, progress) = createRefs()
@@ -71,7 +73,7 @@ fun OverviewCard(
         ) {
 
             Text(modifier = Modifier.padding(bottom = 4.dp), text = "Income", fontSize = 14.sp)
-            Text(text = "Rs. ${data.income}", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+            Text(text = "Rs. ${data.getIncomeLabel()}", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
 
         }
 
@@ -90,7 +92,7 @@ fun OverviewCard(
         ) {
 
             Text(modifier = Modifier.padding(bottom = 4.dp), text = "Expense", fontSize = 14.sp)
-            Text(text = "Rs. ${data.expense}", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+            Text(text = "Rs. ${data.getExpenseLabel()}", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
 
         }
 
@@ -153,9 +155,7 @@ fun OverviewCard(
                 with(Path()) {
                     moveTo(0F, 0F)
                     lineTo(size.width, 0F)
-//                    lineTo(size.width, size.height / 1.5F)
                     lineTo(size.width / 2F, size.height)
-//                    lineTo(0F, size.height / 1.5F)
                     lineTo(0F, 0F)
                     close()
 
@@ -165,6 +165,7 @@ fun OverviewCard(
 
             Text(
                 modifier = Modifier
+                    .wrapContentWidth()
                     .constrainAs(percentageText) {
                         top.linkTo(parent.top)
                         start.linkTo(progressBar.end)
@@ -183,6 +184,15 @@ fun OverviewCard(
 data class OverallData(
     val income: Double, val expense: Double
 )
+
+val decimalFormatter = DecimalFormat("#0.0#") // FIXME: Generic and user config
+fun OverallData.getIncomeLabel(): String {
+    return decimalFormatter.format(income)
+}
+
+fun OverallData.getExpenseLabel(): String {
+    return decimalFormatter.format(expense)
+}
 
 class OverallDataProvider : PreviewParameterProvider<OverallData> {
 
@@ -258,7 +268,7 @@ fun TransactionPreviewRow(modifier: Modifier = Modifier, transaction: Transactio
                     bias = 0F
                 )
 
-            }, text = transaction.title,
+            }, text = transaction.category.label,
             fontSize = 14.sp
         )
         Text(
@@ -271,7 +281,7 @@ fun TransactionPreviewRow(modifier: Modifier = Modifier, transaction: Transactio
                     endMargin = 8.dp,
                     bias = 0F
                 )
-            }, text = transaction.category,
+            }, text = transaction.paymentType.name,
             color = Color(0xFFCCCCCC),
             fontSize = 12.sp
         )
@@ -291,51 +301,85 @@ class TransactionPreviewDataProvider : PreviewParameterProvider<Transaction> {
     override val values: Sequence<Transaction>
         get() = sequenceOf(
             Transaction(
-                "Lunch",
+                121L,
                 Transaction.Type.EXPENSE,
-                "",
                 1000.0,
-                "Food",
+                Transaction.Category(
+                    12L,
+                    Transaction.Type.EXPENSE,
+                    "Food",
+                    null
+                ),
+                PaymentType.UPI,
                 Date()
             ),
             Transaction(
-                "Lunch",
+                121L,
                 Transaction.Type.INCOME,
-                "",
                 1000.0,
-                "Food",
+                Transaction.Category(
+                    12L,
+                    Transaction.Type.EXPENSE,
+                    "Food",
+                    null
+                ),
+
+                PaymentType.UPI,
                 Date()
             ),
             Transaction(
-                "Lunch",
+                121L,
                 Transaction.Type.EXPENSE,
-                "",
                 1000.0,
-                "Food",
+                Transaction.Category(
+                    12L,
+                    Transaction.Type.EXPENSE,
+                    "Food",
+                    null
+                ),
+
+                PaymentType.UPI,
                 Date()
             ),
             Transaction(
-                "Lunch",
+                121L,
                 Transaction.Type.INCOME,
-                "",
                 1000.0,
-                "Food",
+                Transaction.Category(
+                    12L,
+                    Transaction.Type.EXPENSE,
+                    "Food",
+                    null
+                ),
+                PaymentType.UPI,
                 Date()
             ),
             Transaction(
-                "Lunch",
-                Transaction.Type.EXPENSE,
-                "",
-                1000.0,
-                "Food",
-                Date()
-            ),
-            Transaction(
-                "Lunch",
+                121L,
                 Transaction.Type.INCOME,
-                "",
                 1000.0,
-                "Food",
+                Transaction.Category(
+                    12L,
+                    Transaction.Type.INCOME,
+                    "Salary",
+                    null
+                ),
+
+                PaymentType.UPI,
+                Date()
+            ),
+            Transaction(
+                121L,
+                Transaction.Type.INCOME,
+                1000.0,
+                Transaction.Category(
+                    12L,
+                    Transaction.Type.EXPENSE,
+                    "Food",
+                    null
+                ),
+
+                PaymentType.UPI,
                 Date()
             ),
         )
