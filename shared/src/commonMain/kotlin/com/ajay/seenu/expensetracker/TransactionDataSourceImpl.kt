@@ -9,7 +9,12 @@ import org.koin.core.logger.Logger
 class TransactionDataSourceImpl constructor(
     private val database: ExpenseDatabase
 ): TransactionDataSource {
-    private val queries = database.expenseDatabaseQueries
+    private val queries = ExpenseDatabase(driver,
+        TransactionDetailAdapter = TransactionDetail.Adapter(
+            typeAdapter = EnumColumnAdapter(),
+            categoryAdapter = EnumColumnAdapter(),
+            paymentTypeAdapter = EnumColumnAdapter()
+        )).expenseDatabaseQueries
 
     override fun getAllTransactions(pageNo: Int, count: Int): PaginationData<List<TransactionDetail>> {
         if (pageNo == 0) {
