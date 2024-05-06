@@ -10,6 +10,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import java.text.SimpleDateFormat
+import java.util.Locale
 import javax.inject.Singleton
 
 @Module
@@ -20,6 +22,18 @@ object ModuleProvider {
     @Singleton
     fun provideDataSource(@ApplicationContext context: Context): TransactionDataSource {
         return TransactionDataSourceImpl(createDatabase(DriverFactory(context)))
+    }
+
+    @Provides
+    @Singleton
+    fun provideDateFormatter(locale: Locale): SimpleDateFormat {
+        return SimpleDateFormat("dd MMM, yyyy", locale) // FIXME: user configurable
+    }
+
+    @Provides
+    @Singleton
+    fun provideLocale(): Locale {
+        return Locale.ENGLISH
     }
 
 }

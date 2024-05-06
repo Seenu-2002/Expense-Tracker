@@ -1,21 +1,33 @@
 package com.ajay.seenu.expensetracker
 
-import com.ajay.seenu.expensetracker.entity.Category
 import com.ajay.seenu.expensetracker.entity.PaymentType
 import com.ajay.seenu.expensetracker.entity.TransactionType
-
 
 class TransactionDataSourceImpl constructor(
     private val database: ExpenseDatabase
 ): TransactionDataSource {
     private val queries = database.expenseDatabaseQueries
 
-    override fun getAllTransactions(): List<TransactionDetail> {
-        return queries.getAllTransactions().executeAsList()
+    override fun getAllTransactions(pageNo: Int, count: Int): PaginationData<List<TransactionDetail>> {
+        if (pageNo == 0) {
+            return PaginationData(emptyList(), false)
+        }
+        return queries.getAllTransactions((count + 1).toLong(), (pageNo - 1L) * count).executeAsList().let {
+            val hasMoreData = it.size > count
+            val data = if (hasMoreData) {
+                it.subList(0, count)
+            } else {
+                it
+            }
+            PaginationData(data, hasMoreData)
+        }
     }
 
-    override fun getAllTransactionsByType(type: TransactionType): List<TransactionDetail> {
-        return queries.getAllTransactionsByType(type).executeAsList()
+    override fun getAllTransactionsByType(type: TransactionType, pageNo: Int, count: Int): List<TransactionDetail> {
+        if (pageNo == 0) {
+            return emptyList()
+        }
+        return queries.getAllTransactionsByType(type, count.toLong(), (pageNo - 1L) * count).executeAsList()
     }
 
     override fun getTransaction(id: Long): TransactionDetail {
@@ -35,7 +47,7 @@ class TransactionDataSourceImpl constructor(
         queries.addTransaction(
             type = type,
             amount = amount,
-            category = category,
+            category = category.id,
             paymentType = paymentType,
             note = note,
             date = date,
@@ -57,5 +69,13 @@ class TransactionDataSourceImpl constructor(
 
     override fun getSumOfAmountByType(type: TransactionType): Double {
         return queries.getSumOfAmountByType(type).executeAsOne().SUM ?: 0.0
+    }
+
+    override fun getAllCategories(): List<Category> {
+        return queries.getAllCategories().executeAsList()
+    }
+
+    override fun getCategories(type: TransactionType): List<Category> {
+        return queries.getCategories(type).executeAsList()
     }
 }

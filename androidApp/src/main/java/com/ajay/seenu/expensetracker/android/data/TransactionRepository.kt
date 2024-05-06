@@ -3,7 +3,11 @@ package com.ajay.seenu.expensetracker.android.data
 import com.ajay.seenu.expensetracker.TransactionDataSource
 import com.ajay.seenu.expensetracker.TransactionDetail
 import com.ajay.seenu.expensetracker.android.presentation.widgets.OverallData
-import com.ajay.seenu.expensetracker.entity.Category
+import com.ajay.seenu.expensetracker.Category
+import com.ajay.seenu.expensetracker.PaginationData
+import com.ajay.seenu.expensetracker.android.domain.data.Transaction
+import com.ajay.seenu.expensetracker.android.domain.mapper.CategoryMapper
+import com.ajay.seenu.expensetracker.android.domain.mapper.TransactionMapper.map
 import com.ajay.seenu.expensetracker.entity.PaymentType
 import com.ajay.seenu.expensetracker.entity.TransactionType
 import kotlinx.coroutines.Dispatchers
@@ -14,15 +18,28 @@ import javax.inject.Inject
 
 class TransactionRepository @Inject constructor(private val dataSource: TransactionDataSource) {
 
-    fun getAllTransactions(): List<TransactionDetail> {
-        return dataSource.getAllTransactions()
+    suspend fun getAllTransactions(pageNo: Int, count: Int): PaginationData<List<Transaction>> {
+        return withContext(Dispatchers.IO) {
+            val paginationData = dataSource.getAllTransactions(pageNo, count)
+            val transactions = paginationData.data
+            val categories = dataSource.getAllCategories().let {
+                CategoryMapper.mapCategories(it)
+            }
+            transactions.mapNotNull { transaction ->
+                val category = categories.find { it.id == transaction.category }
+                    ?: return@mapNotNull null
+                transaction.map(category)
+            }.let {
+                PaginationData(it, paginationData.hasMoreData)
+            }
+        }
     }
 
-    fun getAllTransactionsByType(type: TransactionType): Flow<List<TransactionDetail>> {
-        return listOf(dataSource.getAllTransactionsByType(type)).asFlow()
+    suspend fun getAllTransactionsByType(type: TransactionType, pageNo: Int, count: Int): Flow<List<TransactionDetail>> {
+        return listOf(dataSource.getAllTransactionsByType(type, pageNo, count)).asFlow()
     }
 
-    fun getTransaction(id: Long): TransactionDetail {
+    suspend fun getTransaction(id: Long): TransactionDetail {
         return dataSource.getTransaction(id)
     }
 
@@ -68,9 +85,23 @@ class TransactionRepository @Inject constructor(private val dataSource: Transact
         }
     }
 
-    fun getOverallData(): OverallData {
-        val income = dataSource.getSumOfAmountByType(TransactionType.INCOME)
-        val expense = dataSource.getSumOfAmountByType(TransactionType.EXPENSE)
-        return OverallData(income = income, expense = expense)
+    suspend fun getOverallData(): OverallData {
+        return withContext(Dispatchers.IO) {
+            val income = dataSource.getSumOfAmountByType(TransactionType.INCOME)
+            val expense = dataSource.getSumOfAmountByType(TransactionType.EXPENSE)
+            OverallData(income = income, expense = expense)
+        }
     }
+
+    suspend fun getCategories(type: Transaction.Type): List<Category> {
+        return withContext(Dispatchers.IO) {
+            val transactionType = if (type == Transaction.Type.INCOME) {
+                TransactionType.INCOME
+            } else {
+                TransactionType.EXPENSE
+            }
+            dataSource.getCategories(transactionType)
+        }
+    }
+
 }

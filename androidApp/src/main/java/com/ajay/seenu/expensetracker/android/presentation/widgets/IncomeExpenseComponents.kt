@@ -1,7 +1,10 @@
 package com.ajay.seenu.expensetracker.android.presentation.widgets
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,14 +32,14 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
-import com.ajay.seenu.expensetracker.android.presentation.viewmodels.Transaction
+import com.ajay.seenu.expensetracker.android.domain.data.Transaction
+import com.ajay.seenu.expensetracker.entity.PaymentType
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -51,19 +54,18 @@ fun AddTransactionForm(
         "dd MMM, yyyy",
         Locale.ENGLISH
     ),
-    onAdd: (transaction: Transaction) -> Unit = {}
+    selectedCategory: Transaction.Category? = transaction?.category,
+    selectedPaymentType: PaymentType? = transaction?.paymentType,
+    onCategoryClicked: (selectedValue: Transaction.Category?) -> Unit = {},
+    onTransactionTypeChanged: (type: Transaction.Type) -> Unit = {},
+    onPaymentTypeClicked: (type: PaymentType?) -> Unit = {},
+    onAdd: (transaction: Transaction) -> Unit = {},
 ) {
     var transactionType by remember {
         mutableStateOf(transaction?.type ?: Transaction.Type.INCOME)
     }
-    var type by remember {
-        mutableStateOf("")
-    }
     var description by remember {
-        mutableStateOf(transaction?.description ?: "")
-    }
-    var category by remember {
-        mutableStateOf(transaction?.category ?: "Category")
+        mutableStateOf(transaction?.note ?: "")
     }
     var date by remember {
         mutableStateOf(transaction?.date ?: Date())
@@ -75,14 +77,41 @@ fun AddTransactionForm(
         mutableStateOf(false)
     }
 
-    var datePickerState by remember {
+    val datePickerState by remember {
         // FIXME: Year is hardcoded
-        mutableStateOf(DatePickerState(Locale.ENGLISH, null, null,2020..2024, DisplayMode.Picker))
+        mutableStateOf(DatePickerState(Locale.ENGLISH, null, null, 2020..2024, DisplayMode.Picker))
     }
     val focusRequester = remember {
         FocusRequester()
     }
     val focusManager = LocalFocusManager.current
+
+    val categoryInteractionSource = remember {
+        MutableInteractionSource()
+    }
+    val paymentInteractionSource = remember {
+        MutableInteractionSource()
+    }
+
+    var showCategoryError by remember {
+        mutableStateOf(false)
+    }
+
+    var showPaymentTypeError by remember {
+        mutableStateOf(false)
+    }
+
+
+    if (categoryInteractionSource.collectIsPressedAsState().value) {
+        showCategoryError = false
+        onCategoryClicked.invoke(selectedCategory)
+    }
+
+    if (paymentInteractionSource.collectIsPressedAsState().value) {
+        showPaymentTypeError = false
+        onPaymentTypeClicked.invoke(selectedPaymentType)
+    }
+
     if (showDialog) {
         DatePickerDialog(
             onDismissRequest = {
@@ -120,18 +149,29 @@ fun AddTransactionForm(
 
     Column(modifier = modifier) {
         TransactionTypeSelector(transactionType = transactionType, onClick = {
+            onTransactionTypeChanged.invoke(it)
             transactionType = it
             focusManager.clearFocus()
-            category = ""
         })
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = type,
+            value = selectedPaymentType?.label ?: "",
             label = {
                 Text(text = "Type")
             },
+            readOnly = true,
+            interactionSource = paymentInteractionSource,
             textStyle = LocalTextStyle.current, onValueChange = {
-                type = it
+//                type = it.name
+            },
+            supportingText = {
+                if (showPaymentTypeError) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = "Select a valid Payment Type", // FIXME: String resource
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
             })
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
@@ -143,17 +183,26 @@ fun AddTransactionForm(
             },
             textStyle = LocalTextStyle.current, onValueChange = {
                 description = it
-                category = it
             })
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = category,
+            modifier = Modifier
+                .fillMaxWidth(),
+            interactionSource = categoryInteractionSource,
+            value = selectedCategory?.label ?: "",
             readOnly = true,
             label = {
                 Text(text = "Category")
             },
-            textStyle = LocalTextStyle.current, onValueChange = {
-                category = it
+            textStyle = LocalTextStyle.current,
+            onValueChange = {},
+            supportingText = {
+                if (showCategoryError) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = "Select a valid Category", // FIXME: String resource
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
             })
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
@@ -181,15 +230,25 @@ fun AddTransactionForm(
                 Text(text = "Date")
             },
             textStyle = LocalTextStyle.current, onValueChange = { /* do nothing */ })
+        val context = LocalContext.current
         Button(
             onClick = {
+                if (selectedPaymentType == null) {
+                    showPaymentTypeError = true
+                    return@Button
+                }
+                if (selectedCategory == null) {
+                    showCategoryError = true
+                    return@Button
+                }
                 val newTransaction = Transaction(
-                    "",
+                    212L,
                     transactionType,
-                    description,
-                    amount.toDoubleOrNull() ?: 0.0,
-                    category,
-                    date
+                    amount = amount.toDoubleOrNull() ?: 0.0,
+                    category = selectedCategory,
+                    paymentType = selectedPaymentType,
+                    date = date,
+                    note = description,
                 )
                 onAdd(newTransaction)
             },
@@ -205,7 +264,7 @@ fun AddTransactionForm(
 fun TransactionTypeSelector(
     modifier: Modifier = Modifier,
     transactionType: Transaction.Type = Transaction.Type.EXPENSE,
-    onClick: (Transaction.Type) -> Unit = {}
+    onClick: (Transaction.Type) -> Unit = {},
 ) {
     Row(
         modifier = Modifier
