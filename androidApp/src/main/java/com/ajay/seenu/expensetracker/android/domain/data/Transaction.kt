@@ -15,8 +15,8 @@ data class Transaction constructor(
     val note: String? = null
 ) {
 
-    enum class Type {
-        INCOME, EXPENSE
+    enum class Type(val value: String) {
+        INCOME("Income"), EXPENSE("Expense")
     }
 
     data class Category(

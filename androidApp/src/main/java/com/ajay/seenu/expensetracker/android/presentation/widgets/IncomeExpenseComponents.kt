@@ -1,16 +1,11 @@
 package com.ajay.seenu.expensetracker.android.presentation.widgets
 
-import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
@@ -34,10 +29,11 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.domain.data.Transaction
 import com.ajay.seenu.expensetracker.entity.PaymentType
 import java.text.SimpleDateFormat
@@ -71,7 +67,7 @@ fun AddTransactionForm(
         mutableStateOf(transaction?.date ?: Date())
     }
     var amount: String by remember {
-        mutableStateOf(transaction?.amount?.toString() ?: "0")
+        mutableStateOf(transaction?.amount?.toString() ?: "")
     }
     var showDialog by remember {
         mutableStateOf(false)
@@ -98,6 +94,10 @@ fun AddTransactionForm(
     }
 
     var showPaymentTypeError by remember {
+        mutableStateOf(false)
+    }
+
+    var showAmountError by remember {
         mutableStateOf(false)
     }
 
@@ -148,73 +148,82 @@ fun AddTransactionForm(
     }
 
     Column(modifier = modifier) {
-        TransactionTypeSelector(transactionType = transactionType, onClick = {
-            onTransactionTypeChanged.invoke(it)
-            transactionType = it
-            focusManager.clearFocus()
-        })
+        SlidingSwitch(selectedValue = transactionType.value,
+            values = Transaction.Type.entries.map { it.value },
+            onSelectedValue = {
+                val selectedTransactionType = Transaction.Type.valueOf(it.uppercase())
+                onTransactionTypeChanged.invoke(selectedTransactionType)
+                transactionType = selectedTransactionType
+                focusManager.clearFocus()
+            })
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = amount.toString(),
+            label = {
+                Text(text = stringResource(id = R.string.amount))
+            },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            textStyle = LocalTextStyle.current,
+            onValueChange = {
+                amount = it
+                showAmountError = it.isEmpty()
+            },
+            supportingText = {
+                if (showAmountError) {
+                    Text(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 10.dp),
+                        text = stringResource(R.string.enter_the_amount), // FIXME: String resource
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            isError = showAmountError)
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = selectedPaymentType?.label ?: "",
             label = {
-                Text(text = "Type")
+                Text(text = stringResource(id = R.string.paymentType))
             },
             readOnly = true,
             interactionSource = paymentInteractionSource,
-            textStyle = LocalTextStyle.current, onValueChange = {
-//                type = it.name
-            },
+            textStyle = LocalTextStyle.current,
+            onValueChange = {},
             supportingText = {
                 if (showPaymentTypeError) {
                     Text(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 10.dp),
                         text = "Select a valid Payment Type", // FIXME: String resource
                         color = MaterialTheme.colorScheme.error
                     )
                 }
-            })
+            },
+            isError = showPaymentTypeError)
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = description,
-            maxLines = 4,
-            minLines = 3,
-            label = {
-                Text(text = "Description")
-            },
-            textStyle = LocalTextStyle.current, onValueChange = {
-                description = it
-            })
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth(),
             interactionSource = categoryInteractionSource,
             value = selectedCategory?.label ?: "",
             readOnly = true,
             label = {
-                Text(text = "Category")
+                Text(text = stringResource(id = R.string.category))
             },
             textStyle = LocalTextStyle.current,
             onValueChange = {},
             supportingText = {
                 if (showCategoryError) {
                     Text(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 10.dp),
                         text = "Select a valid Category", // FIXME: String resource
                         color = MaterialTheme.colorScheme.error
                     )
                 }
-            })
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = amount.toString(),
-            label = {
-                Text(text = "Amount")
             },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-            textStyle = LocalTextStyle.current,
-            onValueChange = {
-                amount = it
-            })
+            isError = showCategoryError)
         OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()
@@ -230,17 +239,33 @@ fun AddTransactionForm(
                 Text(text = "Date")
             },
             textStyle = LocalTextStyle.current, onValueChange = { /* do nothing */ })
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = description,
+            maxLines = 4,
+            minLines = 3,
+            label = {
+                Text(text = "Description")
+            },
+            textStyle = LocalTextStyle.current, onValueChange = {
+                description = it
+            })
         val context = LocalContext.current
         Button(
             onClick = {
                 if (selectedPaymentType == null) {
                     showPaymentTypeError = true
-                    return@Button
+
                 }
                 if (selectedCategory == null) {
                     showCategoryError = true
-                    return@Button
                 }
+                if(amount.toDoubleOrNull() == null) {
+                    showAmountError = true
+                }
+                if(selectedPaymentType == null || selectedCategory == null || amount.toDoubleOrNull() == null)
+                    return@Button
+
                 val newTransaction = Transaction(
                     212L,
                     transactionType,
@@ -256,49 +281,5 @@ fun AddTransactionForm(
         ) {
             Text(text = "Add")
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun TransactionTypeSelector(
-    modifier: Modifier = Modifier,
-    transactionType: Transaction.Type = Transaction.Type.EXPENSE,
-    onClick: (Transaction.Type) -> Unit = {},
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        val (expenseBackground, incomeBackground) = if (transactionType == Transaction.Type.INCOME) {
-            Color.Transparent to MaterialTheme.colorScheme.primary
-        } else {
-            MaterialTheme.colorScheme.primary to Color.Transparent
-        }
-
-        Text(
-            modifier = Modifier
-                .fillMaxWidth(.5F)
-                .background(color = incomeBackground, shape = RoundedCornerShape(2.dp))
-                .padding(end = 4.dp)
-                .padding(vertical = 4.dp)
-                .clickable { onClick.invoke(Transaction.Type.INCOME) },
-            text = "Income",
-            textAlign = TextAlign.Center,
-            color = Color.White
-        )
-        Text(
-            text = "Expense",
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(color = expenseBackground, shape = RoundedCornerShape(2.dp))
-                .padding(start = 4.dp)
-                .padding(vertical = 4.dp)
-                .clickable { onClick.invoke(Transaction.Type.EXPENSE) },
-            textAlign = TextAlign.Center,
-            color = Color.White
-        )
     }
 }
