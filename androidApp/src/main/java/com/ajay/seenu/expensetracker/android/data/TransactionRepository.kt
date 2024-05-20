@@ -39,8 +39,13 @@ class TransactionRepository @Inject constructor(private val dataSource: Transact
         return listOf(dataSource.getAllTransactionsByType(type, pageNo, count)).asFlow()
     }
 
-    suspend fun getTransaction(id: Long): TransactionDetail {
-        return dataSource.getTransaction(id)
+    suspend fun getTransaction(id: Long): Transaction {
+        val transactionDetail = dataSource.getTransaction(id)
+        val categories = dataSource.getAllCategories().let {
+            CategoryMapper.mapCategories(it)
+        }
+        val category = categories.find { it.id == transactionDetail.category }!!
+        return transactionDetail.map(category)
     }
 
     suspend fun addTransaction(

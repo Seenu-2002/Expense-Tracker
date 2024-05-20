@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ajay.seenu.expensetracker.TransactionDetail
 import com.ajay.seenu.expensetracker.android.domain.data.Transaction
+import com.ajay.seenu.expensetracker.android.domain.usecases.DeleteTransactionUseCase
 import com.ajay.seenu.expensetracker.android.domain.usecases.GetOverallDataUseCase
 import com.ajay.seenu.expensetracker.android.domain.usecases.GetRecentTransactionsUseCase
 import com.ajay.seenu.expensetracker.android.domain.usecases.TransactionsByDate
@@ -46,6 +47,9 @@ class OverviewScreenViewModel @Inject constructor(
     @Inject
     internal lateinit var getOverallDataUseCase: GetOverallDataUseCase
 
+    @Inject
+    internal lateinit var deleteTransactionUseCase: DeleteTransactionUseCase
+
     init {
         viewModelScope.launch {
             _userName.emit("Seenivasan T")
@@ -81,6 +85,12 @@ class OverviewScreenViewModel @Inject constructor(
         viewModelScope.launch {
             lastFetchedPage++
             getTransactions()
+        }
+    }
+
+    fun deleteTransaction(id: Long) {
+        viewModelScope.launch {
+            deleteTransactionUseCase.invoke(id)
         }
     }
 }

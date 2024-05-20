@@ -61,9 +61,16 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddTransactionScreen(
-    navController: NavController,
+    onNavigateBack: () -> Unit,
+    cloneId: Long? = null,
     viewModel: AddTransactionViewModel = hiltViewModel(),
 ) {
+    //FIXME: Clone implemented but not updating in form
+    LaunchedEffect(Unit) {
+        cloneId?.let {id ->
+            viewModel.getTransaction(id)
+        }
+    }
     val context = LocalContext.current
     val transaction by viewModel.transaction.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
@@ -107,7 +114,7 @@ fun AddTransactionScreen(
                             .clip(RoundedCornerShape(percent = 50))
                             .clickable(
                                 onClick = {
-                                    navController.popBackStack()
+                                    onNavigateBack.invoke()
                                 }
                             )
                             .padding(8.dp),
@@ -139,7 +146,7 @@ fun AddTransactionScreen(
         ) { transaction ->
             Toast.makeText(context, "Transaction added Successfully!", Toast.LENGTH_SHORT).show()
             viewModel.addTransaction(transaction)
-            navController.popBackStack()
+            onNavigateBack.invoke()
         }
 
         val categoriesBottomSheetState = rememberModalBottomSheetState(true)

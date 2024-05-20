@@ -31,8 +31,8 @@ import com.ajay.seenu.expensetracker.android.presentation.widgets.TransactionPre
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun OverviewScreen(
-    navController: NavController,
-    viewModel: OverviewScreenViewModel = hiltViewModel()
+    viewModel: OverviewScreenViewModel = hiltViewModel(),
+    onCloneTransaction: (Long) -> Unit,
 ) {
     val recentTransactions by viewModel.recentTransactions.collectAsStateWithLifecycle()
     val overallData by viewModel.overallData.collectAsStateWithLifecycle()
@@ -86,8 +86,20 @@ fun OverviewScreen(
                             text = it.dateLabel
                         )
                     }
-                    items(it.transactions, itemContent = {
-                        TransactionPreviewRow(Modifier.fillMaxWidth(), it)
+                    items(it.transactions,
+                        key = { transaction ->
+                              transaction.id
+                        },
+                        itemContent = {
+                        TransactionPreviewRow(Modifier.fillMaxWidth(), it,
+                            onDelete = {
+                                //FIXME: Getting deleted by data not updated live
+                                viewModel.deleteTransaction(it.id)
+                            },
+                            onClone = {
+                                onCloneTransaction.invoke(it.id)
+                            }
+                        )
                     })
                 }
             }
