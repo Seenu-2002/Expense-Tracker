@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Expense Tracker</string>
     <string name="enter_the_amount">Enter the amount</string>
     <string name="amount">Amount <font color='#FF0000'>*</font></string>
     <string name="category">Category <font color='#FF0000'>*</font></string>
