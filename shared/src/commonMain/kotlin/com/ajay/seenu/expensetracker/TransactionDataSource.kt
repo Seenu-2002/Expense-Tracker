@@ -6,6 +6,7 @@ import com.ajay.seenu.expensetracker.entity.TransactionType
 
 interface TransactionDataSource {
     fun getAllTransactions(pageNo: Int, count: Int): PaginationData<List<TransactionDetail>>
+    fun getAllTransactionsBetween(pageNo: Int, count: Int, fromValue: Long, toValue: Long): PaginationData<List<TransactionDetail>>
     fun getAllTransactionsByType(type: TransactionType,pageNo: Int, count: Int): List<TransactionDetail>
     fun getTransaction(id: Long): TransactionDetail
     fun addTransaction(type: TransactionType,

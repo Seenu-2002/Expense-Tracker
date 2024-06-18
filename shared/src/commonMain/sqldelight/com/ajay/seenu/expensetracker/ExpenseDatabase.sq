@@ -1,4 +1,3 @@
-import com.ajay.seenu.expensetracker.entity.Category;
 import com.ajay.seenu.expensetracker.entity.PaymentType;
 import com.ajay.seenu.expensetracker.entity.TransactionType;
 
@@ -28,6 +27,11 @@ CREATE INDEX transaction_time ON TransactionDetail(date);
 getAllTransactions:
 SELECT *
 FROM TransactionDetail ORDER BY date DESC LIMIT :limit OFFSET :offset;
+
+getAllTransactionsBetween:
+SELECT *
+FROM TransactionDetail WHERE date >= :startUTCValue AND date <= :endUTCValue
+ORDER BY date DESC LIMIT :limit OFFSET :offset;
 
 getAllTransactionsByType:
 SELECT *

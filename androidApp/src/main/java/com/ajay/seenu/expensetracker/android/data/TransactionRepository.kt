@@ -35,6 +35,28 @@ class TransactionRepository @Inject constructor(private val dataSource: Transact
         }
     }
 
+    suspend fun getAllTransactionsBetween(
+        pageNo: Int,
+        count: Int,
+        fromValue: Long,
+        toValue: Long
+    ): PaginationData<List<Transaction>> {
+        return withContext(Dispatchers.IO) {
+            val paginationData = dataSource.getAllTransactionsBetween(pageNo, count, fromValue, toValue)
+            val transactions = paginationData.data
+            val categories = dataSource.getAllCategories().let {
+                CategoryMapper.mapCategories(it)
+            }
+            transactions.mapNotNull { transaction ->
+                val category = categories.find { it.id == transaction.category }
+                    ?: return@mapNotNull null
+                transaction.map(category)
+            }.let {
+                PaginationData(it, paginationData.hasMoreData)
+            }
+        }
+    }
+
     suspend fun getAllTransactionsByType(type: TransactionType, pageNo: Int, count: Int): Flow<List<TransactionDetail>> {
         return listOf(dataSource.getAllTransactionsByType(type, pageNo, count)).asFlow()
     }
