@@ -51,10 +51,19 @@ deleteTransaction:
 DELETE FROM TransactionDetail WHERE id = :id;
 
 getSumOfAmountByType:
-SELECT SUM(amount) FROM TransactionDetail WHERE type = :type;
+SELECT SUM(amount) AS sum FROM TransactionDetail WHERE type = :type;
 
 getAllCategories:
 SELECT * FROM Category;
 
 getCategories:
 SELECT * FROM Category WHERE type = :type;
+
+getTotalTransactionPerDayByType:
+SELECT date, category, SUM(amount) AS totalAmount FROM TransactionDetail WHERE type = :type GROUP BY date, category ORDER BY date DESC;
+
+getTotalExpenseByPaymentType:
+SELECT paymentType, SUM(amount) AS totalAmount FROM TransactionDetail WHERE type = "EXPENSE" GROUP BY paymentType ORDER BY totalAmount DESC;
+
+getTotalExpenseByCategory:
+SELECT category, SUM(amount) AS totalAmount FROM TransactionDetail WHERE type = "EXPENSE" GROUP BY category ORDER BY totalAmount DESC;
