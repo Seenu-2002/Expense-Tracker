@@ -4,6 +4,8 @@ import com.ajay.seenu.expensetracker.TransactionDataSource
 import com.ajay.seenu.expensetracker.TransactionDetail
 import com.ajay.seenu.expensetracker.android.presentation.widgets.OverallData
 import com.ajay.seenu.expensetracker.Category
+import com.ajay.seenu.expensetracker.GetTotalExpenseByCategory
+import com.ajay.seenu.expensetracker.GetTotalExpenseByPaymentType
 import com.ajay.seenu.expensetracker.PaginationData
 import com.ajay.seenu.expensetracker.android.domain.data.Transaction
 import com.ajay.seenu.expensetracker.android.domain.mapper.CategoryMapper
@@ -14,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.withContext
+import java.util.Date
 import javax.inject.Inject
 
 class TransactionRepository @Inject constructor(private val dataSource: TransactionDataSource) {
@@ -104,4 +107,33 @@ class TransactionRepository @Inject constructor(private val dataSource: Transact
         }
     }
 
+    suspend fun getTotalTransactionPerDayByType(type: Transaction.Type): List<ExpensePerDay> {
+        return withContext(Dispatchers.IO) {
+            val transactionType = if (type == Transaction.Type.INCOME) {
+                TransactionType.INCOME
+            } else {
+                TransactionType.EXPENSE
+            }
+            val categories = getCategories(Transaction.Type.EXPENSE).let {
+                CategoryMapper.mapCategories(it)
+            }
+            dataSource.getTotalTransactionPerDayByType(transactionType).mapNotNull {
+                it.totalAmount?.let { sum ->
+                    ExpensePerDay(Date(it.date), categories.find { category -> category.id == it.category }!!, sum)
+                }
+            }
+        }
+    }
+
+    suspend fun getExpensePerDayByPaymentType(): List<GetTotalExpenseByPaymentType> {
+        return withContext(Dispatchers.IO) {
+            dataSource.getExpenseByPaymentType()
+        }
+    }
+
+    suspend fun getExpensePerDayByCategory(): List<GetTotalExpenseByCategory> {
+        return withContext(Dispatchers.IO) {
+            dataSource.getExpenseByCategory()
+        }
+    }
 }

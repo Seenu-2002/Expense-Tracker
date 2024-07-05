@@ -29,6 +29,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.ajay.seenu.expensetracker.android.presentation.screeens.AnalyticsScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.OverviewScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.TestComposeScreen
 
@@ -104,7 +105,7 @@ fun MainScreen(onAddTransactionClicked: () -> Unit) {
                 OverviewScreen(navController = navController)
             }
             composable(Screen.Analytics.route) {
-                TestComposeScreen(navController = navController, label = "Analytics")
+                AnalyticsScreen(navController = navController)
             }
             composable(Screen.Settings.route) {
                 TestComposeScreen(navController = navController, label = "Settings")
