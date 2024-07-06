@@ -1,6 +1,5 @@
 package com.ajay.seenu.expensetracker
 
-import com.ajay.seenu.expensetracker.Category
 import com.ajay.seenu.expensetracker.entity.PaymentType
 import com.ajay.seenu.expensetracker.entity.TransactionType
 
@@ -23,4 +22,7 @@ interface TransactionDataSource {
     fun getSumOfAmountByType(type: TransactionType): Double
     fun getAllCategories(): List<Category>
     fun getCategories(type: TransactionType): List<Category>
+    fun getTotalTransactionPerDayByType(type: TransactionType): List<GetTotalTransactionPerDayByType>
+    fun getExpenseByPaymentType(): List<GetTotalExpenseByPaymentType>
+    fun getExpenseByCategory(): List<GetTotalExpenseByCategory>
 }

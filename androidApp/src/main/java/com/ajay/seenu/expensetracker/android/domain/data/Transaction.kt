@@ -19,11 +19,11 @@ data class Transaction constructor(
         INCOME("Income"), EXPENSE("Expense")
     }
 
-    data class Category(
+    data class Category constructor(
         val id: Long,
         val type: Type,
         val label: String,
-        var parent: Category?,
+        var parent: Category?
     )
 }
 

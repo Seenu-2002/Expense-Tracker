@@ -91,7 +91,7 @@ class TransactionDataSourceImpl constructor(
     }
 
     override fun getSumOfAmountByType(type: TransactionType): Double {
-        return queries.getSumOfAmountByType(type).executeAsOne().SUM ?: 0.0
+        return queries.getSumOfAmountByType(type).executeAsOne().sum ?: 0.0
     }
 
     override fun getAllCategories(): List<Category> {
@@ -100,5 +100,17 @@ class TransactionDataSourceImpl constructor(
 
     override fun getCategories(type: TransactionType): List<Category> {
         return queries.getCategories(type).executeAsList()
+    }
+
+    override fun getTotalTransactionPerDayByType(type: TransactionType): List<GetTotalTransactionPerDayByType> {
+        return queries.getTotalTransactionPerDayByType(type).executeAsList()
+    }
+
+    override fun getExpenseByPaymentType(): List<GetTotalExpenseByPaymentType> {
+        return queries.getTotalExpenseByPaymentType().executeAsList()
+    }
+
+    override fun getExpenseByCategory(): List<GetTotalExpenseByCategory> {
+        return queries.getTotalExpenseByCategory().executeAsList()
     }
 }

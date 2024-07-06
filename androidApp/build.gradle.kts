@@ -80,4 +80,7 @@ dependencies {
 
     // Compose bottom sheet
     implementation(libs.compose.bottomsheet)
+
+    // Vico Charts
+    implementation(libs.vico.compose)
 }
