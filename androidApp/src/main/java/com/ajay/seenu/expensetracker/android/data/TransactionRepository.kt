@@ -123,6 +123,14 @@ class TransactionRepository @Inject constructor(private val dataSource: Transact
         }
     }
 
+    suspend fun getOverallDataBetween(fromValue: Long, toValue: Long): OverallData {
+        return withContext(Dispatchers.IO) {
+            val income = dataSource.getSumOfAmountBetweenByType(TransactionType.INCOME, fromValue, toValue)
+            val expense = dataSource.getSumOfAmountBetweenByType(TransactionType.EXPENSE, fromValue, toValue)
+            OverallData(income = income, expense = expense)
+        }
+    }
+
     suspend fun getCategories(type: Transaction.Type): List<Category> {
         return withContext(Dispatchers.IO) {
             val transactionType = if (type == Transaction.Type.INCOME) {

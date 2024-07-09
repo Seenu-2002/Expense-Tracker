@@ -71,7 +71,6 @@ fun OverviewScreen(
     }
 
     LaunchedEffect(Unit) {
-        viewModel.getOverallData()
         viewModel.setFilter(Filter.All)
     }
 

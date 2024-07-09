@@ -7,6 +7,7 @@ import com.ajay.seenu.expensetracker.android.data.getThisYearInMillis
 import com.ajay.seenu.expensetracker.android.domain.data.Filter
 import com.ajay.seenu.expensetracker.android.domain.data.TransactionsByDate
 import com.ajay.seenu.expensetracker.android.domain.usecases.DeleteTransactionUseCase
+import com.ajay.seenu.expensetracker.android.domain.usecases.GetFilteredOverallDataUseCase
 import com.ajay.seenu.expensetracker.android.domain.usecases.GetFilteredTransactionsUseCase
 import com.ajay.seenu.expensetracker.android.domain.usecases.GetOverallDataUseCase
 import com.ajay.seenu.expensetracker.android.domain.usecases.GetRecentTransactionsUseCase
@@ -52,6 +53,9 @@ class OverviewScreenViewModel @Inject constructor(
     internal lateinit var getOverallDataUseCase: GetOverallDataUseCase
 
     @Inject
+    internal lateinit var getFilteredOverallDataUseCase: GetFilteredOverallDataUseCase
+
+    @Inject
     internal lateinit var deleteTransactionUseCase: DeleteTransactionUseCase
 
     init {
@@ -62,9 +66,30 @@ class OverviewScreenViewModel @Inject constructor(
 
     private var lastFetchedPage: Int = 1
 
-    fun getOverallData() {
+    private fun getOverallData(filter: Filter) {
         viewModelScope.launch {
-            getOverallDataUseCase().collectLatest {
+            when(filter) {
+                Filter.All -> {
+                    getOverallDataUseCase().collectLatest {
+                        _overallData.emit(it)
+                    }
+                }
+                Filter.ThisWeek -> {
+                    val values = getThisWeekInMillis()
+                    getFilteredOverallData(values.first, values.second)
+                }
+                Filter.ThisYear -> {
+                    val values = getThisYearInMillis()
+                    getFilteredOverallData(values.first, values.second)
+                }
+            }
+
+        }
+    }
+
+    private fun getFilteredOverallData(fromValue: Long, toValue: Long) {
+        viewModelScope.launch {
+            getFilteredOverallDataUseCase.invoke(fromValue, toValue).collectLatest {
                 _overallData.emit(it)
             }
         }
@@ -145,6 +170,7 @@ class OverviewScreenViewModel @Inject constructor(
     fun setFilter(filter: Filter) {
         viewModelScope.launch {
             _currentFilter.emit(filter)
+            getOverallData(filter)
             getRecentTransactions(filter)
         }
     }

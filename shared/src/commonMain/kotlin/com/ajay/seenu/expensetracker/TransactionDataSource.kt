@@ -20,6 +20,7 @@ interface TransactionDataSource {
     fun deleteAllTransactionsByType(type: TransactionType)
     fun deleteTransaction(id: Long)
     fun getSumOfAmountByType(type: TransactionType): Double
+    fun getSumOfAmountBetweenByType(type: TransactionType, fromValue: Long, toValue: Long): Double
     fun getAllCategories(): List<Category>
     fun getCategories(type: TransactionType): List<Category>
     fun getTotalTransactionPerDayByType(type: TransactionType): List<GetTotalTransactionPerDayByType>

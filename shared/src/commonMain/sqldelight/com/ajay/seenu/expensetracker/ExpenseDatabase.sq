@@ -57,6 +57,10 @@ DELETE FROM TransactionDetail WHERE id = :id;
 getSumOfAmountByType:
 SELECT SUM(amount) AS sum FROM TransactionDetail WHERE type = :type;
 
+getSumOfAmountBetweenByType:
+SELECT SUM(amount) AS sum FROM TransactionDetail WHERE type = :type
+AND date >= :startUTCValue AND date <= :endUTCValue;
+
 getAllCategories:
 SELECT * FROM Category;
 

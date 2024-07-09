@@ -94,6 +94,18 @@ class TransactionDataSourceImpl constructor(
         return queries.getSumOfAmountByType(type).executeAsOne().sum ?: 0.0
     }
 
+    override fun getSumOfAmountBetweenByType(
+        type: TransactionType,
+        fromValue: Long,
+        toValue: Long
+    ): Double {
+        return queries.getSumOfAmountBetweenByType(
+            type = type,
+            startUTCValue = fromValue,
+            endUTCValue = toValue
+        ).executeAsOne().sum ?: 0.0
+    }
+
     override fun getAllCategories(): List<Category> {
         return queries.getAllCategories().executeAsList()
     }
