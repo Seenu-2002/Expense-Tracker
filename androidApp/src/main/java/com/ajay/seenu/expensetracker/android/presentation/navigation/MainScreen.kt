@@ -35,7 +35,8 @@ import com.ajay.seenu.expensetracker.android.presentation.screeens.TestComposeSc
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(onAddTransactionClicked: () -> Unit) {
+fun MainScreen(onAddTransaction: () -> Unit,
+               onCloneTransaction: (Long) -> Unit) {
     var navigationSelectedItem by remember {
         mutableIntStateOf(0)
     }
@@ -84,7 +85,7 @@ fun MainScreen(onAddTransactionClicked: () -> Unit) {
                 exit = scaleOut(animationSpec = tween(100)),
             ) {
                 FloatingActionButton(
-                    onClick = onAddTransactionClicked,
+                    onClick = onAddTransaction,
                     shape = CircleShape,
                     contentColor = Color.White
                 ) {
@@ -102,7 +103,9 @@ fun MainScreen(onAddTransactionClicked: () -> Unit) {
             modifier = Modifier.padding(paddingValues = paddingValues)
         ) {
             composable(Screen.Overview.route) {
-                OverviewScreen(navController = navController)
+                OverviewScreen(
+                    onCloneTransaction = onCloneTransaction
+                )
             }
             composable(Screen.Analytics.route) {
                 AnalyticsScreen(navController = navController)

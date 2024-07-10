@@ -38,12 +38,39 @@ class TransactionRepository @Inject constructor(private val dataSource: Transact
         }
     }
 
+    suspend fun getAllTransactionsBetween(
+        pageNo: Int,
+        count: Int,
+        fromValue: Long,
+        toValue: Long
+    ): PaginationData<List<Transaction>> {
+        return withContext(Dispatchers.IO) {
+            val paginationData = dataSource.getAllTransactionsBetween(pageNo, count, fromValue, toValue)
+            val transactions = paginationData.data
+            val categories = dataSource.getAllCategories().let {
+                CategoryMapper.mapCategories(it)
+            }
+            transactions.mapNotNull { transaction ->
+                val category = categories.find { it.id == transaction.category }
+                    ?: return@mapNotNull null
+                transaction.map(category)
+            }.let {
+                PaginationData(it, paginationData.hasMoreData)
+            }
+        }
+    }
+
     suspend fun getAllTransactionsByType(type: TransactionType, pageNo: Int, count: Int): Flow<List<TransactionDetail>> {
         return listOf(dataSource.getAllTransactionsByType(type, pageNo, count)).asFlow()
     }
 
-    suspend fun getTransaction(id: Long): TransactionDetail {
-        return dataSource.getTransaction(id)
+    suspend fun getTransaction(id: Long): Transaction {
+        val transactionDetail = dataSource.getTransaction(id)
+        val categories = dataSource.getAllCategories().let {
+            CategoryMapper.mapCategories(it)
+        }
+        val category = categories.find { it.id == transactionDetail.category }!!
+        return transactionDetail.map(category)
     }
 
     suspend fun addTransaction(
@@ -92,6 +119,14 @@ class TransactionRepository @Inject constructor(private val dataSource: Transact
         return withContext(Dispatchers.IO) {
             val income = dataSource.getSumOfAmountByType(TransactionType.INCOME)
             val expense = dataSource.getSumOfAmountByType(TransactionType.EXPENSE)
+            OverallData(income = income, expense = expense)
+        }
+    }
+
+    suspend fun getOverallDataBetween(fromValue: Long, toValue: Long): OverallData {
+        return withContext(Dispatchers.IO) {
+            val income = dataSource.getSumOfAmountBetweenByType(TransactionType.INCOME, fromValue, toValue)
+            val expense = dataSource.getSumOfAmountBetweenByType(TransactionType.EXPENSE, fromValue, toValue)
             OverallData(income = income, expense = expense)
         }
     }

@@ -1,6 +1,7 @@
 [versions]
 agp = "8.2.2"
 androidDriver = "2.0.0-alpha05"
+glance = "1.0.0"
 hiltNavigationCompose = "1.0.0"
 koinCore = "3.2.0"
 kotlin = "1.9.22"
@@ -23,6 +24,8 @@ coreKtx = "1.5.0"
 vico = "2.0.0-alpha.20"
 
 [libraries]
+androidx-glance = { module = "androidx.glance:glance", version.ref = "glance" }
+androidx-glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "glance" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinCore" }
