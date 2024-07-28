@@ -12,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.ajay.seenu.expensetracker.android.presentation.navigation.MainScreen
+import com.ajay.seenu.expensetracker.android.presentation.navigation.Screen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.AddTransactionScreen
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -30,15 +31,15 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     NavHost(
                         navController = navController,
-                        startDestination = "default",
+                        startDestination = Screen.Default.route,
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        composable("default") {
-                            MainScreen {
-                                navController.navigate("add_transaction")
-                            }
+                        composable(Screen.Default.route) {
+                            MainScreen(onAddTransactionClicked = {
+                                navController.navigate(Screen.AddTransaction.route)
+                            })
                         }
-                        composable("add_transaction") {
+                        composable(Screen.AddTransaction.route) {
                             AddTransactionScreen(navController)
                         }
                     }

@@ -31,13 +31,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.ajay.seenu.expensetracker.android.presentation.screeens.AnalyticsScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.OverviewScreen
-import com.ajay.seenu.expensetracker.android.presentation.screeens.TestComposeScreen
+import com.ajay.seenu.expensetracker.android.presentation.screeens.SettingsScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(onAddTransactionClicked: () -> Unit) {
     var navigationSelectedItem by remember {
-        mutableIntStateOf(0)
+        mutableIntStateOf(2)
     }
     var isFABVisible by remember {
         mutableStateOf(true)
@@ -98,7 +98,7 @@ fun MainScreen(onAddTransactionClicked: () -> Unit) {
         }
         NavHost(
             navController = navController,
-            startDestination = Screen.Overview.route,
+            startDestination = Screen.Settings.route,
             modifier = Modifier.padding(paddingValues = paddingValues)
         ) {
             composable(Screen.Overview.route) {
@@ -108,7 +108,7 @@ fun MainScreen(onAddTransactionClicked: () -> Unit) {
                 AnalyticsScreen(navController = navController)
             }
             composable(Screen.Settings.route) {
-                TestComposeScreen(navController = navController, label = "Settings")
+                SettingsScreen(navController = navController)
             }
         }
     }

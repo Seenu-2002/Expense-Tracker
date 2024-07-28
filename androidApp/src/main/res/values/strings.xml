@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_system_theme">System Theme</string>
+
+    <string name="monday">Monday</string>
+    <string name="sunday">Sunday</string>
+</resources>
