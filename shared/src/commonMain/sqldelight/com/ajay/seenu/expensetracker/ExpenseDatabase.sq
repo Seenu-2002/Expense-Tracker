@@ -1,4 +1,3 @@
-import com.ajay.seenu.expensetracker.entity.Category;
 import com.ajay.seenu.expensetracker.entity.PaymentType;
 import com.ajay.seenu.expensetracker.entity.TransactionType;
 
@@ -29,6 +28,11 @@ getAllTransactions:
 SELECT *
 FROM TransactionDetail ORDER BY date DESC LIMIT :limit OFFSET :offset;
 
+getAllTransactionsBetween:
+SELECT *
+FROM TransactionDetail WHERE date >= :startUTCValue AND date <= :endUTCValue
+ORDER BY date DESC LIMIT :limit OFFSET :offset;
+
 getAllTransactionsByType:
 SELECT *
 FROM TransactionDetail WHERE type = :type ORDER BY date DESC LIMIT :limit OFFSET :offset;
@@ -52,6 +56,10 @@ DELETE FROM TransactionDetail WHERE id = :id;
 
 getSumOfAmountByType:
 SELECT SUM(amount) AS sum FROM TransactionDetail WHERE type = :type;
+
+getSumOfAmountBetweenByType:
+SELECT SUM(amount) AS sum FROM TransactionDetail WHERE type = :type
+AND date >= :startUTCValue AND date <= :endUTCValue;
 
 getAllCategories:
 SELECT * FROM Category;

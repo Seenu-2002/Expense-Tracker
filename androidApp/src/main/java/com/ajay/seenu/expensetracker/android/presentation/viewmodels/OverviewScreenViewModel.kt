@@ -1,24 +1,24 @@
 package com.ajay.seenu.expensetracker.android.presentation.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ajay.seenu.expensetracker.TransactionDetail
-import com.ajay.seenu.expensetracker.android.domain.data.Transaction
+import com.ajay.seenu.expensetracker.android.data.getThisWeekInMillis
+import com.ajay.seenu.expensetracker.android.data.getThisYearInMillis
+import com.ajay.seenu.expensetracker.android.domain.data.Filter
+import com.ajay.seenu.expensetracker.android.domain.data.TransactionsByDate
+import com.ajay.seenu.expensetracker.android.domain.usecases.DeleteTransactionUseCase
+import com.ajay.seenu.expensetracker.android.domain.usecases.GetFilteredOverallDataUseCase
+import com.ajay.seenu.expensetracker.android.domain.usecases.GetFilteredTransactionsUseCase
 import com.ajay.seenu.expensetracker.android.domain.usecases.GetOverallDataUseCase
 import com.ajay.seenu.expensetracker.android.domain.usecases.GetRecentTransactionsUseCase
-import com.ajay.seenu.expensetracker.android.domain.usecases.TransactionsByDate
 import com.ajay.seenu.expensetracker.android.presentation.widgets.OverallData
-import com.ajay.seenu.expensetracker.entity.TransactionType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.HashMap
-import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -40,11 +40,23 @@ class OverviewScreenViewModel @Inject constructor(
     private val _hasMoreData: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val hasMoreData = _hasMoreData.asStateFlow()
 
+    private val _currentFilter: MutableStateFlow<Filter> = MutableStateFlow(Filter.All)
+    val currentFilter: StateFlow<Filter> = _currentFilter.asStateFlow()
+
     @Inject
     internal lateinit var getRecentTransactions: GetRecentTransactionsUseCase
 
     @Inject
+    internal lateinit var getFilteredTransactionsUseCase: GetFilteredTransactionsUseCase
+
+    @Inject
     internal lateinit var getOverallDataUseCase: GetOverallDataUseCase
+
+    @Inject
+    internal lateinit var getFilteredOverallDataUseCase: GetFilteredOverallDataUseCase
+
+    @Inject
+    internal lateinit var deleteTransactionUseCase: DeleteTransactionUseCase
 
     init {
         viewModelScope.launch {
@@ -54,33 +66,112 @@ class OverviewScreenViewModel @Inject constructor(
 
     private var lastFetchedPage: Int = 1
 
-    fun getOverallData() {
+    private fun getOverallData(filter: Filter) {
         viewModelScope.launch {
-            getOverallDataUseCase().collectLatest {
+            when(filter) {
+                Filter.All -> {
+                    getOverallDataUseCase().collectLatest {
+                        _overallData.emit(it)
+                    }
+                }
+                Filter.ThisWeek -> {
+                    val values = getThisWeekInMillis()
+                    getFilteredOverallData(values.first, values.second)
+                }
+                Filter.ThisYear -> {
+                    val values = getThisYearInMillis()
+                    getFilteredOverallData(values.first, values.second)
+                }
+            }
+
+        }
+    }
+
+    private fun getFilteredOverallData(fromValue: Long, toValue: Long) {
+        viewModelScope.launch {
+            getFilteredOverallDataUseCase.invoke(fromValue, toValue).collectLatest {
                 _overallData.emit(it)
             }
         }
     }
 
-    fun getRecentTransactions() {
+    private fun getRecentTransactions(filter: Filter = Filter.All) {
         viewModelScope.launch {
             lastFetchedPage = 1
-            _recentTransactions.emit(emptyList())
-            getTransactions()
+            //_recentTransactions.emit(emptyList())
+            when(filter) {
+                Filter.All -> getTransactions()
+                Filter.ThisWeek -> {
+                    val values = getThisWeekInMillis()
+                    getFilteredTransactions(fromValue = values.first, toValue = values.second)
+                }
+                Filter.ThisYear -> {
+                    val values = getThisYearInMillis()
+                    getFilteredTransactions(fromValue = values.first, toValue = values.second)
+                }
+            }
         }
     }
 
     private suspend fun getTransactions(pageNo: Int = lastFetchedPage) {
         getRecentTransactions.invoke(pageNo).collectLatest { // FIXME: PAGINATION
-            _recentTransactions.emit(_recentTransactions.value + it.data)
+            _recentTransactions.emit(
+                if(lastFetchedPage == 1)
+                    it.data
+                else
+                    _recentTransactions.value + it.data
+            )
             _hasMoreData.emit(it.hasMoreData)
+        }
+    }
+
+    private fun getFilteredTransactions(
+        pageNo: Int = lastFetchedPage,
+        fromValue: Long,
+        toValue: Long
+    ) {
+        viewModelScope.launch {
+            getFilteredTransactionsUseCase.invoke(pageNo, fromValue, toValue).collectLatest {
+                _recentTransactions.emit(
+                    if(lastFetchedPage == 1)
+                        it.data
+                    else
+                        _recentTransactions.value + it.data
+                )
+                _hasMoreData.emit(it.hasMoreData)
+            }
         }
     }
 
     fun getNextPageTransactions() {
         viewModelScope.launch {
             lastFetchedPage++
-            getTransactions()
+            val filter = _currentFilter.value
+            when(filter) {
+                Filter.All -> getTransactions()
+                Filter.ThisWeek -> {
+                    val values = getThisWeekInMillis()
+                    getFilteredTransactions(fromValue = values.first, toValue = values.second)
+                }
+                Filter.ThisYear -> {
+                    val values = getThisYearInMillis()
+                    getFilteredTransactions(fromValue = values.first, toValue = values.second)
+                }
+            }
+        }
+    }
+
+    fun deleteTransaction(id: Long) {
+        viewModelScope.launch {
+            deleteTransactionUseCase.invoke(id)
+        }
+    }
+
+    fun setFilter(filter: Filter) {
+        viewModelScope.launch {
+            _currentFilter.emit(filter)
+            getOverallData(filter)
+            getRecentTransactions(filter)
         }
     }
 }

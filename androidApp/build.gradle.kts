@@ -57,6 +57,8 @@ dependencies {
     implementation(libs.compose.material)
     implementation(libs.androidx.lifecycle.runtime.compose)
     debugImplementation(libs.compose.ui.tooling)
+    implementation(libs.androidx.glance)
+    implementation(libs.androidx.glance.appwidget)
 
     // Hilt dependencies
     implementation(libs.hilt)

@@ -23,6 +23,29 @@ class TransactionDataSourceImpl constructor(
         }
     }
 
+    override fun getAllTransactionsBetween(
+        pageNo: Int,
+        count: Int,
+        fromValue: Long,
+        toValue: Long
+    ): PaginationData<List<TransactionDetail>> {
+        if (pageNo == 0) {
+            return PaginationData(emptyList(), false)
+        }
+        return queries.getAllTransactionsBetween(startUTCValue = fromValue,
+            endUTCValue = toValue,
+            limit = (count + 1).toLong(),
+            offset = (pageNo - 1L) * count).executeAsList().let {
+            val hasMoreData = it.size > count
+            val data = if (hasMoreData) {
+                it.subList(0, count)
+            } else {
+                it
+            }
+            PaginationData(data, hasMoreData)
+        }
+    }
+
     override fun getAllTransactionsByType(type: TransactionType, pageNo: Int, count: Int): List<TransactionDetail> {
         if (pageNo == 0) {
             return emptyList()
@@ -69,6 +92,18 @@ class TransactionDataSourceImpl constructor(
 
     override fun getSumOfAmountByType(type: TransactionType): Double {
         return queries.getSumOfAmountByType(type).executeAsOne().sum ?: 0.0
+    }
+
+    override fun getSumOfAmountBetweenByType(
+        type: TransactionType,
+        fromValue: Long,
+        toValue: Long
+    ): Double {
+        return queries.getSumOfAmountBetweenByType(
+            type = type,
+            startUTCValue = fromValue,
+            endUTCValue = toValue
+        ).executeAsOne().sum ?: 0.0
     }
 
     override fun getAllCategories(): List<Category> {
