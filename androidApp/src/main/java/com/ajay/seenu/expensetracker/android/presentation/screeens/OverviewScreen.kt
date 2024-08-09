@@ -3,6 +3,7 @@ package com.ajay.seenu.expensetracker.android.presentation.screeens
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,10 +20,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +38,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -76,7 +80,9 @@ fun OverviewScreen(
 
     Scaffold(
         topBar = {
-            Row(modifier = Modifier.fillMaxWidth(),
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp),
                 verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "Welcome, $userName",
@@ -87,7 +93,8 @@ fun OverviewScreen(
                 BadgedBox(
                     badge = {
                         if(currentFilter == Filter.ThisWeek || currentFilter == Filter.ThisYear) {
-                            Box(modifier = Modifier.size(10.dp)
+                            Box(modifier = Modifier
+                                .size(10.dp)
                                 .clip(RoundedCornerShape(10.dp))
                                 .background(color = MaterialTheme.colorScheme.errorContainer))
                         }
@@ -101,7 +108,8 @@ fun OverviewScreen(
                 }
                 Spacer(modifier = Modifier.width(10.dp))
             }
-        }
+        },
+        //containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2F)
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -143,6 +151,7 @@ fun OverviewScreen(
                                 .padding(horizontal = 12.dp, vertical = 8.dp),
                             text = it.dateLabel
                         )
+                        HorizontalDivider(modifier = Modifier.padding(horizontal = 10.dp))
                     }
                     items(it.transactions,
                         key = { transaction ->
@@ -179,27 +188,65 @@ fun OverviewScreen(
     if(openFilterBottomSheet) {
         ModalBottomSheet(sheetState = sheetState,
             onDismissRequest = { openFilterBottomSheet = false }) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                TextButton(modifier = Modifier.fillMaxWidth(),
-                    onClick = {
+            Column(modifier = Modifier.fillMaxWidth()
+                .padding(horizontal = 15.dp)) {
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 10.dp)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
                         openFilterBottomSheet = false
                         viewModel.setFilter(filter = Filter.All)
-                }) {
+                    },
+                    verticalAlignment = Alignment.CenterVertically) {
                     Text(text = "All")
+                    if(currentFilter == Filter.All) {
+                        Spacer(modifier = Modifier.weight(1f))
+                        Icon(
+                            imageVector = Icons.Default.Done,
+                            contentDescription = "selected filter"
+                        )
+                    }
                 }
-                TextButton(modifier = Modifier.fillMaxWidth(),
-                    onClick = {
+                Row(modifier = Modifier.fillMaxWidth()
+                    .padding(vertical = 10.dp)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
                         openFilterBottomSheet = false
                         viewModel.setFilter(filter = Filter.ThisWeek)
-                    }) {
+                    },
+                    verticalAlignment = Alignment.CenterVertically) {
                     Text(text = "This week")
+                    if(currentFilter == Filter.ThisWeek) {
+                        Spacer(modifier = Modifier.weight(1f))
+                        Icon(
+                            imageVector = Icons.Default.Done,
+                            contentDescription = "selected filter"
+                        )
+                    }
                 }
-                TextButton(modifier = Modifier.fillMaxWidth(),
-                    onClick = {
+                Row(modifier = Modifier.fillMaxWidth()
+                    .padding(vertical = 10.dp)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
                         openFilterBottomSheet = false
                         viewModel.setFilter(filter = Filter.ThisYear)
-                    }) {
+                    },
+                    verticalAlignment = Alignment.CenterVertically) {
                     Text(text = "This year")
+                    if(currentFilter == Filter.ThisYear) {
+                        Spacer(modifier = Modifier.weight(1f))
+                        Icon(
+                            imageVector = Icons.Default.Done,
+                            contentDescription = "selected filter"
+                        )
+                    }
                 }
             }
         }

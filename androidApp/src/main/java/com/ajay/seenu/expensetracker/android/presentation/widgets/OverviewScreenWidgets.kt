@@ -2,29 +2,33 @@ package com.ajay.seenu.expensetracker.android.presentation.widgets
 
 import android.icu.text.DecimalFormat
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardElevation
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,7 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -45,7 +48,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.Text
 import com.ajay.seenu.expensetracker.android.R
@@ -74,56 +76,59 @@ fun OverviewCard(
     val expensePercentageLabel =
         String.format(Locale.ENGLISH, "%.2f", expensePercentageRaw * 100) + " % "
 
-    ConstraintLayout(modifier = modifier) {
-        val (expense, income, progress) = createRefs()
-        Column(
-            modifier = Modifier
-                .background(shape = RoundedCornerShape(6.dp), color = Color(0xFF8BC34A))
-                .constrainAs(income) {
-                    width = Dimension.fillToConstraints
-                    top.linkTo(parent.top, 8.dp)
-                    start.linkTo(parent.start, 8.dp)
-                    end.linkTo(expense.start, 4.dp)
-                    bottom.linkTo(expense.bottom)
-                }
-                .padding(vertical = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceEvenly
-        ) {
+    Card(modifier = modifier
+        .fillMaxWidth()
+        .wrapContentHeight()
+        .padding(horizontal = 10.dp, vertical = 15.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        ),
+        shape = RoundedCornerShape(15.dp),
+        elevation = CardDefaults.elevatedCardElevation()
+    ) {
+        Spacer(modifier = Modifier.height(20.dp))
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 15.dp)) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .background(shape = RoundedCornerShape(6.dp), color = Color(0xFF8BC34A))
+                    .padding(vertical = 15.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceEvenly
+            ) {
 
-            Text(modifier = Modifier.padding(bottom = 4.dp), text = "Income", fontSize = 14.sp)
-            Text(text = "Rs. ${data.getIncomeLabel()}", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                Text(modifier = Modifier.padding(bottom = 4.dp), text = "Income", fontSize = 14.sp)
+                Text(
+                    text = "Rs. ${data.getIncomeLabel()}",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
 
-        }
-
-        Column(
-            modifier = Modifier
-                .background(shape = RoundedCornerShape(6.dp), color = Color(0xFFEE6C62))
-                .constrainAs(expense) {
-                    width = Dimension.fillToConstraints
-                    top.linkTo(parent.top, 8.dp)
-                    start.linkTo(income.end, 4.dp)
-                    end.linkTo(parent.end, 8.dp)
-                }
-                .padding(vertical = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceEvenly
-        ) {
-
-            Text(modifier = Modifier.padding(bottom = 4.dp), text = "Expense", fontSize = 14.sp)
-            Text(text = "Rs. ${data.getExpenseLabel()}", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-
-        }
-
-        ConstraintLayout(modifier = Modifier
-            .constrainAs(progress) {
-                width = Dimension.fillToConstraints
-                top.linkTo(expense.bottom, 8.dp)
-                start.linkTo(parent.start, 8.dp)
-                end.linkTo(parent.end, 8.dp)
-                bottom.linkTo(parent.bottom, 8.dp)
             }
-            .padding(bottom = 8.dp, start = 24.dp, end = 24.dp)) {
+            Spacer(modifier = Modifier.width(10.dp))
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .background(shape = RoundedCornerShape(6.dp), color = Color(0xFFEE6C62))
+                    .padding(vertical = 15.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceEvenly
+            ) {
+
+                Text(modifier = Modifier.padding(bottom = 4.dp), text = "Expense", fontSize = 14.sp)
+                Text(
+                    text = "Rs. ${data.getExpenseLabel()}",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+            }
+        }
+        Spacer(modifier = Modifier.height(15.dp))
+        ConstraintLayout(modifier = Modifier
+            .padding(bottom = 20.dp, start = 24.dp, end = 24.dp)) {
 
             val (progressBarBg, progressBar, marker, percentageText) = createRefs()
             val percentage = if (expensePercentageRaw > 1) {
@@ -149,7 +154,7 @@ fun OverviewCard(
                     }
                     .fillMaxWidth()
                     .height(2.dp)
-                    .background(shape = RoundedCornerShape(4.dp), color = Color.Gray)
+                    .background(shape = RoundedCornerShape(4.dp), color = Color.LightGray)
             )
 
             Box(
@@ -163,6 +168,7 @@ fun OverviewCard(
                     .background(shape = RoundedCornerShape(4.dp), color = color)
             )
 
+            val pathColor = LocalContentColor.current
             Canvas(modifier = Modifier
                 .width(10.dp)
                 .height(10.dp)
@@ -178,7 +184,7 @@ fun OverviewCard(
                     lineTo(0F, 0F)
                     close()
 
-                    drawPath(path = this, color = Color.White)
+                    drawPath(path = this, color = pathColor)
                 }
             }
 
@@ -192,7 +198,8 @@ fun OverviewCard(
                     },
                 textAlign = TextAlign.Center,
                 text = expensePercentageLabel,
-                fontSize = 12.sp
+                fontSize = 12.sp,
+                color = LocalContentColor.current
             )
 
         }
@@ -263,7 +270,7 @@ fun TransactionPreviewRow(modifier: Modifier = Modifier,
             icon = { Icon(modifier = Modifier,
                 painter = painterResource(id = R.drawable.baseline_content_copy_24), contentDescription = "Clone") }
             alignment = Alignment.CenterStart
-            color = Color.Blue.copy(alpha = 0.3f)
+            color = MaterialTheme.colorScheme.primaryContainer
         }
     }
     when (swipeState.currentValue) {
@@ -353,6 +360,7 @@ fun TransactionPreviewRow(modifier: Modifier = Modifier,
                     )
 
                 }, text = transaction.category.label,
+                color = LocalContentColor.current,
                 fontSize = 16.sp
             )
             Text(
@@ -371,7 +379,7 @@ fun TransactionPreviewRow(modifier: Modifier = Modifier,
                         bottom = parent.bottom
                     )
                 }, text = transaction.paymentType.name,
-                color = Color(0xFFCCCCCC),
+                color = LocalContentColor.current.copy(alpha = 0.5F),
                 fontSize = 14.sp
             )
             Text(

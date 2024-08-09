@@ -22,7 +22,7 @@ fun ExpenseTrackerTheme(
 ) {
     val colors = if (darkTheme) {
         darkColorScheme(
-            primary = Color(0xFFBB86FC),
+            primary = Color(0xFFF2F9FF),
             secondary = Color(0xFF03DAC5),
             tertiary = Color(0xFF3700B3),
             surface = Color.DarkGray,
@@ -30,9 +30,13 @@ fun ExpenseTrackerTheme(
         )
     } else {
         lightColorScheme(
-            primary = Color(0xFF6200EE),
+            primary = Color(0xFFD2E6F9),
+            primaryContainer = Color(0xFF0164AF),
             secondary = Color(0xFF03DAC5),
-            tertiary = Color(0xFF3700B3)
+            tertiary = Color(0xFF3700B3),
+            background = Color(0xFFF4F6F8),
+            surfaceContainer = Color.White,
+            errorContainer = Color(0xFFEE6C62)
         )
     }
     val typography = Typography(
