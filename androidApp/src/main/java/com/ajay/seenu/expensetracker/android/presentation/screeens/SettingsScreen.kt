@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Visibility
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.SettingsViewModel
@@ -69,7 +70,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel = hiltViewModel()) {
-    val configs = viewModel.userConfigs.collectAsState()
+    val configs by viewModel.userConfigs.collectAsStateWithLifecycle()
 
     val context = LocalContext.current.applicationContext
     var showWeekStartsFromBottomSheet by remember { mutableStateOf(false) }
@@ -79,12 +80,12 @@ fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel = 
     val dateFormatBottomSheet = rememberModalBottomSheetState()
     val themeBottomSheet = rememberModalBottomSheetState()
 
-    val weekStartsFromStringRes = when (configs.value.weekStartsFrom) {
+    val weekStartsFromStringRes = when (configs.weekStartsFrom) {
         StartDayOfTheWeek.SUNDAY -> R.string.sunday
         StartDayOfTheWeek.MONDAY -> R.string.monday
     }
 
-    val themeStringRes = when (configs.value.theme) {
+    val themeStringRes = when (configs.theme) {
         Theme.LIGHT -> R.string.theme_light
         Theme.DARK -> R.string.theme_dark
         Theme.SYSTEM_THEME -> R.string.theme_system_theme
@@ -127,7 +128,7 @@ fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel = 
     }
 
     if (showDateFormatBottomSheet) {
-        ListBottomSheet(state = dateFormatBottomSheet, items = DateFormats.FORMATS, selectedItem = configs.value.dateFormat, onDismiss = {
+        ListBottomSheet(state = dateFormatBottomSheet, items = DateFormats.FORMATS, selectedItem = configs.dateFormat, onDismiss = {
             showDateFormatBottomSheet = false
         }) { _, option ->
             scope.launch {
@@ -156,7 +157,7 @@ fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel = 
             .verticalScroll(rememberScrollState())
             .padding(bottom = 12.dp)
     ) {
-        UserInfo(name = configs.value.name, userImagePath = configs.value.userImagePath)
+        UserInfo(name = configs.name, userImagePath = configs.userImagePath)
         Spacer(Modifier.height(12.dp))
         Column(
             modifier = Modifier.padding(horizontal = 12.dp)
@@ -174,8 +175,8 @@ fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel = 
                     SettingsRowWithSwitch(Modifier,
                         Icons.Filled.Lock,
                         "App Lock",
-                        configs.value.isAppLockEnabled,
-                        onClick = { viewModel.shouldEnableAppLock(!configs.value.isAppLockEnabled) }) {
+                        configs.isAppLockEnabled,
+                        onClick = { viewModel.shouldEnableAppLock(!configs.isAppLockEnabled) }) {
                         viewModel.shouldEnableAppLock(it)
                         showToBeImplementedToast(context)
                     }
@@ -188,7 +189,7 @@ fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel = 
                         showWeekStartsFromBottomSheet = true
                     }
                     SettingsRow(
-                        Modifier, Icons.Filled.DateRange, "Date Format", configs.value.dateFormat
+                        Modifier, Icons.Filled.DateRange, "Date Format", configs.dateFormat
                     ) {
                         showDateFormatBottomSheet = true
                     }
@@ -199,8 +200,8 @@ fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel = 
                     SettingsRowWithSwitch(Modifier,
                         Icons.Filled.Lock,
                         "Data Encryption",
-                        configs.value.isEncryptionEnabled,
-                        onClick = { viewModel.shouldEnableAppLock(!configs.value.isEncryptionEnabled) }) {
+                        configs.isEncryptionEnabled,
+                        onClick = { viewModel.shouldEnableAppLock(!configs.isEncryptionEnabled) }) {
                         viewModel.shouldEnableEncryption(it)
                         showToBeImplementedToast(context)
                     }

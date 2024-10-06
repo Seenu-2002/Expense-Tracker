@@ -2,11 +2,18 @@ package com.ajay.seenu.expensetracker.android.presentation.viewmodels.chart_view
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ajay.seenu.expensetracker.android.domain.data.Filter
 import com.ajay.seenu.expensetracker.android.domain.usecases.GetTotalTransactionPerDayByCategoryUseCase
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import javax.inject.Inject
@@ -17,12 +24,20 @@ class TotalExpensePerDayChartViewModel @Inject constructor(
     private val dateFormat: SimpleDateFormat
 ) : ViewModel() {
 
+    private val _isChartLoadingCompleted: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val isChartLoadingCompleted: StateFlow<Boolean> = _isChartLoadingCompleted.asStateFlow()
+
     val modelProducer: CartesianChartModelProducer = CartesianChartModelProducer.build()
     val labelListKey = ExtraStore.Key<List<String>>()
+    private lateinit var filter: Filter
 
-    fun getData() {
+    private fun getData(filter: Filter) {
         viewModelScope.launch {
-            val data = useCase()
+            _isChartLoadingCompleted.emit(false)
+            val data = async(Dispatchers.Default) {
+                delay((0 .. 400L).random())
+                useCase(filter)
+            }.await()
             modelProducer.tryRunTransaction {
                 columnSeries {
                     val totalCategories = data.first().expensePerCategory.size
@@ -35,6 +50,14 @@ class TotalExpensePerDayChartViewModel @Inject constructor(
                     extraStore[labelListKey] = data.map { dateFormat.format(it.date) }
                 }
             }
+            _isChartLoadingCompleted.emit(true)
+        }
+    }
+
+    fun setFilter(filter: Filter) {
+        if (!this::filter.isInitialized || this.filter != filter) {
+            this.filter = filter
+            getData(filter)
         }
     }
 

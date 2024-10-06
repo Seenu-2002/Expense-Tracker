@@ -35,8 +35,10 @@ import com.ajay.seenu.expensetracker.android.presentation.screeens.SettingsScree
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(onAddTransaction: () -> Unit,
-               onCloneTransaction: (Long) -> Unit) {
+fun MainScreen(
+    onAddTransaction: () -> Unit,
+    onCloneTransaction: (Long) -> Unit,
+) {
     var navigationSelectedItem by remember {
         mutableIntStateOf(2)
     }
@@ -99,7 +101,7 @@ fun MainScreen(onAddTransaction: () -> Unit,
         }
         NavHost(
             navController = navController,
-            startDestination = Screen.Settings.route,
+            startDestination = Screen.Analytics.route,
             modifier = Modifier.padding(paddingValues = paddingValues)
         ) {
             composable(Screen.Overview.route) {
