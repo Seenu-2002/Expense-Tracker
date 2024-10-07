@@ -1,14 +1,18 @@
 package com.ajay.seenu.expensetracker.android.presentation.screeens.charts
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.ajay.seenu.expensetracker.android.domain.data.Filter
 import com.ajay.seenu.expensetracker.android.presentation.screeens.ChartDefaults.color4
 import com.ajay.seenu.expensetracker.android.presentation.screeens.ChartDefaults.columnChartColors
+import com.ajay.seenu.expensetracker.android.presentation.screeens.Loader
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.chart_viewmodels.TotalExpensePerDayChartViewModel
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottomAxis
@@ -30,12 +34,17 @@ import com.patrykandpatrick.vico.core.common.shape.Shape
 @Composable
 fun TotalExpensePerDayChart(
     modifier: Modifier = Modifier,
+    filter: Filter = Filter.All,
     viewModel: TotalExpensePerDayChartViewModel = hiltViewModel(),
 ) {
+    val isChartLoadingCompleted = viewModel.isChartLoadingCompleted.collectAsState()
 
-    LaunchedEffect(Unit) {
-        viewModel.getData()
+    viewModel.setFilter(filter)
+
+    if (!isChartLoadingCompleted.value) {
+        return Loader(modifier)
     }
+
     val bottomAxis = rememberBottomAxis(
         guideline = null,
         valueFormatter = CartesianValueFormatter { value, chartValues, _ ->

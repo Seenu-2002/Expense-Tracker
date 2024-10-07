@@ -1,12 +1,14 @@
 package com.ajay.seenu.expensetracker.android.presentation.screeens.charts
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.ajay.seenu.expensetracker.android.domain.data.Filter
 import com.ajay.seenu.expensetracker.android.presentation.screeens.ChartDefaults.columnChartColors
+import com.ajay.seenu.expensetracker.android.presentation.screeens.Loader
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.chart_viewmodels.ExpenseByCategoryChartViewModel
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottomAxis
@@ -20,36 +22,45 @@ import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
 import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
 
 @Composable
-fun ExpenseByCategoryChart(modifier: Modifier = Modifier,
-     viewModel: ExpenseByCategoryChartViewModel = hiltViewModel<ExpenseByCategoryChartViewModel>()) {
+fun ExpenseByCategoryChart(
+    modifier: Modifier = Modifier,
+    filter: Filter = Filter.All,
+    viewModel: ExpenseByCategoryChartViewModel = hiltViewModel(),
+) {
+    val isChartLoadingCompleted = viewModel.isChartLoadingCompleted.collectAsState()
 
-     LaunchedEffect(Unit) {
-          viewModel.getData()
-     }
+    viewModel.setFilter(filter)
 
-     ProvideVicoTheme(rememberM3VicoTheme(textColor = Color.Red)) {
-          val startAxis = rememberStartAxis()
-          val bottomAxis = rememberBottomAxis(valueFormatter = CartesianValueFormatter { value, chartValues, _ ->
-               chartValues.model.extraStore[viewModel.labelListKey][value.toInt()]
-          })
-          val layer = rememberColumnCartesianLayer(
-               columnProvider = ColumnCartesianLayer.ColumnProvider.series(
-                    columnChartColors.map { color ->
-                         rememberLineComponent(color = color,
-                              thickness = 32.dp)
-                    }
-               )
-          )
-          val chart = rememberCartesianChart(
-               layer,
-               startAxis = startAxis,
-               bottomAxis = bottomAxis,
-          )
-          CartesianChartHost(
-               modifier = modifier,
-               chart = chart,
-               modelProducer = viewModel.modelProducer
-          )
-     }
+    if (!isChartLoadingCompleted.value) {
+        return Loader(modifier)
+    }
+
+    ProvideVicoTheme(rememberM3VicoTheme(textColor = Color.Red)) {
+        val startAxis = rememberStartAxis()
+        val bottomAxis =
+            rememberBottomAxis(valueFormatter = CartesianValueFormatter { value, chartValues, _ ->
+                chartValues.model.extraStore[viewModel.labelListKey][value.toInt()]
+            })
+        val layer = rememberColumnCartesianLayer(
+            columnProvider = ColumnCartesianLayer.ColumnProvider.series(
+                columnChartColors.map { color ->
+                    rememberLineComponent(
+                        color = color,
+                        thickness = 32.dp
+                    )
+                }
+            )
+        )
+        val chart = rememberCartesianChart(
+            layer,
+            startAxis = startAxis,
+            bottomAxis = bottomAxis,
+        )
+        CartesianChartHost(
+            modifier = modifier,
+            chart = chart,
+            modelProducer = viewModel.modelProducer
+        )
+    }
 
 }

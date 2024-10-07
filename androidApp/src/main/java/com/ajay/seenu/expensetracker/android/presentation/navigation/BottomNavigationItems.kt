@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 
 data class BottomNavigationItems(
@@ -16,6 +17,7 @@ fun getBottomNavigationItems(): List<BottomNavigationItems> {
     return arrayListOf<BottomNavigationItems>().apply {
         add(BottomNavigationItems(
             label = "Overview",
+            icon = Icons.Filled.Home,
             route = Screen.Overview.route
         ))
         add(BottomNavigationItems(
@@ -24,8 +26,8 @@ fun getBottomNavigationItems(): List<BottomNavigationItems> {
             route = Screen.Analytics.route
         ))
         add(BottomNavigationItems(
-            label = "Profile",
-            icon = Icons.Filled.Person,
+            label = "Settings",
+            icon = Icons.Filled.Settings,
             route = Screen.Settings.route
         ))
     }

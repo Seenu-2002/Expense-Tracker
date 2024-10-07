@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ajay.seenu.expensetracker.android.presentation.navigation.MainScreen
+import com.ajay.seenu.expensetracker.android.presentation.navigation.Screen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.AddTransactionScreen
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -32,21 +33,21 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     NavHost(
                         navController = navController,
-                        startDestination = "default",
+                        startDestination = Screen.Default.route,
                         modifier = Modifier.fillMaxSize(),
                         route = "MainScreenRoute"
                     ) {
-                        composable("default") {
+                        composable(Screen.Default.route) {
                             MainScreen (
                                 onAddTransaction = {
-                                    navController.navigate("add_transaction/-1L")
+                                    navController.navigate("${Screen.AddTransaction.route}/-1L")
                                 },
                                 onCloneTransaction = {
-                                    navController.navigate("add_transaction/${it}")
+                                    navController.navigate("${Screen.AddTransaction.route}/${it}")
                                 }
                             )
                         }
-                        composable("add_transaction/{clone_id}",
+                        composable("${Screen.AddTransaction.route}/{clone_id}",
                             arguments = listOf(
                                 navArgument("clone_id") {
                                     type = NavType.LongType

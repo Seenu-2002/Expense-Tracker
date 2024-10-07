@@ -1,12 +1,15 @@
 package com.ajay.seenu.expensetracker.android.presentation.viewmodels
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ajay.seenu.expensetracker.android.data.FilterPreference
+import com.ajay.seenu.expensetracker.android.data.getThisMonthInMillis
 import com.ajay.seenu.expensetracker.android.data.getThisWeekInMillis
 import com.ajay.seenu.expensetracker.android.data.getThisYearInMillis
 import com.ajay.seenu.expensetracker.android.domain.data.Filter
 import com.ajay.seenu.expensetracker.android.domain.data.TransactionsByDate
-import com.ajay.seenu.expensetracker.android.domain.usecases.DeleteTransactionUseCase
+import com.ajay.seenu.expensetracker.android.domain.usecases.transaction.DeleteTransactionUseCase
 import com.ajay.seenu.expensetracker.android.domain.usecases.GetFilteredOverallDataUseCase
 import com.ajay.seenu.expensetracker.android.domain.usecases.GetFilteredTransactionsUseCase
 import com.ajay.seenu.expensetracker.android.domain.usecases.GetOverallDataUseCase
@@ -82,6 +85,10 @@ class OverviewScreenViewModel @Inject constructor(
                     val values = getThisYearInMillis()
                     getFilteredOverallData(values.first, values.second)
                 }
+                Filter.ThisMonth -> {
+                    val values = getThisMonthInMillis()
+                    getFilteredOverallData(values.first, values.second)
+                }
             }
 
         }
@@ -107,6 +114,10 @@ class OverviewScreenViewModel @Inject constructor(
                 }
                 Filter.ThisYear -> {
                     val values = getThisYearInMillis()
+                    getFilteredTransactions(fromValue = values.first, toValue = values.second)
+                }
+                Filter.ThisMonth -> {
+                    val values = getThisMonthInMillis()
                     getFilteredTransactions(fromValue = values.first, toValue = values.second)
                 }
             }
@@ -157,6 +168,10 @@ class OverviewScreenViewModel @Inject constructor(
                     val values = getThisYearInMillis()
                     getFilteredTransactions(fromValue = values.first, toValue = values.second)
                 }
+                Filter.ThisMonth -> {
+                    val values = getThisMonthInMillis()
+                    getFilteredTransactions(fromValue = values.first, toValue = values.second)
+                }
             }
         }
     }
@@ -167,7 +182,8 @@ class OverviewScreenViewModel @Inject constructor(
         }
     }
 
-    fun setFilter(filter: Filter) {
+    fun setFilter(context: Context, filter: Filter) {
+        FilterPreference.setCurrentFilter(context, filter)
         viewModelScope.launch {
             _currentFilter.emit(filter)
             getOverallData(filter)

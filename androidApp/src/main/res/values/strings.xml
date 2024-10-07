@@ -5,4 +5,11 @@
     <string name="amount">Amount <font color='#FF0000'>*</font></string>
     <string name="category">Category <font color='#FF0000'>*</font></string>
     <string name="paymentType">Type <font color='#FF0000'>*</font></string>
+
+    <string name="theme_dark">Dark</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_system_theme">System Theme</string>
+
+    <string name="monday">Monday</string>
+    <string name="sunday">Sunday</string>
 </resources>

@@ -4,6 +4,7 @@ import android.content.Context
 import com.ajay.seenu.expensetracker.DriverFactory
 import com.ajay.seenu.expensetracker.TransactionDataSource
 import com.ajay.seenu.expensetracker.TransactionDataSourceImpl
+import com.ajay.seenu.expensetracker.UserConfigurationsManager
 import com.ajay.seenu.expensetracker.createDatabase
 import dagger.Module
 import dagger.Provides
@@ -26,8 +27,9 @@ object ModuleProvider {
 
     @Provides
     @Singleton
-    fun provideDateFormatter(locale: Locale): SimpleDateFormat {
-        return SimpleDateFormat("dd MMM, yyyy", locale) // FIXME: user configurable
+    fun provideDateFormatter(@ApplicationContext context: Context, locale: Locale): SimpleDateFormat {
+        val configs = UserConfigurationsManager(context).getConfigs()
+        return SimpleDateFormat(configs.dateFormat, locale)
     }
 
     @Provides
