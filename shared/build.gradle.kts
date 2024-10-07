@@ -44,6 +44,8 @@ kotlin {
         }
         androidMain.dependencies {
             implementation(libs.sqldelight.android.driver)
+            implementation(libs.security.crypto)
+
         }
         val androidUnitTest by getting {
             dependencies {

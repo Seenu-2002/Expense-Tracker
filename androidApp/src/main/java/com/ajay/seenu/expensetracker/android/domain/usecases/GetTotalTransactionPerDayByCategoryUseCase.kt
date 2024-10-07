@@ -4,7 +4,9 @@ import com.ajay.seenu.expensetracker.android.data.ExpenseByCategory
 import com.ajay.seenu.expensetracker.android.data.ExpensePerDay
 import com.ajay.seenu.expensetracker.android.data.TotalExpensePerDay
 import com.ajay.seenu.expensetracker.android.data.TransactionRepository
+import com.ajay.seenu.expensetracker.android.domain.data.Filter
 import com.ajay.seenu.expensetracker.android.domain.data.Transaction
+import com.ajay.seenu.expensetracker.android.domain.data.getDateRange
 import java.text.SimpleDateFormat
 import javax.inject.Inject
 
@@ -13,8 +15,8 @@ class GetTotalTransactionPerDayByCategoryUseCase @Inject constructor(
     private val dateFormatter: SimpleDateFormat,
 ) {
 
-    suspend operator fun invoke(): List<TotalExpensePerDay> {
-        val totalExpenses = repository.getTotalTransactionPerDayByType(Transaction.Type.EXPENSE)
+    suspend operator fun invoke(filter: Filter): List<TotalExpensePerDay> {
+        val totalExpenses = repository.getTotalTransactionPerDayByType(Transaction.Type.EXPENSE, filter.getDateRange())
         return totalExpenses.mapData()
     }
 

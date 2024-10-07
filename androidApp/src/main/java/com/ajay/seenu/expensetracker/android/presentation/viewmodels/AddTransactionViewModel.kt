@@ -2,22 +2,17 @@ package com.ajay.seenu.expensetracker.android.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ajay.seenu.expensetracker.Category
 import com.ajay.seenu.expensetracker.android.data.TransactionRepository
 import com.ajay.seenu.expensetracker.android.domain.data.Transaction
 import com.ajay.seenu.expensetracker.android.domain.mapper.CategoryMapper
-import com.ajay.seenu.expensetracker.android.domain.usecases.AddTransactionUseCase
-import com.ajay.seenu.expensetracker.android.domain.usecases.GetRecentTransactionsUseCase
-import com.ajay.seenu.expensetracker.android.domain.usecases.GetTransactionUseCase
+import com.ajay.seenu.expensetracker.android.domain.usecases.transaction.AddTransactionUseCase
+import com.ajay.seenu.expensetracker.android.domain.usecases.transaction.GetTransactionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel

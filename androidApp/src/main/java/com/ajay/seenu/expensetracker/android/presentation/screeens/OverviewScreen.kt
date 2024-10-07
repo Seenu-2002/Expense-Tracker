@@ -44,9 +44,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ajay.seenu.expensetracker.android.R
+import com.ajay.seenu.expensetracker.android.data.FilterPreference
 import com.ajay.seenu.expensetracker.android.domain.data.Filter
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.OverviewScreenViewModel
 import com.ajay.seenu.expensetracker.android.presentation.widgets.OverviewCard
@@ -69,9 +71,11 @@ fun OverviewScreen(
     var openFilterBottomSheet by rememberSaveable {
         mutableStateOf(false)
     }
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        viewModel.setFilter(Filter.All)
+        val filter = FilterPreference.getCurrentFilter(context)
+        viewModel.setFilter(context, filter)
     }
 
     Scaffold(
@@ -86,7 +90,7 @@ fun OverviewScreen(
                 Spacer(modifier = Modifier.weight(1f))
                 BadgedBox(
                     badge = {
-                        if(currentFilter == Filter.ThisWeek || currentFilter == Filter.ThisYear) {
+                        if(currentFilter != Filter.All) {
                             Box(modifier = Modifier.size(10.dp)
                                 .clip(RoundedCornerShape(10.dp))
                                 .background(color = MaterialTheme.colorScheme.errorContainer))
@@ -183,23 +187,30 @@ fun OverviewScreen(
                 TextButton(modifier = Modifier.fillMaxWidth(),
                     onClick = {
                         openFilterBottomSheet = false
-                        viewModel.setFilter(filter = Filter.All)
+                        viewModel.setFilter(context, filter = Filter.All)
                 }) {
                     Text(text = "All")
                 }
                 TextButton(modifier = Modifier.fillMaxWidth(),
                     onClick = {
                         openFilterBottomSheet = false
-                        viewModel.setFilter(filter = Filter.ThisWeek)
+                        viewModel.setFilter(context, filter = Filter.ThisWeek)
                     }) {
-                    Text(text = "This week")
+                    Text(text = "This Week")
                 }
                 TextButton(modifier = Modifier.fillMaxWidth(),
                     onClick = {
                         openFilterBottomSheet = false
-                        viewModel.setFilter(filter = Filter.ThisYear)
+                        viewModel.setFilter(context, filter = Filter.ThisMonth)
                     }) {
-                    Text(text = "This year")
+                    Text(text = "This Month")
+                }
+                TextButton(modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        openFilterBottomSheet = false
+                        viewModel.setFilter(context, filter = Filter.ThisYear)
+                    }) {
+                    Text(text = "This Year")
                 }
             }
         }
