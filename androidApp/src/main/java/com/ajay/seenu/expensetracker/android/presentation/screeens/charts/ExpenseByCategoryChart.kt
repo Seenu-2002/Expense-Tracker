@@ -1,5 +1,7 @@
 package com.ajay.seenu.expensetracker.android.presentation.screeens.charts
 
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
@@ -8,6 +10,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ajay.seenu.expensetracker.android.domain.data.Filter
 import com.ajay.seenu.expensetracker.android.presentation.screeens.ChartDefaults.columnChartColors
+import com.ajay.seenu.expensetracker.android.presentation.screeens.InsufficientDataCard
 import com.ajay.seenu.expensetracker.android.presentation.screeens.Loader
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.chart_viewmodels.ExpenseByCategoryChartViewModel
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
@@ -24,15 +27,22 @@ import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
 @Composable
 fun ExpenseByCategoryChart(
     modifier: Modifier = Modifier,
-    filter: Filter = Filter.All,
+    filter: Filter = Filter.ThisMonth,
     viewModel: ExpenseByCategoryChartViewModel = hiltViewModel(),
 ) {
-    val isChartLoadingCompleted = viewModel.isChartLoadingCompleted.collectAsState()
+    val chartState = viewModel.chartState.collectAsState()
 
     viewModel.setFilter(filter)
-
-    if (!isChartLoadingCompleted.value) {
-        return Loader(modifier)
+    when (chartState.value) {
+        ChartState.Fetching, ChartState.Empty -> {
+            return Loader(modifier)
+        }
+        is ChartState.Failed -> {
+            return InsufficientDataCard(Modifier.fillMaxWidth().height(200.dp))
+        }
+        else -> {
+            // Nothing has to be done
+        }
     }
 
     ProvideVicoTheme(rememberM3VicoTheme(textColor = Color.Red)) {

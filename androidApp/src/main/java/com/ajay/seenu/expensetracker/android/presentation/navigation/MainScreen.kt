@@ -18,10 +18,10 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,7 +40,7 @@ fun MainScreen(
     onCloneTransaction: (Long) -> Unit,
 ) {
     var navigationSelectedItem by remember {
-        mutableIntStateOf(2)
+        mutableIntStateOf(0)
     }
     var isFABVisible by remember {
         mutableStateOf(true)
@@ -101,7 +101,7 @@ fun MainScreen(
         }
         NavHost(
             navController = navController,
-            startDestination = Screen.Analytics.route,
+            startDestination = Screen.Overview.route,
             modifier = Modifier.padding(paddingValues = paddingValues)
         ) {
             composable(Screen.Overview.route) {

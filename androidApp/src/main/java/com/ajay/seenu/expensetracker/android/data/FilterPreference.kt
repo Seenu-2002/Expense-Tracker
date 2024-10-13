@@ -12,9 +12,9 @@ object FilterPreference {
     private const val CURRENT_FILTER = "CURRENT_FILTER"
 
     fun getCurrentFilter(context: Context): Filter {
-        val filter = getPref(context)
-            .getString(CURRENT_FILTER, Filter.All.key) ?: Filter.All.key
-        return Filter.valueOf(filter)
+        val filterKey = getPref(context)
+            .getString(CURRENT_FILTER, null) ?: return Filter.ThisMonth
+        return Filter.valueOf(filterKey)
     }
 
     fun setCurrentFilter(context: Context, filter: Filter) {

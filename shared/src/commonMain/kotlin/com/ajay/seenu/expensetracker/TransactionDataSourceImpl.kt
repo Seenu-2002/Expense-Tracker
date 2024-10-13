@@ -118,20 +118,8 @@ class TransactionDataSourceImpl constructor(
         return queries.getTotalTransactionPerDayByTypeBetween(type, startDate, endDate).executeAsList()
     }
 
-    override fun getTotalTransactionPerDayByType(type: TransactionType): List<GetTotalTransactionPerDayByType> {
-        return queries.getTotalTransactionPerDayByType(type).executeAsList()
-    }
-
-    override fun getExpenseByPaymentType(): List<GetTotalExpenseByPaymentType> {
-        return queries.getTotalExpenseByPaymentType().executeAsList()
-    }
-
     override fun getExpenseByPaymentType(startDate: Long, endDate: Long): List<GetTotalExpenseByPaymentTypeBetween> {
         return queries.getTotalExpenseByPaymentTypeBetween(startDate, endDate).executeAsList()
-    }
-
-    override fun getExpenseByCategory(): List<GetTotalExpenseByCategory> {
-        return queries.getTotalExpenseByCategory().executeAsList()
     }
 
     override fun getExpenseByCategory(startDate: Long, endDate: Long): List<GetTotalExpenseByCategoryBetween> {

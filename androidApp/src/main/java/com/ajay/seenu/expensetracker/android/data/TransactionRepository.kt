@@ -1,20 +1,17 @@
 package com.ajay.seenu.expensetracker.android.data
 
-import com.ajay.seenu.expensetracker.TransactionDataSource
-import com.ajay.seenu.expensetracker.TransactionDetail
-import com.ajay.seenu.expensetracker.android.presentation.widgets.OverallData
 import com.ajay.seenu.expensetracker.Category
-import com.ajay.seenu.expensetracker.GetTotalExpenseByCategory
 import com.ajay.seenu.expensetracker.GetTotalExpenseByCategoryBetween
-import com.ajay.seenu.expensetracker.GetTotalExpenseByPaymentType
 import com.ajay.seenu.expensetracker.GetTotalExpenseByPaymentTypeBetween
 import com.ajay.seenu.expensetracker.PaginationData
+import com.ajay.seenu.expensetracker.TransactionDataSource
+import com.ajay.seenu.expensetracker.TransactionDetail
 import com.ajay.seenu.expensetracker.android.domain.data.Transaction
 import com.ajay.seenu.expensetracker.android.domain.mapper.CategoryMapper
 import com.ajay.seenu.expensetracker.android.domain.mapper.TransactionMapper.map
+import com.ajay.seenu.expensetracker.android.presentation.widgets.OverallData
 import com.ajay.seenu.expensetracker.entity.PaymentType
 import com.ajay.seenu.expensetracker.entity.TransactionType
-import com.patrykandpatrick.vico.core.common.Animation.range
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
@@ -145,7 +142,7 @@ class TransactionRepository @Inject constructor(private val dataSource: Transact
         }
     }
 
-    suspend fun getTotalTransactionPerDayByType(type: Transaction.Type, range: Pair<Long, Long>?): List<ExpensePerDay> {
+    suspend fun getTotalTransactionPerDayByType(type: Transaction.Type, range: Pair<Long, Long>): List<ExpensePerDay> {
         return withContext(Dispatchers.IO) {
             val transactionType = if (type == Transaction.Type.INCOME) {
                 TransactionType.INCOME
@@ -155,37 +152,16 @@ class TransactionRepository @Inject constructor(private val dataSource: Transact
             val categories = getCategories(Transaction.Type.EXPENSE).let {
                 CategoryMapper.mapCategories(it)
             }
-            if (range == null) {
-                dataSource.getTotalTransactionPerDayByType(transactionType).mapNotNull {
-                    it.totalAmount?.let { sum ->
-                        ExpensePerDay(Date(it.date), categories.find { category -> category.id == it.category }!!, sum)
-                    }
-                }
-            } else {
-                dataSource.getTotalTransactionPerDayByType(transactionType, range.first, range.second).mapNotNull {
-                    it.totalAmount?.let { sum ->
-                        ExpensePerDay(Date(it.date), categories.find { category -> category.id == it.category }!!, sum)
-                    }
+            dataSource.getTotalTransactionPerDayByType(transactionType, range.first, range.second).mapNotNull {
+                it.totalAmount?.let { sum ->
+                    ExpensePerDay(Date(it.date), categories.find { category -> category.id == it.category }!!, sum)
                 }
             }
         }
     }
-
-    suspend fun getExpensePerDayByPaymentType(): List<GetTotalExpenseByPaymentType> {
-        return withContext(Dispatchers.IO) {
-            dataSource.getExpenseByPaymentType()
-        }
-    }
-
     suspend fun getExpensePerDayByPaymentTypeBetween(range: Pair<Long, Long>): List<GetTotalExpenseByPaymentTypeBetween> {
         return withContext(Dispatchers.IO) {
             dataSource.getExpenseByPaymentType(range.first, range.second)
-        }
-    }
-
-    suspend fun getExpensePerDayByCategory(): List<GetTotalExpenseByCategory> {
-        return withContext(Dispatchers.IO) {
-            dataSource.getExpenseByCategory()
         }
     }
 
