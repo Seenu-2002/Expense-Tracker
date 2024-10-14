@@ -13,6 +13,11 @@ expect class DriverFactory {
 
 fun createDatabase(driverFactory: DriverFactory): ExpenseDatabase {
     val driver = driverFactory.createDriver()
+    driver.execute(
+        identifier = null,
+        sql = "PRAGMA foreign_keys=ON",
+        parameters = 0
+    )
     return ExpenseDatabase(
         driver,
         CategoryAdapter = Category.Adapter(EnumColumnAdapter()),

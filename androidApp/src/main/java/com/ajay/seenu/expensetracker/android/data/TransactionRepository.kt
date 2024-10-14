@@ -82,8 +82,8 @@ class TransactionRepository @Inject constructor(private val dataSource: Transact
         note: String?,
         payer: String?,
         place: String?
-    ) {
-        withContext(Dispatchers.IO) {
+    ): Long {
+        return withContext(Dispatchers.IO) {
             dataSource.addTransaction(
                 type = type,
                 amount = amount,

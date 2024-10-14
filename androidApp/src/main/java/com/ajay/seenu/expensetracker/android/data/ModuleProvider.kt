@@ -1,7 +1,10 @@
 package com.ajay.seenu.expensetracker.android.data
 
 import android.content.Context
+import com.ajay.seenu.expensetracker.AttachmentDataSourceImpl
+import com.ajay.seenu.expensetracker.AttachmentDateSource
 import com.ajay.seenu.expensetracker.DriverFactory
+import com.ajay.seenu.expensetracker.ExpenseDatabase
 import com.ajay.seenu.expensetracker.TransactionDataSource
 import com.ajay.seenu.expensetracker.TransactionDataSourceImpl
 import com.ajay.seenu.expensetracker.UserConfigurationsManager
@@ -21,8 +24,20 @@ object ModuleProvider {
 
     @Provides
     @Singleton
-    fun provideDataSource(@ApplicationContext context: Context): TransactionDataSource {
-        return TransactionDataSourceImpl(createDatabase(DriverFactory(context)))
+    fun provideDataSource(database: ExpenseDatabase): TransactionDataSource {
+        return TransactionDataSourceImpl(database)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAttachmentSource(database: ExpenseDatabase): AttachmentDateSource {
+        return AttachmentDataSourceImpl(database)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDatabase(@ApplicationContext context: Context): ExpenseDatabase {
+        return createDatabase(DriverFactory(context))
     }
 
     @Provides

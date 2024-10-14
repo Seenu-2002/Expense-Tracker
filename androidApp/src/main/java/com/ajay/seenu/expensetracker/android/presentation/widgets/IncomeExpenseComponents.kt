@@ -1,11 +1,21 @@
 package com.ajay.seenu.expensetracker.android.presentation.widgets
 
+import android.content.res.Configuration
+import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
@@ -13,35 +23,48 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import com.ajay.seenu.expensetracker.Attachment
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.domain.data.Transaction
+import com.ajay.seenu.expensetracker.android.domain.util.getFileInfoFromUri
+import com.ajay.seenu.expensetracker.android.domain.util.getFileNameFromUri
+import com.ajay.seenu.expensetracker.android.domain.util.saveBitmapToFile
+import com.ajay.seenu.expensetracker.android.presentation.common.MultiSelectChipsView
 import com.ajay.seenu.expensetracker.entity.PaymentType
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview
 @Composable
 fun AddTransactionForm(
     modifier: Modifier = Modifier,
@@ -52,11 +75,57 @@ fun AddTransactionForm(
     ),
     selectedCategory: Transaction.Category? = transaction?.category,
     selectedPaymentType: PaymentType? = transaction?.paymentType,
-    onCategoryClicked: (selectedValue: Transaction.Category?) -> Unit = {},
-    onTransactionTypeChanged: (type: Transaction.Type) -> Unit = {},
-    onPaymentTypeClicked: (type: PaymentType?) -> Unit = {},
-    onAdd: (transaction: Transaction) -> Unit = {},
+    onCategoryClicked: (selectedValue: Transaction.Category?) -> Unit,
+    onTransactionTypeChanged: (type: Transaction.Type) -> Unit,
+    onPaymentTypeClicked: (type: PaymentType?) -> Unit,
+    onAdd: (transaction: Transaction, attachments: List<Uri>) -> Unit,
 ) {
+    val context = LocalContext.current
+
+    var selectedImageUriList by remember {
+        mutableStateOf<List<Uri>>(emptyList())
+    }
+    var imageFile by remember { mutableStateOf<Uri?>(null) }
+    val attachments = remember {
+        mutableStateListOf<Uri>()
+    }
+    LaunchedEffect(selectedImageUriList, imageFile) {
+        selectedImageUriList.forEach {
+            if(!attachments.contains(it))
+                attachments.add(it)
+        }
+        imageFile?.let { attachments.add(it) }
+    }
+    val pickImageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetMultipleContents()
+    ) { uriList ->
+        if(attachments.size >= 5)
+            Toast.makeText(context, "Cannot add more than 5 attachments", Toast.LENGTH_SHORT).show()
+        else {
+            val availableSpace = 5 - attachments.size
+            if (uriList.size > availableSpace) {
+                Toast.makeText(context, "Cannot add more than 5 attachments", Toast.LENGTH_SHORT).show()
+            } else {
+                selectedImageUriList = uriList
+                //viewModel.addAttachmentFromUri(transactionId, uri, context)
+            }
+        }
+    }
+    val takePictureLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicturePreview()
+    ) { bitmap ->
+        bitmap?.let {
+            if(attachments.size >= 5)
+                Toast.makeText(context, "Cannot add more than 5 attachments", Toast.LENGTH_SHORT).show()
+            else
+                imageFile = saveBitmapToFile(context, bitmap)
+            //viewModel.addAttachmentFromFile(transactionId, imageFile)
+        }
+    }
+    var showAddAttachmentDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
+
     var transactionType by remember {
         mutableStateOf(transaction?.type ?: Transaction.Type.INCOME)
     }
@@ -156,6 +225,7 @@ fun AddTransactionForm(
                 transactionType = selectedTransactionType
                 focusManager.clearFocus()
             })
+
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = amount.toString(),
@@ -250,7 +320,22 @@ fun AddTransactionForm(
             textStyle = LocalTextStyle.current, onValueChange = {
                 description = it
             })
-        val context = LocalContext.current
+
+        MultiSelectChipsView(
+            modifier = Modifier.fillMaxWidth()
+                .padding(vertical = 10.dp),
+            selectedOptions =  attachments,
+            onClick = {
+                showAddAttachmentDialog = true
+            },
+            selectionOptionView = {
+                Text(text = getFileNameFromUri(context, it) ?: "N/A")
+            },
+            onOptionCanceled = {
+                attachments.remove(it)
+            }
+        )
+
         Button(
             onClick = {
                 if (selectedPaymentType == null) {
@@ -275,11 +360,65 @@ fun AddTransactionForm(
                     date = date,
                     note = description,
                 )
-                onAdd(newTransaction)
+
+                onAdd(newTransaction, attachments)
             },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = "Add")
+        }
+    }
+
+    if(showAddAttachmentDialog) {
+        Dialog(
+            onDismissRequest = {
+                showAddAttachmentDialog = false
+            },
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(horizontal = 15.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(color = MaterialTheme.colorScheme.background)
+                    .padding(vertical = 10.dp)
+            ) {
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 10.dp, vertical = 5.dp)
+                    .clickable {
+                        pickImageLauncher.launch("image/*")
+                        showAddAttachmentDialog = false
+                    }) {
+                    Icon(
+                        modifier = Modifier.size(24.dp),
+                        painter = painterResource(id = R.drawable.baseline_upload_24),
+                        contentDescription = "image gallery",
+                    )
+                    Text(
+                        text = "Open Image Gallery",
+                        modifier = Modifier.padding(start = 15.dp),
+                    )
+                }
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 10.dp, vertical = 5.dp)
+                    .clickable {
+                        takePictureLauncher.launch(null)
+                        showAddAttachmentDialog = false
+                    }) {
+                    Icon(
+                        modifier = Modifier.size(24.dp),
+                        painter = painterResource(id = R.drawable.baseline_camera_24),
+                        contentDescription = "image gallery",
+                    )
+                    Text(
+                        text = "Open Camera",
+                        modifier = Modifier.padding(start = 15.dp),
+                    )
+                }
+            }
         }
     }
 }

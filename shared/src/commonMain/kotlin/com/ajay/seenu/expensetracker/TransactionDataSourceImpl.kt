@@ -66,7 +66,7 @@ class TransactionDataSourceImpl constructor(
         note: String?,
         payer: String?,
         place: String?
-    ) {
+    ): Long {
         queries.addTransaction(
             type = type,
             amount = amount,
@@ -76,6 +76,7 @@ class TransactionDataSourceImpl constructor(
             date = date,
             payer = payer,
             place = place)
+        return queries.getLastInsertTransactionRowId().executeAsOne()
     }
 
     override fun deleteAllTransactions() {

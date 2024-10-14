@@ -22,6 +22,16 @@ CREATE TABLE Category (
     FOREIGN KEY(parent) REFERENCES Category(id)
 );
 
+CREATE TABLE Attachment (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    transactionId INTEGER NOT NULL, -- Foreign key to link to the ITEM table
+    name TEXT NOT NULL,
+    filePath TEXT NOT NULL,
+    fileType TEXT NOT NULL,
+    size INTEGER NOT NULL,
+    FOREIGN KEY (transactionId) REFERENCES TransactionDetail(id) ON DELETE CASCADE
+);
+
 CREATE INDEX transaction_time ON TransactionDetail(date);
 
 getAllTransactions:
@@ -44,6 +54,9 @@ FROM TransactionDetail WHERE id = :id;
 addTransaction:
 INSERT INTO TransactionDetail(type, amount, category, paymentType, note, date, payer, place)
 VALUES (?,?, ?, ?, ?, ?, ?, ?);
+
+getLastInsertTransactionRowId:
+SELECT last_insert_rowid();
 
 deleteAllTransactions:
 DELETE FROM TransactionDetail;
@@ -75,3 +88,16 @@ SELECT paymentType, SUM(amount) AS totalAmount FROM TransactionDetail WHERE type
 
 getTotalExpenseByCategoryBetween:
 SELECT category, SUM(amount) AS totalAmount FROM TransactionDetail WHERE type = "EXPENSE" AND date >= :startUTCValue AND date <= :endUTCValue GROUP BY category ORDER BY totalAmount DESC;
+
+getAllAttachmentsForTransaction:
+SELECT * FROM Attachment WHERE transactionId = ?;
+
+insertAttachment:
+INSERT INTO Attachment (transactionId, name, filePath, fileType, size)
+VALUES (?, ?, ?, ?, ?);
+
+deleteAttachmentById:
+DELETE FROM Attachment WHERE id = ?;
+
+deleteAttachmentsByTransactionId:
+DELETE FROM Attachment WHERE transactionId = ?;

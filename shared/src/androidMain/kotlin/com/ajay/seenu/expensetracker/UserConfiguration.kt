@@ -25,7 +25,7 @@ actual class UserConfigurationsManager(private val appContext: Context) {
     }
 
     actual fun isUserLoggedIn(): Boolean {
-        return getSharedPreference().getBoolean(IS_USER_LOGGED_IN, false)
+        return getSharedPreference().getBoolean(IS_USER_LOGGED_IN, true)
     }
 
     @Throws(UserNotLoggedIn::class)
