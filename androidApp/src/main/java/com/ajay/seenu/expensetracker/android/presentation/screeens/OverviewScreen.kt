@@ -184,7 +184,6 @@ fun OverviewScreen(
                         itemContent = {
                             TransactionPreviewRow(Modifier.fillMaxWidth(), it,
                                 onDelete = {
-                                    //FIXME: Getting deleted by data not updated live
                                     viewModel.deleteTransaction(it.id)
                                 },
                                 onClone = {

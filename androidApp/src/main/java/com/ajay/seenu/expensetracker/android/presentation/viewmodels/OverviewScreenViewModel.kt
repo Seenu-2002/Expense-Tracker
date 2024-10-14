@@ -156,7 +156,10 @@ class OverviewScreenViewModel @Inject constructor(
 
     fun deleteTransaction(id: Long) {
         viewModelScope.launch {
+            val currentFilter = _currentFilter.value
             deleteTransactionUseCase.invoke(id)
+            getOverallData(currentFilter)
+            getRecentTransactions(currentFilter)
         }
     }
 
