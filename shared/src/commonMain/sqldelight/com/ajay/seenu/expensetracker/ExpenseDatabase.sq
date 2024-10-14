@@ -67,20 +67,11 @@ SELECT * FROM Category;
 getCategories:
 SELECT * FROM Category WHERE type = :type;
 
-getTotalTransactionPerDayByType:
-SELECT date, category, SUM(amount) AS totalAmount FROM TransactionDetail WHERE type = :type GROUP BY date, category ORDER BY date DESC;
-
 getTotalTransactionPerDayByTypeBetween:
 SELECT date, category, SUM(amount) AS totalAmount FROM TransactionDetail WHERE type = :type AND date >= :startUTCValue AND date <= :endUTCValue GROUP BY date, category ORDER BY date DESC;
 
-getTotalExpenseByPaymentType:
-SELECT paymentType, SUM(amount) AS totalAmount FROM TransactionDetail WHERE type = "EXPENSE" GROUP BY paymentType ORDER BY totalAmount DESC;
-
 getTotalExpenseByPaymentTypeBetween:
 SELECT paymentType, SUM(amount) AS totalAmount FROM TransactionDetail WHERE type = "EXPENSE" AND date >= :startUTCValue AND date <= :endUTCValue GROUP BY paymentType ORDER BY totalAmount DESC;
-
-getTotalExpenseByCategory:
-SELECT category, SUM(amount) AS totalAmount FROM TransactionDetail WHERE type = "EXPENSE" GROUP BY category ORDER BY totalAmount DESC;
 
 getTotalExpenseByCategoryBetween:
 SELECT category, SUM(amount) AS totalAmount FROM TransactionDetail WHERE type = "EXPENSE" AND date >= :startUTCValue AND date <= :endUTCValue GROUP BY category ORDER BY totalAmount DESC;

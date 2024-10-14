@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ajay.seenu.expensetracker.android.domain.data.Filter
 import com.ajay.seenu.expensetracker.android.domain.usecases.GetTotalTransactionPerDayByCategoryUseCase
+import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.ChartState
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
@@ -24,8 +25,8 @@ class TotalExpensePerDayChartViewModel @Inject constructor(
     private val dateFormat: SimpleDateFormat
 ) : ViewModel() {
 
-    private val _isChartLoadingCompleted: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val isChartLoadingCompleted: StateFlow<Boolean> = _isChartLoadingCompleted.asStateFlow()
+    private val _chartState: MutableStateFlow<ChartState> = MutableStateFlow(ChartState.Empty)
+    val chartState: StateFlow<ChartState> = _chartState.asStateFlow()
 
     val modelProducer: CartesianChartModelProducer = CartesianChartModelProducer.build()
     val labelListKey = ExtraStore.Key<List<String>>()
@@ -33,11 +34,16 @@ class TotalExpensePerDayChartViewModel @Inject constructor(
 
     private fun getData(filter: Filter) {
         viewModelScope.launch {
-            _isChartLoadingCompleted.emit(false)
+            _chartState.emit(ChartState.Fetching)
             val data = async(Dispatchers.Default) {
                 delay((0 .. 400L).random())
                 useCase(filter)
             }.await()
+
+            if (data.isEmpty()) {
+                return@launch _chartState.emit(ChartState.Failed.InSufficientData)
+            }
+
             modelProducer.tryRunTransaction {
                 columnSeries {
                     val totalCategories = data.first().expensePerCategory.size
@@ -50,7 +56,7 @@ class TotalExpensePerDayChartViewModel @Inject constructor(
                     extraStore[labelListKey] = data.map { dateFormat.format(it.date) }
                 }
             }
-            _isChartLoadingCompleted.emit(true)
+            _chartState.emit(ChartState.Success)
         }
     }
 

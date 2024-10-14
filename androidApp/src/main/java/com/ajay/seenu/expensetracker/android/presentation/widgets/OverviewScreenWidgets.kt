@@ -12,19 +12,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -53,7 +48,6 @@ import com.ajay.seenu.expensetracker.android.domain.data.Transaction
 import com.ajay.seenu.expensetracker.entity.PaymentType
 import kotlinx.coroutines.delay
 import java.util.Date
-import java.util.Locale
 
 @Preview(showBackground = true)
 @Composable
@@ -70,9 +64,14 @@ fun OverviewCard(
     modifier: Modifier = Modifier, data: OverallData
 ) {
 
-    val expensePercentageRaw = data.expense / data.income
-    val expensePercentageLabel =
-        String.format(Locale.ENGLISH, "%.2f", expensePercentageRaw * 100) + " % "
+    val expensePercentageRaw = (data.expense / data.income).let { 
+        if (it == Double.POSITIVE_INFINITY) {
+            0.0
+        } else {
+            it
+        }
+    }
+    val expensePercentageLabel = decimalFormatter.format(expensePercentageRaw * 100) + " %"
 
     ConstraintLayout(modifier = modifier) {
         val (expense, income, progress) = createRefs()
@@ -184,7 +183,7 @@ fun OverviewCard(
 
             Text(
                 modifier = Modifier
-                    .wrapContentWidth()
+                    .wrapContentSize()
                     .constrainAs(percentageText) {
                         top.linkTo(parent.top)
                         start.linkTo(progressBar.end)
@@ -204,7 +203,7 @@ data class OverallData(
     val income: Double, val expense: Double
 )
 
-val decimalFormatter = DecimalFormat("#0.0#") // FIXME: Generic and user config
+val decimalFormatter = DecimalFormat("#0.##") // FIXME: Generic and user config
 fun OverallData.getIncomeLabel(): String {
     return decimalFormatter.format(income)
 }
@@ -222,7 +221,8 @@ class OverallDataProvider : PreviewParameterProvider<OverallData> {
             OverallData(22333.33, 1031.44),
             OverallData(22333.33, 15333.44),
             OverallData(21333.33, 22333.44),
-            OverallData(21333.33, 0.0)
+            OverallData(21333.33, 0.0),
+            OverallData(0.0, 21333.33)
         ).asSequence()
 
 }

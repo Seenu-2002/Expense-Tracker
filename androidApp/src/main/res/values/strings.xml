@@ -12,4 +12,16 @@
 
     <string name="monday">Monday</string>
     <string name="sunday">Sunday</string>
+
+    <string name="select_dates">Select Dates</string>
+    <string name="start_date">Start Date</string>
+    <string name="end_date">End Date</string>
+
+    <string name="filter_this_week">This Week</string>
+    <string name="filter_this_month">This Month</string>
+    <string name="filter_this_year">This Year</string>
+    <string name="filter_custom_arg">Custom %1$s</string>
+    <string name="filter_custom">Custom</string>
+    <string name="filter_custom_arg_format">(%1$s - %2$s)</string>
+    <string name="date_range">%1$s - %2$s</string>
 </resources>

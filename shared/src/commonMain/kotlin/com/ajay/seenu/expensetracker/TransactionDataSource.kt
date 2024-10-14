@@ -24,9 +24,6 @@ interface TransactionDataSource {
     fun getAllCategories(): List<Category>
     fun getCategories(type: TransactionType): List<Category>
     fun getTotalTransactionPerDayByType(type: TransactionType, startDate: Long, endDate: Long): List<GetTotalTransactionPerDayByTypeBetween>
-    fun getTotalTransactionPerDayByType(type: TransactionType): List<GetTotalTransactionPerDayByType>
-    fun getExpenseByPaymentType(): List<GetTotalExpenseByPaymentType>
     fun getExpenseByPaymentType(startDate: Long, endDate: Long): List<GetTotalExpenseByPaymentTypeBetween>
-    fun getExpenseByCategory(): List<GetTotalExpenseByCategory>
     fun getExpenseByCategory(startDate: Long, endDate: Long): List<GetTotalExpenseByCategoryBetween>
 }
