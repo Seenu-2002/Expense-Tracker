@@ -17,7 +17,7 @@ class AnalyticsViewModel @Inject constructor() : ViewModel() {
 
     val chartOrder: List<Charts> = Charts.entries
 
-    private val _currentFilter: MutableStateFlow<Filter> = MutableStateFlow(Filter.All)
+    private val _currentFilter: MutableStateFlow<Filter> = MutableStateFlow(Filter.ThisMonth)
     val currentFilter: StateFlow<Filter> = _currentFilter.asStateFlow()
 
     fun setFilter(context: Context, filter: Filter) {

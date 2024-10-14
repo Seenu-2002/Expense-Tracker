@@ -1,9 +1,8 @@
 package com.ajay.seenu.expensetracker.android.presentation.screeens.charts
 
-import android.util.Log
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -11,6 +10,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ajay.seenu.expensetracker.android.domain.data.Filter
 import com.ajay.seenu.expensetracker.android.presentation.screeens.ChartDefaults.columnChartColors
+import com.ajay.seenu.expensetracker.android.presentation.screeens.InsufficientDataCard
 import com.ajay.seenu.expensetracker.android.presentation.screeens.Loader
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.chart_viewmodels.ExpenseByPaymentTypeChartViewModel
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
@@ -27,16 +27,23 @@ import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
 @Composable
 internal fun ExpenseByPaymentTypeChart(
     modifier: Modifier = Modifier,
-    filter: Filter = Filter.All,
+    filter: Filter = Filter.ThisMonth,
     viewModel: ExpenseByPaymentTypeChartViewModel = hiltViewModel<ExpenseByPaymentTypeChartViewModel>(),
 ) {
 
-    val isChartLoadingCompleted = viewModel.isChartLoadingCompleted.collectAsState()
+    val chartState = viewModel.chartState.collectAsState()
 
     viewModel.setFilter(filter)
-
-    if (!isChartLoadingCompleted.value) {
-        return Loader(modifier)
+    when (chartState.value) {
+        ChartState.Fetching, ChartState.Empty -> {
+            return Loader(modifier)
+        }
+        is ChartState.Failed -> {
+            return InsufficientDataCard(Modifier.fillMaxWidth().height(200.dp))
+        }
+        else -> {
+            // Nothing has to be done
+        }
     }
 
     ProvideVicoTheme(rememberM3VicoTheme(textColor = Color.Red)) {

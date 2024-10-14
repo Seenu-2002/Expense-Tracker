@@ -2,6 +2,7 @@ package com.ajay.seenu.expensetracker.android.presentation.screeens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -18,26 +19,26 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberDateRangePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -49,6 +50,10 @@ import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.Expens
 import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.TotalExpensePerDayChart
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.AnalyticsViewModel
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.Charts
+import com.ajay.seenu.expensetracker.android.presentation.widgets.DateRangePickerBottomSheet
+import com.ajay.seenu.expensetracker.android.presentation.widgets.FilterBottomSheet
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,6 +64,20 @@ fun AnalyticsScreen(navController: NavController, viewModel: AnalyticsViewModel 
     var openFilterBottomSheet by rememberSaveable {
         mutableStateOf(false)
     }
+    val dateRangePickerState = rememberDateRangePickerState(
+        initialSelectedStartDateMillis = (currentFilter as? Filter.Custom)?.startDate,
+        initialSelectedEndDateMillis = (currentFilter as? Filter.Custom)?.endDate
+    )
+    val dateRangeSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var openDateRangePicker by rememberSaveable {
+        mutableStateOf(false)
+    }
+    val formatter = remember {
+        SimpleDateFormat(
+            "dd MMM, yyyy",
+            Locale.ENGLISH
+        ) // TODO: User configured date format
+    }
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
@@ -66,17 +85,26 @@ fun AnalyticsScreen(navController: NavController, viewModel: AnalyticsViewModel 
         viewModel.setFilter(context, filter)
     }
 
+    LaunchedEffect(currentFilter) {
+        val filter = currentFilter
+        if (filter is Filter.Custom) {
+            dateRangePickerState.setSelection(filter.startDate, filter.endDate)
+        }
+    }
+
     Scaffold(topBar = {
         ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
             val box = createRef()
             BadgedBox(
-                modifier = Modifier.constrainAs(box) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    end.linkTo(parent.end)
-                }.padding(4.dp),
+                modifier = Modifier
+                    .constrainAs(box) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                        end.linkTo(parent.end)
+                    }
+                    .padding(4.dp),
                 badge = {
-                    if (currentFilter != Filter.All) {
+                    if (currentFilter != Filter.ThisMonth) {
                         Box(
                             modifier = Modifier
                                 .size(10.dp)
@@ -143,40 +171,41 @@ fun AnalyticsScreen(navController: NavController, viewModel: AnalyticsViewModel 
             }
         }
 
-        if(openFilterBottomSheet) {
-            ModalBottomSheet(sheetState = sheetState,
-                onDismissRequest = { openFilterBottomSheet = false }) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    TextButton(modifier = Modifier.fillMaxWidth(),
-                        onClick = {
+        if (openFilterBottomSheet) {
+            FilterBottomSheet(
+                sheetState = sheetState,
+                filter = currentFilter,
+                formatter = formatter,
+                onFilterSelected = { filter ->
+                    when (filter) {
+                        Filter.CUSTOM_MOCK -> {
+                            openDateRangePicker = true
                             openFilterBottomSheet = false
-                            viewModel.setFilter(context, filter = Filter.All)
-                        }) {
-                        Text(text = "All") // FIXME: String res
-                    }
-                    TextButton(modifier = Modifier.fillMaxWidth(),
-                        onClick = {
+                        }
+
+                        else -> {
                             openFilterBottomSheet = false
-                            viewModel.setFilter(context, filter = Filter.ThisWeek)
-                        }) {
-                        Text(text = "This Week") // FIXME: String res
+                            viewModel.setFilter(context, filter)
+                        }
                     }
-                    TextButton(modifier = Modifier.fillMaxWidth(),
-                        onClick = {
-                            openFilterBottomSheet = false
-                            viewModel.setFilter(context, filter = Filter.ThisMonth)
-                        }) {
-                        Text(text = "This Month") // FIXME: String res
-                    }
-                    TextButton(modifier = Modifier.fillMaxWidth(),
-                        onClick = {
-                            openFilterBottomSheet = false
-                            viewModel.setFilter(context, filter = Filter.ThisYear)
-                        }) {
-                        Text(text = "This Year") // FIXME: String res
-                    }
-                }
-            }
+                },
+                onDismiss = {
+                    openFilterBottomSheet = false
+                })
+        }
+
+        if (openDateRangePicker) {
+            DateRangePickerBottomSheet(
+                state = dateRangeSheetState,
+                dateRangePickerState = dateRangePickerState,
+                onDismiss = {
+                    openDateRangePicker = false
+                },
+                formatter = formatter,
+                onDateSelected = { startDate, endDate ->
+                    openDateRangePicker = false
+                    viewModel.setFilter(context, Filter.Custom(startDate, endDate))
+                })
         }
     }
 }
@@ -198,6 +227,24 @@ fun ChartContainer(modifier: Modifier = Modifier, title: String, chart: @Composa
 fun Loader(modifier: Modifier = Modifier) {
     Box(modifier, contentAlignment = Alignment.Center) {
         CircularProgressIndicator()
+    }
+}
+
+@Preview()
+@Composable
+fun InsufficientDataCard(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            modifier = Modifier.size(80.dp),
+            painter = painterResource(id = R.drawable.icon_filter_list),
+            contentDescription = "Empty"
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        Text(text = "Such Vacant")
     }
 }
 

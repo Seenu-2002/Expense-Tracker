@@ -9,11 +9,10 @@ import com.ajay.seenu.expensetracker.android.data.getThisWeekInMillis
 import com.ajay.seenu.expensetracker.android.data.getThisYearInMillis
 import com.ajay.seenu.expensetracker.android.domain.data.Filter
 import com.ajay.seenu.expensetracker.android.domain.data.TransactionsByDate
-import com.ajay.seenu.expensetracker.android.domain.usecases.transaction.DeleteTransactionUseCase
 import com.ajay.seenu.expensetracker.android.domain.usecases.GetFilteredOverallDataUseCase
 import com.ajay.seenu.expensetracker.android.domain.usecases.GetFilteredTransactionsUseCase
-import com.ajay.seenu.expensetracker.android.domain.usecases.GetOverallDataUseCase
 import com.ajay.seenu.expensetracker.android.domain.usecases.GetRecentTransactionsUseCase
+import com.ajay.seenu.expensetracker.android.domain.usecases.transaction.DeleteTransactionUseCase
 import com.ajay.seenu.expensetracker.android.presentation.widgets.OverallData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,7 +42,7 @@ class OverviewScreenViewModel @Inject constructor(
     private val _hasMoreData: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val hasMoreData = _hasMoreData.asStateFlow()
 
-    private val _currentFilter: MutableStateFlow<Filter> = MutableStateFlow(Filter.All)
+    private val _currentFilter: MutableStateFlow<Filter> = MutableStateFlow(Filter.ThisMonth)
     val currentFilter: StateFlow<Filter> = _currentFilter.asStateFlow()
 
     @Inject
@@ -51,9 +50,6 @@ class OverviewScreenViewModel @Inject constructor(
 
     @Inject
     internal lateinit var getFilteredTransactionsUseCase: GetFilteredTransactionsUseCase
-
-    @Inject
-    internal lateinit var getOverallDataUseCase: GetOverallDataUseCase
 
     @Inject
     internal lateinit var getFilteredOverallDataUseCase: GetFilteredOverallDataUseCase
@@ -71,25 +67,21 @@ class OverviewScreenViewModel @Inject constructor(
 
     private fun getOverallData(filter: Filter) {
         viewModelScope.launch {
-            when(filter) {
-                Filter.All -> {
-                    getOverallDataUseCase().collectLatest {
-                        _overallData.emit(it)
-                    }
-                }
+            val range = when(filter) {
                 Filter.ThisWeek -> {
-                    val values = getThisWeekInMillis()
-                    getFilteredOverallData(values.first, values.second)
+                    getThisWeekInMillis()
                 }
                 Filter.ThisYear -> {
-                    val values = getThisYearInMillis()
-                    getFilteredOverallData(values.first, values.second)
+                    getThisYearInMillis()
                 }
                 Filter.ThisMonth -> {
-                    val values = getThisMonthInMillis()
-                    getFilteredOverallData(values.first, values.second)
+                    getThisMonthInMillis()
+                }
+                is Filter.Custom -> {
+                    filter.startDate to filter.endDate
                 }
             }
+            getFilteredOverallData(range.first, range.second)
 
         }
     }
@@ -102,37 +94,24 @@ class OverviewScreenViewModel @Inject constructor(
         }
     }
 
-    private fun getRecentTransactions(filter: Filter = Filter.All) {
+    private fun getRecentTransactions(filter: Filter = Filter.ThisMonth) {
         viewModelScope.launch {
             lastFetchedPage = 1
-            //_recentTransactions.emit(emptyList())
-            when(filter) {
-                Filter.All -> getTransactions()
+            val range = when (filter) {
                 Filter.ThisWeek -> {
-                    val values = getThisWeekInMillis()
-                    getFilteredTransactions(fromValue = values.first, toValue = values.second)
+                    getThisWeekInMillis()
                 }
                 Filter.ThisYear -> {
-                    val values = getThisYearInMillis()
-                    getFilteredTransactions(fromValue = values.first, toValue = values.second)
+                    getThisYearInMillis()
                 }
                 Filter.ThisMonth -> {
-                    val values = getThisMonthInMillis()
-                    getFilteredTransactions(fromValue = values.first, toValue = values.second)
+                    getThisMonthInMillis()
+                }
+                is Filter.Custom -> {
+                    filter.startDate to filter.endDate
                 }
             }
-        }
-    }
-
-    private suspend fun getTransactions(pageNo: Int = lastFetchedPage) {
-        getRecentTransactions.invoke(pageNo).collectLatest { // FIXME: PAGINATION
-            _recentTransactions.emit(
-                if(lastFetchedPage == 1)
-                    it.data
-                else
-                    _recentTransactions.value + it.data
-            )
-            _hasMoreData.emit(it.hasMoreData)
+            getFilteredTransactions(fromValue = range.first, toValue = range.second)
         }
     }
 
@@ -157,22 +136,21 @@ class OverviewScreenViewModel @Inject constructor(
     fun getNextPageTransactions() {
         viewModelScope.launch {
             lastFetchedPage++
-            val filter = _currentFilter.value
-            when(filter) {
-                Filter.All -> getTransactions()
+            val range = when (val filter = _currentFilter.value) {
                 Filter.ThisWeek -> {
-                    val values = getThisWeekInMillis()
-                    getFilteredTransactions(fromValue = values.first, toValue = values.second)
+                    getThisWeekInMillis()
                 }
                 Filter.ThisYear -> {
-                    val values = getThisYearInMillis()
-                    getFilteredTransactions(fromValue = values.first, toValue = values.second)
+                    getThisYearInMillis()
                 }
                 Filter.ThisMonth -> {
-                    val values = getThisMonthInMillis()
-                    getFilteredTransactions(fromValue = values.first, toValue = values.second)
+                    getThisMonthInMillis()
+                }
+                is Filter.Custom -> {
+                    filter.startDate to filter.endDate
                 }
             }
+            getFilteredTransactions(fromValue = range.first, toValue = range.second)
         }
     }
 

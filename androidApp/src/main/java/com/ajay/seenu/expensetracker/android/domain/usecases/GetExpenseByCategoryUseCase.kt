@@ -17,30 +17,16 @@ class GetExpenseByCategoryUseCase @Inject constructor(
             CategoryMapper.mapCategories(it)
         }
         val range = filter.getDateRange()
-        return if (range == null) {
-            repository.getExpensePerDayByCategory().map {
-                val category = categories.find { category -> category.id == it.category }!!.let { category ->
-                    Transaction.Category(
-                        category.id,
-                        category.type,
-                        category.label,
-                        category.parent
-                    )
-                }
-                TotalExpensePerCategory(category, it.totalAmount ?: 0.0)
+        return repository.getExpensePerDayByCategory(range).map {
+            val category = categories.find { category -> category.id == it.category }!!.let { category ->
+                Transaction.Category(
+                    category.id,
+                    category.type,
+                    category.label,
+                    category.parent
+                )
             }
-        } else {
-            repository.getExpensePerDayByCategory(range).map {
-                val category = categories.find { category -> category.id == it.category }!!.let { category ->
-                    Transaction.Category(
-                        category.id,
-                        category.type,
-                        category.label,
-                        category.parent
-                    )
-                }
-                TotalExpensePerCategory(category, it.totalAmount ?: 0.0)
-            }
+            TotalExpensePerCategory(category, it.totalAmount ?: 0.0)
         }
     }
 
