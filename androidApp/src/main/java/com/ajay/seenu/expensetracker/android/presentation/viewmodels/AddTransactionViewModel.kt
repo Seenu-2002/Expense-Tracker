@@ -1,12 +1,17 @@
 package com.ajay.seenu.expensetracker.android.presentation.viewmodels
 
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ajay.seenu.expensetracker.Attachment
 import com.ajay.seenu.expensetracker.android.data.TransactionRepository
 import com.ajay.seenu.expensetracker.android.domain.data.Transaction
 import com.ajay.seenu.expensetracker.android.domain.mapper.CategoryMapper
+import com.ajay.seenu.expensetracker.android.domain.usecases.attachment.AddAttachmentUseCase
 import com.ajay.seenu.expensetracker.android.domain.usecases.transaction.AddTransactionUseCase
 import com.ajay.seenu.expensetracker.android.domain.usecases.transaction.GetTransactionUseCase
+import com.ajay.seenu.expensetracker.android.domain.util.getFileInfoFromUri
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,16 +30,31 @@ class AddTransactionViewModel @Inject constructor(
     @Inject
     internal lateinit var getTransactionUseCase: GetTransactionUseCase
 
+    @Inject
+    internal lateinit var addAttachmentUseCase: AddAttachmentUseCase
+
     private val _transaction: MutableStateFlow<Transaction?> = MutableStateFlow(null)
     val transaction = _transaction.asStateFlow()
 
     private val _categories: MutableStateFlow<List<Transaction.Category>> = MutableStateFlow(emptyList())
     val categories = _categories.asStateFlow()
 
-    fun addTransaction(transaction: Transaction) {
+    fun addTransaction(context: Context,
+                       transaction: Transaction,
+                       attachments: List<Uri>) {
         viewModelScope.launch {
             try {
-                addTransactionUseCase.addTransaction(transaction)
+                val transactionId = addTransactionUseCase.addTransaction(transaction)
+                attachments.forEach { uri ->
+                    val fileInfo = getFileInfoFromUri(context, uri)
+                    addAttachmentUseCase.invoke(
+                        transactionId = transactionId,
+                        name = fileInfo["fileName"] ?: "N/A",
+                        fileType = fileInfo["fileType"] ?: "N/A",
+                        filePath = fileInfo["filePath"] ?: "N/A",
+                        size = fileInfo["fileSize"]?.toLong() ?: 0L
+                    )
+                }
             } catch (exp: Exception) {
                 // FIXME: Show exception
             }

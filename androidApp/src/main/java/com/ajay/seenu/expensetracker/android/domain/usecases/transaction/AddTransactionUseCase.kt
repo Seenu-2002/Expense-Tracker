@@ -9,8 +9,8 @@ class AddTransactionUseCase @Inject constructor(
     private val repository: TransactionRepository,
 ) {
 
-    suspend fun addTransaction(transaction: Transaction) {
-        repository.addTransaction(
+    suspend fun addTransaction(transaction: Transaction): Long {
+        return repository.addTransaction(
             transaction.type.map(),
             transaction.amount,
             transaction.category.map(),

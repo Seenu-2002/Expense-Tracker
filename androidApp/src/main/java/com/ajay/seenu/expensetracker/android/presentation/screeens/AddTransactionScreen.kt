@@ -143,9 +143,9 @@ fun AddTransactionScreen(
             onPaymentTypeClicked = {
                 showPaymentTypeBottomSheet = true
             }
-        ) { transaction ->
+        ) { transaction, attachments ->
+            viewModel.addTransaction(context, transaction, attachments)
             Toast.makeText(context, "Transaction added Successfully!", Toast.LENGTH_SHORT).show()
-            viewModel.addTransaction(transaction)
             onNavigateBack.invoke()
         }
 
