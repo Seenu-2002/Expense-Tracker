@@ -227,8 +227,8 @@ fun CategoryBottomSheet(
                         .padding(vertical = 4.dp, horizontal = 8.dp),
                     category,
                     categoryRelationShipMapper = categoryMapper
-                ) {
-                    onCategorySelected(category)
+                ) { selectedCategory ->
+                    onCategorySelected(selectedCategory)
                 }
             }
         }
@@ -283,7 +283,18 @@ fun ExpandableRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    onClicked(category)
+                    if( childCategories.isEmpty() ) {
+                        onClicked(category)
+                    } else {
+                        scope.launch {
+                            if (isExpanded) {
+                                rotation.animateTo(180F)
+                            } else {
+                                rotation.animateTo(0F)
+                            }
+                        }
+                        isExpanded = !isExpanded
+                    }
                 }
                 .padding(vertical = 8.dp)
                 .padding(start = 8.dp),
