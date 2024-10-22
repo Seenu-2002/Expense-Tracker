@@ -1,4 +1,4 @@
-package com.ajay.seenu.expensetracker.android.presentation.application
+package com.ajay.seenu.expensetracker.android
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
