@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlinAndroid).apply(false)
     alias(libs.plugins.kotlinMultiplatform).apply(false)
     alias(libs.plugins.hiltPlugin).apply(false)
+    alias(libs.plugins.firebase).apply(false)
     kotlin("jvm")
 }
 dependencies {

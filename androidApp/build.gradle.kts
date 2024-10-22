@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.hiltPlugin)
+    alias(libs.plugins.firebase)
     id("kotlin-kapt")
 }
 
@@ -84,4 +85,8 @@ dependencies {
 
     // Vico Charts
     implementation(libs.vico.compose)
+
+    //firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging.ktx)
 }

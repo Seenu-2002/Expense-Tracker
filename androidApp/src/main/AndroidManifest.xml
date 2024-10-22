@@ -2,8 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
     <application
         android:name=".presentation.application.ExpenseApplication"
+        android:usesCleartextTraffic="true"
         android:allowBackup="false"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
@@ -26,5 +29,11 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/add_transaction_widget_provider" />
         </receiver>
+        <service android:name=".presentation.service.PushNotificationService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
     </application>
 </manifest> 
