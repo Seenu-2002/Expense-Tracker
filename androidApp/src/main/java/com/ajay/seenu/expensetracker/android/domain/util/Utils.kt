@@ -7,9 +7,11 @@ import android.provider.OpenableColumns
 import androidx.core.net.toUri
 import java.io.File
 import java.io.FileOutputStream
+import java.util.UUID
 
 fun saveBitmapToFile(context: Context, bitmap: Bitmap): Uri {
-    val file = File(context.cacheDir, "${System.currentTimeMillis()}.jpg")
+    val fileName = "${System.currentTimeMillis()}_${UUID.randomUUID()}.jpg"
+    val file = File(context.cacheDir, fileName)
     val outputStream = FileOutputStream(file)
     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
     outputStream.flush()
