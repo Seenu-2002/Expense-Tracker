@@ -17,6 +17,10 @@
     <string name="start_date">Start Date</string>
     <string name="end_date">End Date</string>
 
+    <string name="chart_axis_date">Date</string>
+    <string name="chart_axis_category">Category</string>
+    <string name="chart_axis_payment_type">Payment Type</string>
+    <string name="chart_axis_amount">Amount</string>
     <string name="filter_this_week">This Week</string>
     <string name="filter_this_month">This Month</string>
     <string name="filter_this_year">This Year</string>

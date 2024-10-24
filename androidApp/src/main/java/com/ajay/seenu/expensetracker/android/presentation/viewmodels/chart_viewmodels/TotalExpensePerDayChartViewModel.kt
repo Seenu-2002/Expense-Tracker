@@ -30,6 +30,9 @@ class TotalExpensePerDayChartViewModel @Inject constructor(
 
     val modelProducer: CartesianChartModelProducer = CartesianChartModelProducer.build()
     val labelListKey = ExtraStore.Key<List<String>>()
+    private val _dataSetLabels: MutableStateFlow<List<String>> = MutableStateFlow(emptyList())
+    val dataSetLabels: StateFlow<List<String>> = _dataSetLabels.asStateFlow()
+
     private lateinit var filter: Filter
 
     private fun getData(filter: Filter) {
@@ -44,6 +47,7 @@ class TotalExpensePerDayChartViewModel @Inject constructor(
                 return@launch _chartState.emit(ChartState.Failed.InSufficientData)
             }
 
+            _dataSetLabels.emit(data.first().expensePerCategory.map { it.category.label })
             modelProducer.tryRunTransaction {
                 columnSeries {
                     val totalCategories = data.first().expensePerCategory.size

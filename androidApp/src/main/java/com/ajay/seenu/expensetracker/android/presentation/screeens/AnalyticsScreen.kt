@@ -33,7 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -59,6 +58,12 @@ import java.util.Locale
 @Composable
 fun AnalyticsScreen(navController: NavController, viewModel: AnalyticsViewModel = hiltViewModel()) {
 
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        val filter = FilterPreference.getCurrentFilter(context)
+        viewModel.setFilter(context, filter)
+    }
+
     val currentFilter by viewModel.currentFilter.collectAsStateWithLifecycle()
     val sheetState = rememberModalBottomSheetState()
     var openFilterBottomSheet by rememberSaveable {
@@ -77,12 +82,6 @@ fun AnalyticsScreen(navController: NavController, viewModel: AnalyticsViewModel 
             "dd MMM, yyyy",
             Locale.ENGLISH
         ) // TODO: User configured date format
-    }
-    val context = LocalContext.current
-
-    LaunchedEffect(Unit) {
-        val filter = FilterPreference.getCurrentFilter(context)
-        viewModel.setFilter(context, filter)
     }
 
     LaunchedEffect(currentFilter) {
@@ -246,12 +245,4 @@ fun InsufficientDataCard(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(10.dp))
         Text(text = "Such Vacant")
     }
-}
-
-object ChartDefaults {
-    val color1 = Color(0xffa55a5a)
-    val color2 = Color(0xffd3756b)
-    val color3 = Color(0xfff09b7d)
-    val color4 = Color(0xffffc3a1)
-    val columnChartColors = listOf(color1, color2, color3, color4)
 }
