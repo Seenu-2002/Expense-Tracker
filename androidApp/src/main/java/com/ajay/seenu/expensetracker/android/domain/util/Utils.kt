@@ -5,8 +5,13 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.core.net.toUri
+import kotlinx.datetime.LocalDateTime
 import java.io.File
 import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
+import java.util.Calendar
+import java.util.Locale
 import java.util.UUID
 
 fun saveBitmapToFile(context: Context, bitmap: Bitmap): Uri {
@@ -62,4 +67,29 @@ inline fun <T> Iterable<T>.sumOf(selector: (T) -> Float): Float {
         sum += selector(element)
     }
     return sum
+}
+
+fun formatDateHeader(inputDate: String): String {
+    val formatter = SimpleDateFormat("dd MMM, yyyy", Locale.getDefault())
+    val parsedDate = formatter.parse(inputDate) ?: return inputDate
+
+    val calendar = Calendar.getInstance()
+    calendar.time = parsedDate
+
+    val today = Calendar.getInstance()
+    today.set(Calendar.HOUR_OF_DAY, 0)
+    today.set(Calendar.MINUTE, 0)
+    today.set(Calendar.SECOND, 0)
+    today.set(Calendar.MILLISECOND, 0)
+
+    val yesterday = Calendar.getInstance()
+
+    yesterday.time = today.time
+    yesterday.add(Calendar.DAY_OF_YEAR, -1)
+
+    return when (calendar.timeInMillis) {
+        today.timeInMillis -> "Today"
+        yesterday.timeInMillis -> "Yesterday"
+        else -> inputDate
+    }
 }

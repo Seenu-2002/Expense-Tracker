@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -46,6 +47,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.data.FilterPreference
 import com.ajay.seenu.expensetracker.android.domain.data.Filter
+import com.ajay.seenu.expensetracker.android.domain.util.formatDateHeader
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.OverviewScreenViewModel
 import com.ajay.seenu.expensetracker.android.presentation.widgets.DateRangePickerBottomSheet
 import com.ajay.seenu.expensetracker.android.presentation.widgets.FilterBottomSheet
@@ -99,7 +101,8 @@ fun OverviewScreen(
     Scaffold(
         topBar = {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .padding(horizontal = 15.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -115,20 +118,20 @@ fun OverviewScreen(
                                 modifier = Modifier
                                     .size(10.dp)
                                     .clip(RoundedCornerShape(10.dp))
-                                    .background(color = MaterialTheme.colorScheme.errorContainer)
+                                    .background(color = MaterialTheme.colorScheme.error)
                             )
                         }
                     }
                 ) {
                     Icon(
-                        modifier = Modifier.clickable {
-                            openFilterBottomSheet = true
-                        },
+                        modifier = Modifier.size(30.dp)
+                            .clickable {
+                                openFilterBottomSheet = true
+                            },
                         painter = painterResource(id = R.drawable.icon_filter_list),
                         contentDescription = "filter"
                     )
                 }
-                Spacer(modifier = Modifier.width(10.dp))
             }
         }
     ) { paddingValues ->
@@ -173,8 +176,10 @@ fun OverviewScreen(
                             modifier = Modifier
                                 .fillParentMaxWidth()
                                 .background(MaterialTheme.colorScheme.background)
-                                .padding(horizontal = 12.dp, vertical = 8.dp),
-                            text = it.dateLabel
+                                .padding(horizontal = 15.dp, vertical = 8.dp),
+                            text = formatDateHeader(it.dateLabel),
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.W500
                         )
                     }
                     items(it.transactions,

@@ -13,8 +13,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +34,7 @@ import androidx.navigation.compose.rememberNavController
 import com.ajay.seenu.expensetracker.android.presentation.screeens.AnalyticsScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.OverviewScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.SettingsScreen
+import com.ajay.seenu.expensetracker.android.presentation.theme.LocalColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,7 +77,10 @@ fun MainScreen(
                                 launchSingleTop = true
                                 restoreState = true
                             }
-                        }
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            indicatorColor = MaterialTheme.colorScheme.primary
+                        )
                     )
                 }
             }
@@ -89,6 +95,7 @@ fun MainScreen(
                 FloatingActionButton(
                     onClick = onAddTransaction,
                     shape = CircleShape,
+                    containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = Color.White
                 ) {
                     Icon(imageVector = Icons.Filled.Add, contentDescription = "Add transaction")
