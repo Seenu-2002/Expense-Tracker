@@ -9,25 +9,41 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +53,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
@@ -47,9 +64,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.ajay.seenu.expensetracker.Attachment
 import com.ajay.seenu.expensetracker.android.R
@@ -58,6 +77,7 @@ import com.ajay.seenu.expensetracker.android.domain.util.getFileInfoFromUri
 import com.ajay.seenu.expensetracker.android.domain.util.getFileNameFromUri
 import com.ajay.seenu.expensetracker.android.domain.util.saveBitmapToFile
 import com.ajay.seenu.expensetracker.android.presentation.common.MultiSelectChipsView
+import com.ajay.seenu.expensetracker.android.presentation.common.PreviewThemeWrapper
 import com.ajay.seenu.expensetracker.entity.PaymentType
 import java.io.File
 import java.text.SimpleDateFormat
@@ -78,6 +98,7 @@ fun AddTransactionForm(
     onCategoryClicked: (selectedValue: Transaction.Category?) -> Unit,
     onTransactionTypeChanged: (type: Transaction.Type) -> Unit,
     onPaymentTypeClicked: (type: PaymentType?) -> Unit,
+    onNavigateBack: () -> Unit,
     onAdd: (transaction: Transaction, attachments: List<Uri>) -> Unit,
 ) {
     val context = LocalContext.current
@@ -216,156 +237,303 @@ fun AddTransactionForm(
         }
     }
 
-    Column(modifier = modifier) {
-        SlidingSwitch(selectedValue = transactionType.value,
-            values = Transaction.Type.entries.map { it.value },
-            onSelectedValue = {
-                val selectedTransactionType = Transaction.Type.valueOf(it.uppercase())
-                onTransactionTypeChanged.invoke(selectedTransactionType)
-                transactionType = selectedTransactionType
-                focusManager.clearFocus()
-            })
-
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = amount.toString(),
-            label = {
-                Text(text = stringResource(id = R.string.amount))
-            },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-            textStyle = LocalTextStyle.current,
-            onValueChange = {
-                amount = it
-                showAmountError = it.isEmpty()
-            },
-            supportingText = {
-                if (showAmountError) {
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 10.dp),
-                        text = stringResource(R.string.enter_the_amount), // FIXME: String resource
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            },
-            isError = showAmountError)
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = selectedPaymentType?.label ?: "",
-            label = {
-                Text(text = stringResource(id = R.string.paymentType))
-            },
-            readOnly = true,
-            interactionSource = paymentInteractionSource,
-            textStyle = LocalTextStyle.current,
-            onValueChange = {},
-            supportingText = {
-                if (showPaymentTypeError) {
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 10.dp),
-                        text = "Select a valid Payment Type", // FIXME: String resource
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            },
-            isError = showPaymentTypeError)
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            interactionSource = categoryInteractionSource,
-            value = selectedCategory?.label ?: "",
-            readOnly = true,
-            label = {
-                Text(text = stringResource(id = R.string.category))
-            },
-            textStyle = LocalTextStyle.current,
-            onValueChange = {},
-            supportingText = {
-                if (showCategoryError) {
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 10.dp),
-                        text = "Select a valid Category", // FIXME: String resource
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            },
-            isError = showCategoryError)
-        OutlinedTextField(
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .focusRequester(focusRequester)
-                .onFocusChanged {
-                    if (it.isFocused) {
-                        showDialog = true
-                    }
-                },
-            value = formatter.format(date),
-            readOnly = true,
-            label = {
-                Text(text = "Date")
-            },
-            textStyle = LocalTextStyle.current, onValueChange = { /* do nothing */ })
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = description,
-            maxLines = 4,
-            minLines = 3,
-            label = {
-                Text(text = "Description")
-            },
-            textStyle = LocalTextStyle.current, onValueChange = {
-                description = it
-            })
-
-        MultiSelectChipsView(
-            modifier = Modifier.fillMaxWidth()
-                .padding(vertical = 10.dp),
-            selectedOptions =  attachments,
-            onClick = {
-                showAddAttachmentDialog = true
-            },
-            selectionOptionView = {
-                Text(text = getFileNameFromUri(context, it) ?: "N/A")
-            },
-            onOptionCanceled = {
-                attachments.remove(it)
-            }
-        )
-
-        Button(
-            onClick = {
-                if (selectedPaymentType == null) {
-                    showPaymentTypeError = true
-
-                }
-                if (selectedCategory == null) {
-                    showCategoryError = true
-                }
-                if(amount.toDoubleOrNull() == null) {
-                    showAmountError = true
-                }
-                if(selectedPaymentType == null || selectedCategory == null || amount.toDoubleOrNull() == null)
-                    return@Button
-
-                val newTransaction = Transaction(
-                    212L,
-                    transactionType,
-                    amount = amount.toDoubleOrNull() ?: 0.0,
-                    category = selectedCategory,
-                    paymentType = selectedPaymentType,
-                    date = date,
-                    note = description,
+                .fillMaxHeight(0.5F)
+                .background(
+                    color = if(transactionType == Transaction.Type.EXPENSE)
+                        Color(0xFFFD3C4A)
+                    else Color(0xFF00A86B),
+                    shape = RoundedCornerShape(
+                        topStart = 0.dp,
+                        topEnd = 0.dp,
+                        bottomStart = 25.dp,
+                        bottomEnd = 25.dp
+                    )
                 )
-
-                onAdd(newTransaction, attachments)
+                .align(Alignment.TopCenter)
+        )
+        Scaffold(
+            topBar = {
+                Box(
+                    modifier = Modifier
+                        //.fillMaxHeight(.1F)
+                        .background(Color.Transparent)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight(.1F)
+                            .background(Color.Transparent)
+                    ) {
+                        TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = Color.Transparent
+                        ), title = {
+                            Text(
+                                modifier = Modifier.padding(horizontal = 4.dp),
+                                text = "Add Transaction",
+                                color = Color.White
+                            ) // TODO("string resource")
+                        }, navigationIcon = {
+                            Icon(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(percent = 50))
+                                    .clickable(
+                                        onClick = {
+                                            onNavigateBack.invoke()
+                                        }
+                                    )
+                                    .padding(8.dp),
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back",
+                                tint = Color.White
+                            )
+                        })
+                    }
+                }
             },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text = "Add")
+            containerColor = Color.Transparent
+        ) { paddingValues ->
+            Box(
+                modifier = Modifier.fillMaxSize()
+                    .padding(paddingValues)
+            ) {
+                Column(modifier = Modifier.fillMaxWidth()
+                    .padding(horizontal = 15.dp)
+                    .fillMaxHeight(0.30F)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        SlidingSwitch(
+                            modifier = Modifier.width(125.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(color = Color.White)
+                                .padding(horizontal = 5.dp),
+                            selectedValue = transactionType,
+                            values = Transaction.Type.entries,
+                            onSelectedValue = {
+                                onTransactionTypeChanged.invoke(it)
+                                focusManager.clearFocus()
+                                transactionType = it
+                            },
+                            containerColor = Color.Transparent,
+                            sliderColor = Color.LightGray,
+                        )
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(text = stringResource(id = R.string.amount),
+                        modifier = Modifier.padding(start = 20.dp),
+                        color = Color.White)
+                    OutlinedTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        value = amount,
+                        prefix = {
+                            Text(text = "$",
+                                 style = LocalTextStyle.current.copy(
+                                     color = Color.White,
+                                    fontSize = 60.sp
+                                )
+                            )
+                        },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        textStyle = TextStyle(
+                            fontSize = 60.sp,
+                            color = Color.White
+                        ),
+                        onValueChange = {
+                            amount = it
+                            showAmountError = it.isEmpty()
+                        },
+                        supportingText = {
+                            if (showAmountError) {
+                                Text(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(bottom = 10.dp),
+                                    text = stringResource(R.string.enter_the_amount), // FIXME: String resource
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        },
+                        isError = showAmountError,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color.Transparent,
+                            unfocusedBorderColor = Color.Transparent,
+                            errorBorderColor = Color.Transparent
+                        )
+                    )
+                }
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                        .fillMaxHeight(0.70F)
+                        .background(
+                            Color.White,
+                            RoundedCornerShape(
+                                topStart = 25.dp,
+                                topEnd = 25.dp,
+                                bottomStart = 0.dp,
+                                bottomEnd = 0.dp
+                            )
+                        )
+                        .padding(horizontal = 15.dp)
+                        .align(Alignment.BottomCenter)
+                ) {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    OutlinedTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        value = selectedPaymentType?.label ?: "",
+                        label = {
+                            Text(text = stringResource(id = R.string.paymentType),
+                                color = LocalContentColor.current.copy(alpha = 0.5F))
+                        },
+                        readOnly = true,
+                        interactionSource = paymentInteractionSource,
+                        textStyle = LocalTextStyle.current,
+                        onValueChange = {},
+                        supportingText = {
+                            if (showPaymentTypeError) {
+                                Text(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(bottom = 10.dp),
+                                    text = "Select a valid Payment Type", // FIXME: String resource
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        },
+                        isError = showPaymentTypeError,
+                        shape = RoundedCornerShape(10.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            unfocusedBorderColor = LocalContentColor.current.copy(alpha = 0.2F)
+                        )
+                    )
+                    OutlinedTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        interactionSource = categoryInteractionSource,
+                        value = selectedCategory?.label ?: "",
+                        readOnly = true,
+                        label = {
+                            Text(text = stringResource(id = R.string.category),
+                                color = LocalContentColor.current.copy(alpha = 0.5F))
+                        },
+                        textStyle = LocalTextStyle.current,
+                        onValueChange = {},
+                        supportingText = {
+                            if (showCategoryError) {
+                                Text(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(bottom = 10.dp),
+                                    text = "Select a valid Category", // FIXME: String resource
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        },
+                        isError = showCategoryError,
+                        shape = RoundedCornerShape(10.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            unfocusedBorderColor = LocalContentColor.current.copy(alpha = 0.2F)
+                        )
+
+                    )
+                    OutlinedTextField(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequester)
+                            .onFocusChanged {
+                                if (it.isFocused) {
+                                    showDialog = true
+                                }
+                            },
+                        value = formatter.format(date),
+                        readOnly = true,
+                        label = {
+                            Text(text = "Date",
+                                color = LocalContentColor.current.copy(alpha = 0.5F))
+                        },
+                        textStyle = LocalTextStyle.current, onValueChange = { /* do nothing */ },
+                        shape = RoundedCornerShape(10.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            unfocusedBorderColor = LocalContentColor.current.copy(alpha = 0.2F)
+                        )
+                    )
+                    OutlinedTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        value = description,
+                        maxLines = 4,
+                        minLines = 3,
+                        label = {
+                            Text(text = "Description",
+                                color = LocalContentColor.current.copy(alpha = 0.5F))
+                        },
+                        textStyle = LocalTextStyle.current, onValueChange = {
+                            description = it
+                        },
+                        shape = RoundedCornerShape(10.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            unfocusedBorderColor = LocalContentColor.current.copy(alpha = 0.2F)
+                        )
+                    )
+                    MultiSelectChipsView(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 10.dp),
+                        selectedOptions =  attachments,
+                        onClick = {
+                            showAddAttachmentDialog = true
+                        },
+                        selectionOptionView = {
+                            Text(text = getFileNameFromUri(context, it) ?: "N/A")
+                        },
+                        onOptionCanceled = {
+                            attachments.remove(it)
+                        },
+                        borderColor = LocalContentColor.current.copy(alpha = 0.2F)
+                    )
+
+                    Button(
+                        onClick = {
+                            if (selectedPaymentType == null) {
+                                showPaymentTypeError = true
+
+                            }
+                            if (selectedCategory == null) {
+                                showCategoryError = true
+                            }
+                            if(amount.toDoubleOrNull() == null) {
+                                showAmountError = true
+                            }
+                            if(selectedPaymentType == null || selectedCategory == null || amount.toDoubleOrNull() == null)
+                                return@Button
+
+                            val newTransaction = Transaction(
+                                212L,
+                                transactionType,
+                                amount = amount.toDoubleOrNull() ?: 0.0,
+                                category = selectedCategory,
+                                paymentType = selectedPaymentType,
+                                date = date,
+                                note = description,
+                            )
+
+                            onAdd(newTransaction, attachments)
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(vertical = 10.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Text(text = "Add")
+                    }
+                }
+            }
         }
     }
 
@@ -420,5 +588,18 @@ fun AddTransactionForm(
                 }
             }
         }
+    }
+}
+
+@Preview
+@Composable
+private fun AddTransactionFormPreview() {
+    PreviewThemeWrapper {
+        AddTransactionForm(
+            onCategoryClicked = {},
+            onTransactionTypeChanged = {},
+            onPaymentTypeClicked = {},
+            onNavigateBack = {}
+        ) { _,_ -> }
     }
 }

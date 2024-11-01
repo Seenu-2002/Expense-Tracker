@@ -94,41 +94,15 @@ fun AddTransactionScreen(
         viewModel.getCategories(Transaction.Type.INCOME)
     }
 
-    Scaffold(
-        topBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight(.1F)
-                    .background(Color.Transparent)
-            ) {
-                TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
-                ), title = {
-                    Text(
-                        modifier = Modifier.padding(horizontal = 4.dp),
-                        text = "Add Transaction"
-                    ) // TODO("string resource")
-                }, navigationIcon = {
-                    Icon(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(percent = 50))
-                            .clickable(
-                                onClick = {
-                                    onNavigateBack.invoke()
-                                }
-                            )
-                            .padding(8.dp),
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back"
-                    )
-                })
-            }
-        }
-    ) {
+//    Scaffold(
+//        topBar = {
+//
+//        }
+//    ) {
 
         AddTransactionForm(
             modifier = Modifier
-                .padding(paddingValues = it)
+                //.padding(paddingValues = it)
                 .padding(horizontal = 48.dp, vertical = 32.dp),
             transaction = transaction,
             onCategoryClicked = {
@@ -142,7 +116,8 @@ fun AddTransactionScreen(
             },
             onPaymentTypeClicked = {
                 showPaymentTypeBottomSheet = true
-            }
+            },
+            onNavigateBack = onNavigateBack
         ) { transaction, attachments ->
             viewModel.addTransaction(context, transaction, attachments)
             Toast.makeText(context, "Transaction added Successfully!", Toast.LENGTH_SHORT).show()
@@ -193,7 +168,6 @@ fun AddTransactionScreen(
                 }
             }
         }
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
