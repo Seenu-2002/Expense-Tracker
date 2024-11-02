@@ -2,6 +2,9 @@ package com.ajay.seenu.expensetracker.android.presentation.viewmodels.chart_view
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ajay.seenu.expensetracker.UserConfigurationsManager
+import com.ajay.seenu.expensetracker.android.data.getDateFormat
+import com.ajay.seenu.expensetracker.android.data.getStartDayOfTheWeek
 import com.ajay.seenu.expensetracker.android.domain.data.Filter
 import com.ajay.seenu.expensetracker.android.domain.usecases.GetTotalTransactionPerDayByCategoryUseCase
 import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.ChartState
@@ -15,14 +18,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import javax.inject.Inject
 
 @HiltViewModel
 class TotalExpensePerDayChartViewModel @Inject constructor(
     private val useCase: GetTotalTransactionPerDayByCategoryUseCase,
-    private val dateFormat: SimpleDateFormat
+    private val userConfigurationsManager: UserConfigurationsManager
 ) : ViewModel() {
 
     private val _chartState: MutableStateFlow<ChartState> = MutableStateFlow(ChartState.Empty)
@@ -33,14 +36,26 @@ class TotalExpensePerDayChartViewModel @Inject constructor(
     private val _dataSetLabels: MutableStateFlow<List<String>> = MutableStateFlow(emptyList())
     val dataSetLabels: StateFlow<List<String>> = _dataSetLabels.asStateFlow()
 
+    private val _updatedDateFormat: MutableStateFlow<String> = MutableStateFlow("dd MMM, yyyy")
+    val updatedDateFormat = _updatedDateFormat.asStateFlow()
+
     private lateinit var filter: Filter
+
+    fun init() {
+        viewModelScope.launch {
+            userConfigurationsManager.getDateFormat().collectLatest {
+                _updatedDateFormat.emit(it)
+            }
+        }
+    }
 
     private fun getData(filter: Filter) {
         viewModelScope.launch {
             _chartState.emit(ChartState.Fetching)
             val data = async(Dispatchers.Default) {
                 delay((0 .. 400L).random())
-                useCase(filter)
+                val startDayOfTheWeek = userConfigurationsManager.getConfigs().getStartDayOfTheWeek()
+                useCase(startDayOfTheWeek, filter)
             }.await()
 
             if (data.isEmpty()) {
@@ -48,6 +63,7 @@ class TotalExpensePerDayChartViewModel @Inject constructor(
             }
 
             _dataSetLabels.emit(data.first().expensePerCategory.map { it.category.label })
+            val dateFormat = userConfigurationsManager.getConfigs().getDateFormat()
             modelProducer.tryRunTransaction {
                 columnSeries {
                     val totalCategories = data.first().expensePerCategory.size
@@ -65,10 +81,8 @@ class TotalExpensePerDayChartViewModel @Inject constructor(
     }
 
     fun setFilter(filter: Filter) {
-        if (!this::filter.isInitialized || this.filter != filter) {
-            this.filter = filter
-            getData(filter)
-        }
+        this.filter = filter
+        getData(filter)
     }
 
 }

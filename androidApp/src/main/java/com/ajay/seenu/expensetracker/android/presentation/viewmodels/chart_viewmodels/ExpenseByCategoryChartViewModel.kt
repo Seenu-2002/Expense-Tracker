@@ -2,6 +2,8 @@ package com.ajay.seenu.expensetracker.android.presentation.viewmodels.chart_view
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ajay.seenu.expensetracker.UserConfigurationsManager
+import com.ajay.seenu.expensetracker.android.data.getStartDayOfTheWeek
 import com.ajay.seenu.expensetracker.android.domain.data.Filter
 import com.ajay.seenu.expensetracker.android.domain.usecases.GetExpenseByCategoryUseCase
 import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.ChartState
@@ -20,9 +22,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ExpenseByCategoryChartViewModel @Inject constructor(
-    private val getExpenseByCategory: GetExpenseByCategoryUseCase
+    private val getExpenseByCategory: GetExpenseByCategoryUseCase,
+    private val userConfigurationsManager: UserConfigurationsManager
 ) : ViewModel() {
-
 
     private val _chartState: MutableStateFlow<ChartState> = MutableStateFlow(ChartState.Empty)
     val chartState: StateFlow<ChartState> = _chartState.asStateFlow()
@@ -43,7 +45,8 @@ class ExpenseByCategoryChartViewModel @Inject constructor(
             _chartState.emit(ChartState.Fetching)
             val data = async (Dispatchers.Default) {
                 delay((0 .. 400L).random())
-                getExpenseByCategory(filter).associate {
+                val startDayOfTheWeek = userConfigurationsManager.getConfigs().getStartDayOfTheWeek()
+                getExpenseByCategory(startDayOfTheWeek, filter).associate {
                     it.category to it.amount
                 }
             }.await()

@@ -12,11 +12,11 @@ class GetExpenseByCategoryUseCase @Inject constructor(
     private val repository: TransactionRepository,
 ) {
 
-    suspend operator fun invoke(filter: Filter): List<TotalExpensePerCategory> {
+    suspend operator fun invoke(startDayOfTheWeek: Int, filter: Filter): List<TotalExpensePerCategory> {
         val categories = repository.getCategories(Transaction.Type.EXPENSE).let {
             CategoryMapper.mapCategories(it)
         }
-        val range = filter.getDateRange()
+        val range = filter.getDateRange(startDayOfTheWeek)
         return repository.getExpensePerDayByCategory(range).map {
             val category = categories.find { category -> category.id == it.category }!!.let { category ->
                 Transaction.Category(

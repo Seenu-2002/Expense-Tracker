@@ -32,6 +32,7 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(libs.sqldelight.extensions.paging)
             implementation(libs.sqldelight.extensions.coroutines)
+            implementation(libs.androidx.datastore.preferences.core)
         }
         commonTest{
             dependencies {

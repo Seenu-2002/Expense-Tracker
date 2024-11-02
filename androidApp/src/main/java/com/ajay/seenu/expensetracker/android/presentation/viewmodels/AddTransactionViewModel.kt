@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ajay.seenu.expensetracker.Attachment
 import com.ajay.seenu.expensetracker.android.data.TransactionRepository
 import com.ajay.seenu.expensetracker.android.domain.data.Transaction
 import com.ajay.seenu.expensetracker.android.domain.mapper.CategoryMapper
@@ -17,14 +16,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import javax.inject.Inject
 
 @HiltViewModel
 class AddTransactionViewModel @Inject constructor(
     private val repository: TransactionRepository,
-    private val addTransactionUseCase: AddTransactionUseCase,
-    private val dateFormat: SimpleDateFormat
+    private val addTransactionUseCase: AddTransactionUseCase
 ) : ViewModel() {
 
     @Inject

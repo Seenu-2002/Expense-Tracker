@@ -14,8 +14,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import java.text.SimpleDateFormat
-import java.util.Locale
 import javax.inject.Singleton
 
 @Module
@@ -40,17 +38,10 @@ object ModuleProvider {
         return createDatabase(DriverFactory(context))
     }
 
-    @Provides
     @Singleton
-    fun provideDateFormatter(@ApplicationContext context: Context, locale: Locale): SimpleDateFormat {
-        val configs = UserConfigurationsManager(context).getConfigs()
-        return SimpleDateFormat(configs.dateFormat, locale)
-    }
-
     @Provides
-    @Singleton
-    fun provideLocale(): Locale {
-        return Locale.ENGLISH
+    fun provideUserConfigsManager(@ApplicationContext context: Context): UserConfigurationsManager {
+        return UserConfigurationsManager(context)
     }
 
 }

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -13,6 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.domain.data.Filter
 import com.ajay.seenu.expensetracker.android.presentation.common.ChartDefaults
@@ -49,9 +51,12 @@ fun TotalExpensePerDayChart(
     filter: Filter = Filter.ThisMonth,
     viewModel: TotalExpensePerDayChartViewModel = hiltViewModel(),
 ) {
-    val isChartLoadingCompleted by viewModel.chartState.collectAsState()
+    val isChartLoadingCompleted by viewModel.chartState.collectAsStateWithLifecycle()
+    val dateFormat by viewModel.updatedDateFormat.collectAsStateWithLifecycle()
 
-    viewModel.setFilter(filter)
+    LaunchedEffect(filter, dateFormat) {
+        viewModel.setFilter(filter)
+    }
     when (isChartLoadingCompleted) {
         ChartState.Fetching, ChartState.Empty -> {
             return Loader(modifier)
@@ -141,5 +146,5 @@ private fun rememberLegend(
         iconSize = 8.dp,
         iconPadding = 8.dp,
         spacing = 4.dp,
-        padding = Dimensions.of(top = 8.dp),
+        padding = Dimensions.of(top = 8.dp, end = 8.dp),
     )
