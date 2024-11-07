@@ -10,8 +10,8 @@ class GetExpensesByPaymentTypeUseCase @Inject constructor(
     private val repository: TransactionRepository
 ) {
 
-    suspend operator fun invoke(filter: Filter): Map<PaymentType, Double> {
-        val range = filter.getDateRange()
+    suspend operator fun invoke(startDayOfTheWeek: Int, filter: Filter): Map<PaymentType, Double> {
+        val range = filter.getDateRange(startDayOfTheWeek)
         return repository.getExpensePerDayByPaymentTypeBetween(range).associate {
             it.paymentType to (it.totalAmount ?: 0.0)
         }

@@ -3,7 +3,9 @@ package com.ajay.seenu.expensetracker.android.presentation.viewmodels
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ajay.seenu.expensetracker.UserConfigurationsManager
 import com.ajay.seenu.expensetracker.android.data.FilterPreference
+import com.ajay.seenu.expensetracker.android.data.getStartDayOfTheWeek
 import com.ajay.seenu.expensetracker.android.data.getThisMonthInMillis
 import com.ajay.seenu.expensetracker.android.data.getThisWeekInMillis
 import com.ajay.seenu.expensetracker.android.data.getThisYearInMillis
@@ -20,14 +22,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import javax.inject.Inject
 
 @HiltViewModel
 class OverviewScreenViewModel @Inject constructor(
-    private val dateFormat: SimpleDateFormat
-) :
-    ViewModel() {
+    private val userConfigurationsManager: UserConfigurationsManager
+) : ViewModel() {
 
     private val _overallData: MutableStateFlow<OverallData?> = MutableStateFlow(null)
     val overallData = _overallData.asStateFlow()
@@ -44,6 +44,9 @@ class OverviewScreenViewModel @Inject constructor(
 
     private val _currentFilter: MutableStateFlow<Filter> = MutableStateFlow(Filter.ThisMonth)
     val currentFilter: StateFlow<Filter> = _currentFilter.asStateFlow()
+
+    private val _updatedDateFormat: MutableStateFlow<String> = MutableStateFlow("dd MMM, yyyy")
+    val updatedDateFormat = _updatedDateFormat.asStateFlow()
 
     @Inject
     internal lateinit var getRecentTransactions: GetRecentTransactionsUseCase
@@ -69,7 +72,7 @@ class OverviewScreenViewModel @Inject constructor(
         viewModelScope.launch {
             val range = when(filter) {
                 Filter.ThisWeek -> {
-                    getThisWeekInMillis()
+                    getThisWeekInMillis(getStartDayOfTheWeek())
                 }
                 Filter.ThisYear -> {
                     getThisYearInMillis()
@@ -86,6 +89,14 @@ class OverviewScreenViewModel @Inject constructor(
         }
     }
 
+    fun init() {
+        viewModelScope.launch {
+            userConfigurationsManager.getDateFormat().collectLatest {
+                _updatedDateFormat.emit(it)
+            }
+        }
+    }
+
     private fun getFilteredOverallData(fromValue: Long, toValue: Long) {
         viewModelScope.launch {
             getFilteredOverallDataUseCase.invoke(fromValue, toValue).collectLatest {
@@ -99,7 +110,7 @@ class OverviewScreenViewModel @Inject constructor(
             lastFetchedPage = 1
             val range = when (filter) {
                 Filter.ThisWeek -> {
-                    getThisWeekInMillis()
+                    getThisWeekInMillis(getStartDayOfTheWeek())
                 }
                 Filter.ThisYear -> {
                     getThisYearInMillis()
@@ -138,7 +149,7 @@ class OverviewScreenViewModel @Inject constructor(
             lastFetchedPage++
             val range = when (val filter = _currentFilter.value) {
                 Filter.ThisWeek -> {
-                    getThisWeekInMillis()
+                    getThisWeekInMillis(getStartDayOfTheWeek())
                 }
                 Filter.ThisYear -> {
                     getThisYearInMillis()
@@ -170,5 +181,9 @@ class OverviewScreenViewModel @Inject constructor(
             getOverallData(filter)
             getRecentTransactions(filter)
         }
+    }
+
+    private suspend fun getStartDayOfTheWeek(): Int {
+        return userConfigurationsManager.getConfigs().getStartDayOfTheWeek()
     }
 }

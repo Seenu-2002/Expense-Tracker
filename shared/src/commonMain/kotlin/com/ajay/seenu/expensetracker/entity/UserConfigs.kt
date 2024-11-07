@@ -6,7 +6,6 @@ data class UserConfigs(
     val theme: Theme,
     val weekStartsFrom: StartDayOfTheWeek,
     val dateFormat: String,
-    val isEncryptionEnabled: Boolean,
     val isAppLockEnabled: Boolean
 )
 

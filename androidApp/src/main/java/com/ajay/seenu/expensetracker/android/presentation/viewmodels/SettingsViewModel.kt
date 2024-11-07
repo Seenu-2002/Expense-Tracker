@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ajay.seenu.expensetracker.UserConfigurationsManager
+import com.ajay.seenu.expensetracker.domain.DateFormats
 import com.ajay.seenu.expensetracker.entity.StartDayOfTheWeek
 import com.ajay.seenu.expensetracker.entity.Theme
 import com.ajay.seenu.expensetracker.entity.UserConfigs
@@ -12,10 +13,16 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
-class SettingsViewModel @Inject constructor(@ApplicationContext private val context: Context) :
+class SettingsViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val configurationManager: UserConfigurationsManager,
+) :
     ViewModel() {
 
     private val defaultConfig = UserConfigs(
@@ -24,31 +31,25 @@ class SettingsViewModel @Inject constructor(@ApplicationContext private val cont
         Theme.SYSTEM_THEME,
         StartDayOfTheWeek.MONDAY,
         "dd MMM, yyyy",
-        isEncryptionEnabled = false,
         isAppLockEnabled = false
     )
 
     private val _userConfigs: MutableStateFlow<UserConfigs> = MutableStateFlow(defaultConfig)
     val userConfigs = _userConfigs.asStateFlow()
 
-    private val configurationManager = UserConfigurationsManager(context)
-
+    internal val supportedDateFormats: List<Pair<String, String>> by lazy {
+        val simpleDateFormat = SimpleDateFormat("yyyy/MM/dd", Locale.ENGLISH)
+        val today = Date()
+        DateFormats.FORMATS.map {
+            simpleDateFormat.applyPattern(it)
+            it to simpleDateFormat.format(today)
+        }
+    }
 
     fun getConfigs(context: Context) {
         viewModelScope.launch {
             val config = configurationManager.getConfigs()
             _userConfigs.emit(config)
-        }
-    }
-
-    fun shouldEnableEncryption(bool: Boolean) {
-        if (_userConfigs.value.isEncryptionEnabled == bool) {
-            return
-        }
-        viewModelScope.launch {
-            val newConfigs = _userConfigs.value.copy(isEncryptionEnabled = bool)
-            configurationManager.storeConfigs(newConfigs)
-            _userConfigs.emit(newConfigs)
         }
     }
 
@@ -63,12 +64,13 @@ class SettingsViewModel @Inject constructor(@ApplicationContext private val cont
         }
     }
 
-    fun changeDateFormatPref(format: String) {
+    fun changeDateFormatPref(index: Int, format: String) {
         if (_userConfigs.value.dateFormat == format) {
             return
         }
         viewModelScope.launch {
-            val newConfigs = _userConfigs.value.copy(dateFormat = format)
+            val newDateFormat = supportedDateFormats[index].first
+            val newConfigs = _userConfigs.value.copy(dateFormat = newDateFormat)
             configurationManager.storeConfigs(newConfigs)
             _userConfigs.emit(newConfigs)
         }

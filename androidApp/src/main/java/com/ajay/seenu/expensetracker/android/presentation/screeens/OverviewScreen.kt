@@ -86,7 +86,7 @@ fun OverviewScreen(
     }
     val context = LocalContext.current
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(viewModel.updatedDateFormat) {
         val filter = FilterPreference.getCurrentFilter(context)
         viewModel.setFilter(context, filter)
     }

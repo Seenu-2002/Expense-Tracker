@@ -85,4 +85,10 @@ dependencies {
 
     // Vico Charts
     implementation(libs.vico.compose)
+
+    // Splash Screen
+    implementation(libs.androidx.core.splashscreen)
+
+    // Activity KTX
+    implementation(libs.androidx.activity.ktx)
 }

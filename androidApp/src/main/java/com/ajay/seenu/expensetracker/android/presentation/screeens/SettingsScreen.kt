@@ -36,7 +36,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -62,7 +61,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.SettingsViewModel
-import com.ajay.seenu.expensetracker.domain.DateFormats
 import com.ajay.seenu.expensetracker.entity.StartDayOfTheWeek
 import com.ajay.seenu.expensetracker.entity.Theme
 import kotlinx.coroutines.launch
@@ -128,13 +126,18 @@ fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel = 
     }
 
     if (showDateFormatBottomSheet) {
-        ListBottomSheet(state = dateFormatBottomSheet, items = DateFormats.FORMATS, selectedItem = configs.dateFormat, onDismiss = {
+        val dateFormats = remember {
+            viewModel.supportedDateFormats.map {
+                context.getString(R.string.date_format_row, it.first, it.second)
+            }
+        }
+        ListBottomSheet(state = dateFormatBottomSheet, items = dateFormats, selectedItem = configs.dateFormat, onDismiss = {
             showDateFormatBottomSheet = false
-        }) { _, option ->
+        }) { index, option ->
             scope.launch {
                 dateFormatBottomSheet.hide()
             }
-            viewModel.changeDateFormatPref(option)
+            viewModel.changeDateFormatPref(index, option)
         }
     }
 
@@ -197,14 +200,6 @@ fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel = 
             }
             SettingsRowContainer(modifier = Modifier.fillMaxWidth(), title = "Data") { modifier ->
                 Column(modifier.fillMaxWidth()) {
-                    SettingsRowWithSwitch(Modifier,
-                        Icons.Filled.Lock,
-                        "Data Encryption",
-                        configs.isEncryptionEnabled,
-                        onClick = { viewModel.shouldEnableAppLock(!configs.isEncryptionEnabled) }) {
-                        viewModel.shouldEnableEncryption(it)
-                        showToBeImplementedToast(context)
-                    }
                     SettingsRow(
                         Modifier, Icons.Filled.KeyboardArrowUp, "Export", showArrow = false
                     ) { showToBeImplementedToast(context) }
