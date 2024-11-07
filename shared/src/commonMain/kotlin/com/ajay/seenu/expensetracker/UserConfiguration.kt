@@ -3,13 +3,18 @@ package com.ajay.seenu.expensetracker
 import com.ajay.seenu.expensetracker.entity.UserConfigs
 
 
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 expect class UserConfigurationsManager {
 
-    fun isUserLoggedIn(): Boolean
+    suspend fun isUserLoggedIn(): Boolean
 
-    fun getConfigs(): UserConfigs
+    suspend fun onUserLoggedIn()
 
-    fun storeConfigs(configs: UserConfigs)
+    suspend fun onUserLoggedOut()
+
+    suspend fun getConfigs(): UserConfigs
+
+    suspend fun storeConfigs(configs: UserConfigs)
 
 }
 

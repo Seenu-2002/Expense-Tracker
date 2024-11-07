@@ -2,8 +2,11 @@ package com.ajay.seenu.expensetracker.android.data
 
 import com.ajay.seenu.expensetracker.android.domain.data.Transaction
 import com.ajay.seenu.expensetracker.android.domain.data.TransactionsByDate
+import com.ajay.seenu.expensetracker.entity.StartDayOfTheWeek
+import com.ajay.seenu.expensetracker.entity.UserConfigs
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
 
 const val PER_PAGE = 100
 
@@ -23,24 +26,22 @@ fun List<Transaction>.sortByDate(dateFormat: SimpleDateFormat): List<Transaction
 }
 
 // FIXME: It should be calculator using the start day of the week from user configuration
-fun getThisWeekInMillis(calendar: Calendar = Calendar.getInstance()): Pair<Long, Long> {
+// FIXME: Issue when user config added. Fix it and add unit cases
+fun getThisWeekInMillis(startDay: Int, calendar: Calendar = Calendar.getInstance()): Pair<Long, Long> {
     val currentDay = calendar.get(Calendar.DAY_OF_WEEK)
 
-    // Adjust calendar to point to Sunday of the current week
-    calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+    calendar.set(Calendar.DAY_OF_WEEK, startDay)
     calendar.resetTime()
     val weekStart = calendar.timeInMillis
 
-    // Move to the next Saturday (end of the week)
-    calendar.add(Calendar.DAY_OF_WEEK, Calendar.SATURDAY)
+    calendar.add(Calendar.DAY_OF_WEEK, 7)
     calendar.tillMidNight()
     val weekEnd = calendar.timeInMillis
 
     // Adjust for days before Sunday of the current week
-    return Pair(weekStart - (currentDay - Calendar.SUNDAY) * MILLIS_IN_DAY, weekEnd)
+    return Pair(weekStart, weekEnd)
 }
 
-// FIXME: It should be calculator using the start day of the week from user configuration
 fun getThisMonthInMillis(calendar: Calendar = Calendar.getInstance()): Pair<Long, Long> {
     // Adjust calendar to first day of the month
     calendar.set(Calendar.DAY_OF_MONTH, 1)
@@ -55,7 +56,6 @@ fun getThisMonthInMillis(calendar: Calendar = Calendar.getInstance()): Pair<Long
     return Pair(monthStart, monthEnd)
 }
 
-// FIXME: It should be calculator using the start day of the week from user configuration 
 fun getThisYearInMillis(calendar: Calendar = Calendar.getInstance()): Pair<Long, Long> {
     val year = calendar.get(Calendar.YEAR)
 
@@ -91,3 +91,14 @@ fun Calendar.tillMidNight() {
 }
 
 private const val MILLIS_IN_DAY = 1000 * 60 * 60 * 24
+
+internal fun UserConfigs.getStartDayOfTheWeek(): Int {
+    return when (weekStartsFrom) {
+        StartDayOfTheWeek.MONDAY -> Calendar.MONDAY
+        StartDayOfTheWeek.SUNDAY -> Calendar.SUNDAY
+    }
+}
+
+internal fun UserConfigs.getDateFormat(): SimpleDateFormat {
+    return SimpleDateFormat(dateFormat, Locale.ENGLISH)
+}

@@ -27,7 +27,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -51,8 +50,6 @@ import com.ajay.seenu.expensetracker.android.presentation.viewmodels.AnalyticsVi
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.Charts
 import com.ajay.seenu.expensetracker.android.presentation.widgets.DateRangePickerBottomSheet
 import com.ajay.seenu.expensetracker.android.presentation.widgets.FilterBottomSheet
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,12 +73,6 @@ fun AnalyticsScreen(navController: NavController, viewModel: AnalyticsViewModel 
     val dateRangeSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var openDateRangePicker by rememberSaveable {
         mutableStateOf(false)
-    }
-    val formatter = remember {
-        SimpleDateFormat(
-            "dd MMM, yyyy",
-            Locale.ENGLISH
-        ) // TODO: User configured date format
     }
 
     LaunchedEffect(currentFilter) {
@@ -174,7 +165,7 @@ fun AnalyticsScreen(navController: NavController, viewModel: AnalyticsViewModel 
             FilterBottomSheet(
                 sheetState = sheetState,
                 filter = currentFilter,
-                formatter = formatter,
+                formatter = viewModel.getDateFormatter(),
                 onFilterSelected = { filter ->
                     when (filter) {
                         Filter.CUSTOM_MOCK -> {
@@ -200,7 +191,7 @@ fun AnalyticsScreen(navController: NavController, viewModel: AnalyticsViewModel 
                 onDismiss = {
                     openDateRangePicker = false
                 },
-                formatter = formatter,
+                formatter = viewModel.getDateFormatter(),
                 onDateSelected = { startDate, endDate ->
                     openDateRangePicker = false
                     viewModel.setFilter(context, Filter.Custom(startDate, endDate))

@@ -33,13 +33,13 @@ internal fun Filter.Companion.valueOf(str: String): Filter {
 }
 
 // TODO: Should be in common main using expect actual
-internal fun Filter.getDateRange(): Pair<Long, Long> {
+internal fun Filter.getDateRange(startDayOfWeek: Int): Pair<Long, Long> {
     return when (this) {
         Filter.ThisYear -> {
             getThisYearInMillis()
         }
         Filter.ThisWeek -> {
-            getThisWeekInMillis()
+            getThisWeekInMillis(startDayOfWeek)
         }
         Filter.ThisMonth -> {
             getThisMonthInMillis()

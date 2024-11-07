@@ -2,6 +2,8 @@ package com.ajay.seenu.expensetracker.android.presentation.viewmodels.chart_view
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ajay.seenu.expensetracker.UserConfigurationsManager
+import com.ajay.seenu.expensetracker.android.data.getStartDayOfTheWeek
 import com.ajay.seenu.expensetracker.android.domain.data.Filter
 import com.ajay.seenu.expensetracker.android.domain.usecases.GetExpensesByPaymentTypeUseCase
 import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.ChartState
@@ -21,6 +23,7 @@ import javax.inject.Inject
 @HiltViewModel
 internal class ExpenseByPaymentTypeChartViewModel @Inject constructor(
     private val getExpensesPerDayByPaymentType: GetExpensesByPaymentTypeUseCase,
+    private val userConfigurationsManager: UserConfigurationsManager
 ) : ViewModel() {
 
     private val _chartState: MutableStateFlow<ChartState> = MutableStateFlow(ChartState.Empty)
@@ -35,7 +38,8 @@ internal class ExpenseByPaymentTypeChartViewModel @Inject constructor(
             _chartState.emit(ChartState.Fetching)
             val data = async (Dispatchers.Default) {
                 delay((0 .. 400L).random())
-                getExpensesPerDayByPaymentType(filter)
+                val startDayOfTheWeek = userConfigurationsManager.getConfigs().getStartDayOfTheWeek()
+                getExpensesPerDayByPaymentType(startDayOfTheWeek, filter)
             }.await()
             if (data.isEmpty()) {
                 return@launch _chartState.emit(ChartState.Failed.InSufficientData)
