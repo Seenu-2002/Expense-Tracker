@@ -11,6 +11,7 @@ import com.ajay.seenu.expensetracker.android.data.getThisWeekInMillis
 import com.ajay.seenu.expensetracker.android.data.getThisYearInMillis
 import com.ajay.seenu.expensetracker.android.domain.data.Filter
 import com.ajay.seenu.expensetracker.android.domain.data.TransactionsByDate
+import com.ajay.seenu.expensetracker.android.domain.data.UiState
 import com.ajay.seenu.expensetracker.android.domain.usecases.GetFilteredOverallDataUseCase
 import com.ajay.seenu.expensetracker.android.domain.usecases.GetFilteredTransactionsUseCase
 import com.ajay.seenu.expensetracker.android.domain.usecases.GetRecentTransactionsUseCase
@@ -29,11 +30,11 @@ class OverviewScreenViewModel @Inject constructor(
     private val userConfigurationsManager: UserConfigurationsManager
 ) : ViewModel() {
 
-    private val _overallData: MutableStateFlow<OverallData?> = MutableStateFlow(null)
+    private val _overallData: MutableStateFlow<UiState<OverallData>> = MutableStateFlow(UiState.Loading)
     val overallData = _overallData.asStateFlow()
 
-    private val _recentTransactions: MutableStateFlow<List<TransactionsByDate>> =
-        MutableStateFlow(emptyList())
+    private val _recentTransactions: MutableStateFlow<UiState<List<TransactionsByDate>>> =
+        MutableStateFlow(UiState.Loading)
     val recentTransactions = _recentTransactions.asStateFlow()
 
     private val _userName: MutableStateFlow<String> = MutableStateFlow("")
@@ -45,7 +46,7 @@ class OverviewScreenViewModel @Inject constructor(
     private val _currentFilter: MutableStateFlow<Filter> = MutableStateFlow(Filter.ThisMonth)
     val currentFilter: StateFlow<Filter> = _currentFilter.asStateFlow()
 
-    private val _updatedDateFormat: MutableStateFlow<String> = MutableStateFlow("dd MMM, yyyy")
+    private val _updatedDateFormat: MutableStateFlow<String> = MutableStateFlow("")
     val updatedDateFormat = _updatedDateFormat.asStateFlow()
 
     @Inject
@@ -61,6 +62,7 @@ class OverviewScreenViewModel @Inject constructor(
     internal lateinit var deleteTransactionUseCase: DeleteTransactionUseCase
 
     init {
+        init()
         viewModelScope.launch {
             _userName.emit("Seenivasan T")
         }
@@ -89,7 +91,7 @@ class OverviewScreenViewModel @Inject constructor(
         }
     }
 
-    fun init() {
+    private fun init() {
         viewModelScope.launch {
             userConfigurationsManager.getDateFormat().collectLatest {
                 _updatedDateFormat.emit(it)
@@ -99,8 +101,9 @@ class OverviewScreenViewModel @Inject constructor(
 
     private fun getFilteredOverallData(fromValue: Long, toValue: Long) {
         viewModelScope.launch {
+            _overallData.emit(UiState.Loading)
             getFilteredOverallDataUseCase.invoke(fromValue, toValue).collectLatest {
-                _overallData.emit(it)
+                _overallData.emit(UiState.Success(it))
             }
         }
     }
@@ -132,12 +135,16 @@ class OverviewScreenViewModel @Inject constructor(
         toValue: Long
     ) {
         viewModelScope.launch {
+            val currentState = _recentTransactions.value
+            _recentTransactions.emit(UiState.Loading)
             getFilteredTransactionsUseCase.invoke(pageNo, fromValue, toValue).collectLatest {
                 _recentTransactions.emit(
-                    if(lastFetchedPage == 1)
-                        it.data
-                    else
-                        _recentTransactions.value + it.data
+                    UiState.Success(
+                        if(lastFetchedPage == 1)
+                            it.data
+                        else
+                            (currentState as UiState.Success).data + it.data
+                    )
                 )
                 _hasMoreData.emit(it.hasMoreData)
             }

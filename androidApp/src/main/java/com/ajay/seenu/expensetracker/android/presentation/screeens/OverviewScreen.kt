@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -47,6 +46,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.data.FilterPreference
 import com.ajay.seenu.expensetracker.android.domain.data.Filter
+import com.ajay.seenu.expensetracker.android.domain.data.UiState
 import com.ajay.seenu.expensetracker.android.domain.util.formatDateHeader
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.OverviewScreenViewModel
 import com.ajay.seenu.expensetracker.android.presentation.widgets.DateRangePickerBottomSheet
@@ -62,8 +62,9 @@ fun OverviewScreen(
     viewModel: OverviewScreenViewModel = hiltViewModel(),
     onCloneTransaction: (Long) -> Unit,
 ) {
-    val recentTransactions by viewModel.recentTransactions.collectAsStateWithLifecycle()
-    val overallData by viewModel.overallData.collectAsStateWithLifecycle()
+    val dateFormat by viewModel.updatedDateFormat.collectAsStateWithLifecycle()
+    val recentTransactionsUiState by viewModel.recentTransactions.collectAsStateWithLifecycle()
+    val overallDataUiState by viewModel.overallData.collectAsStateWithLifecycle()
     val userName by viewModel.userName.collectAsStateWithLifecycle()
     val hasMoreData by viewModel.hasMoreData.collectAsStateWithLifecycle()
     val currentFilter by viewModel.currentFilter.collectAsStateWithLifecycle()
@@ -86,9 +87,11 @@ fun OverviewScreen(
     }
     val context = LocalContext.current
 
-    LaunchedEffect(viewModel.updatedDateFormat) {
-        val filter = FilterPreference.getCurrentFilter(context)
-        viewModel.setFilter(context, filter)
+    LaunchedEffect(dateFormat) {
+        if(dateFormat.isNotBlank()) {
+            val filter = FilterPreference.getCurrentFilter(context)
+            viewModel.setFilter(context, filter)
+        }
     }
 
     LaunchedEffect(currentFilter) {
@@ -140,77 +143,102 @@ fun OverviewScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-
-            if (recentTransactions.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column {
-                        Icon(
-                            modifier = Modifier.size(100.dp),
-                            painter = painterResource(id = R.drawable.icon_filter_list),
-                            contentDescription = "Empty"
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Text(text = "Such Vacant")
+            when(val state = recentTransactionsUiState) {
+                UiState.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
                     }
                 }
-                return@Scaffold
-            }
-
-            // FIXME: Have to be replaced with UIState instead of null check
-            overallData?.let {
-                OverviewCard(modifier = Modifier.fillMaxWidth(), data = it)
-            }
-
-            LazyColumn(
-                state = listState,
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
-
-                recentTransactions.forEach {
-                    stickyHeader {
-                        Text(
-                            modifier = Modifier
-                                .fillParentMaxWidth()
-                                .background(MaterialTheme.colorScheme.background)
-                                .padding(horizontal = 15.dp, vertical = 8.dp),
-                            text = formatDateHeader(it.dateLabel),
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.W500
-                        )
-                    }
-                    items(it.transactions,
-                        key = { transaction ->
-                            transaction.id
-                        },
-                        itemContent = {
-                            TransactionPreviewRow(Modifier.fillMaxWidth(), it,
-                                onDelete = {
-                                    viewModel.deleteTransaction(it.id)
-                                },
-                                onClone = {
-                                    onCloneTransaction.invoke(it.id)
-                                }
-                            )
-                        })
-                }
-                if (hasMoreData) {
-                    item {
+                is UiState.Success -> {
+                    val recentTransactions = state.data
+                    if (recentTransactions.isEmpty()) {
                         Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentHeight()
-                                .padding(10.dp),
+                            modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            CircularProgressIndicator()
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    modifier = Modifier.size(100.dp),
+                                    painter = painterResource(id = R.drawable.icon_database),
+                                    contentDescription = "Empty",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(modifier = Modifier.height(15.dp))
+                                Text(text = "No transactions found.")
+                            }
                         }
-                        viewModel.getNextPageTransactions()
+                        return@Scaffold
+                    }
+
+                    when(val overallDataState = overallDataUiState) {
+                        UiState.Loading -> {
+                            Box(modifier = Modifier.fillMaxWidth()
+                                .height(120.dp),
+                                contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator()
+                            }
+                        }
+                        is UiState.Success -> {
+                            OverviewCard(modifier = Modifier.fillMaxWidth(), data = overallDataState.data)
+                        }
+                        UiState.Failure -> {}
+                    }
+
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ) {
+
+                        recentTransactions.forEach {
+                            stickyHeader {
+                                Text(
+                                    modifier = Modifier
+                                        .fillParentMaxWidth()
+                                        .background(MaterialTheme.colorScheme.background)
+                                        .padding(horizontal = 15.dp, vertical = 8.dp),
+                                    text = formatDateHeader(it.dateLabel),
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.W500
+                                )
+                            }
+                            items(it.transactions,
+                                key = { transaction ->
+                                    transaction.id
+                                },
+                                itemContent = {
+                                    TransactionPreviewRow(Modifier.fillMaxWidth(), it,
+                                        onDelete = {
+                                            viewModel.deleteTransaction(it.id)
+                                        },
+                                        onClone = {
+                                            onCloneTransaction.invoke(it.id)
+                                        }
+                                    )
+                                })
+                        }
+                        if (hasMoreData) {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .wrapContentHeight()
+                                        .padding(10.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator()
+                                }
+                                viewModel.getNextPageTransactions()
+                            }
+                        }
                     }
                 }
+                UiState.Failure -> {}
             }
         }
     }
