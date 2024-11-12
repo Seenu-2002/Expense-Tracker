@@ -6,7 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class AddCategoryUseCase@Inject constructor(
+class AddCategoryUseCase @Inject constructor(
     private val repository: CategoryRepository
 ) {
     suspend operator fun invoke(
