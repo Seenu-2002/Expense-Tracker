@@ -25,6 +25,8 @@ import com.ajay.seenu.expensetracker.android.presentation.navigation.Screen
 import com.ajay.seenu.expensetracker.android.presentation.theme.AppDefaults
 import com.ajay.seenu.expensetracker.android.presentation.theme.LocalColors
 import com.ajay.seenu.expensetracker.android.presentation.screeens.AddTransactionScreen
+import com.ajay.seenu.expensetracker.android.presentation.screeens.CategoryDetailScreen
+import com.ajay.seenu.expensetracker.android.presentation.screeens.CategoryListScreen
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.MainViewModel
 import com.ajay.seenu.expensetracker.entity.Theme
 import dagger.hilt.android.AndroidEntryPoint
@@ -76,6 +78,9 @@ class MainActivity : ComponentActivity() {
                                     },
                                     onCloneTransaction = {
                                         navController.navigate("${Screen.AddTransaction.route}/${it}")
+                                    },
+                                    onCategoryListScreen = {
+                                        navController.navigate(Screen.CategoryList.route)
                                     }
                                 )
                             }
@@ -89,6 +94,36 @@ class MainActivity : ComponentActivity() {
                                 var cloneId = it.arguments?.getLong("clone_id")
                                 if (cloneId == -1L) cloneId = null
                                 AddTransactionScreen(
+                                    onNavigateBack = {
+                                        navController.popBackStack()
+                                    },
+                                    cloneId
+                                )
+                            }
+                            composable(Screen.CategoryList.route) {
+                                CategoryListScreen (
+                                    categoryDetailScreen = {
+                                        if( it == null ) {
+                                            navController.navigate("${Screen.Category.route}/-1L")
+                                        } else {
+                                            navController.navigate( "${Screen.Category.route}/${it}")
+                                        }
+                                    },
+                                    onNavigateBack = {
+                                        navController.popBackStack()
+                                    }
+                                )
+                            }
+                            composable("${Screen.Category.route}/{clone_id}",
+                                arguments = listOf(
+                                    navArgument("clone_id") {
+                                        type = NavType.LongType
+                                    }
+                                )
+                            ) {
+                                var cloneId = it.arguments?.getLong("clone_id")
+                                if (cloneId == -1L) cloneId = null
+                                CategoryDetailScreen(
                                     onNavigateBack = {
                                         navController.popBackStack()
                                     },

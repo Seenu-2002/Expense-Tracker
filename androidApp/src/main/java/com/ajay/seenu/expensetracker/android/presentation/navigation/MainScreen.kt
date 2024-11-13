@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -36,11 +35,11 @@ import com.ajay.seenu.expensetracker.android.presentation.screeens.OverviewScree
 import com.ajay.seenu.expensetracker.android.presentation.screeens.SettingsScreen
 import com.ajay.seenu.expensetracker.android.presentation.theme.LocalColors
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     onAddTransaction: () -> Unit,
     onCloneTransaction: (Long) -> Unit,
+    onCategoryListScreen: () -> Unit
 ) {
     var navigationSelectedItem by remember {
         mutableIntStateOf(0)
@@ -113,7 +112,8 @@ fun MainScreen(
         ) {
             composable(Screen.Overview.route) {
                 OverviewScreen(
-                    onCloneTransaction = onCloneTransaction
+                    onCloneTransaction = onCloneTransaction,
+                    onCategoryListScreen = onCategoryListScreen
                 )
             }
             composable(Screen.Analytics.route) {
