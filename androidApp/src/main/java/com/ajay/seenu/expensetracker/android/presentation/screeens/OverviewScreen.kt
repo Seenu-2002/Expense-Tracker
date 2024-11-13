@@ -59,6 +59,7 @@ import java.util.Locale
 fun OverviewScreen(
     viewModel: OverviewScreenViewModel = hiltViewModel(),
     onCloneTransaction: (Long) -> Unit,
+    onCategoryListScreen: () -> Unit
 ) {
     val recentTransactions by viewModel.recentTransactions.collectAsStateWithLifecycle()
     val overallData by viewModel.overallData.collectAsStateWithLifecycle()
@@ -128,6 +129,14 @@ fun OverviewScreen(
                         contentDescription = "filter"
                     )
                 }
+                Spacer(modifier = Modifier.width(10.dp))
+                Icon(
+                    modifier = Modifier.clickable {
+                        onCategoryListScreen.invoke()
+                    },
+                    painter = painterResource(id = R.drawable.category_icon),
+                    contentDescription = "categories"
+                )
                 Spacer(modifier = Modifier.width(10.dp))
             }
         }

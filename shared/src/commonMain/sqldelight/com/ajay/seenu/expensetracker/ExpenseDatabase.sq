@@ -80,6 +80,21 @@ SELECT * FROM Category;
 getCategories:
 SELECT * FROM Category WHERE type = :type;
 
+deleteCategory:
+DELETE FROM Category WHERE id = ?;
+
+addCategory:
+INSERT INTO Category(label, type, parent)
+VALUES (?,?,?);
+
+getCategory:
+SELECT * FROM Category WHERE id = ?;
+
+updateCategory:
+UPDATE Category
+SET label = ?, type = ?
+WHERE id = ?;
+
 getTotalTransactionPerDayByTypeBetween:
 SELECT date, category, SUM(amount) AS totalAmount FROM TransactionDetail WHERE type = :type AND date >= :startUTCValue AND date <= :endUTCValue GROUP BY date, category ORDER BY date DESC;
 

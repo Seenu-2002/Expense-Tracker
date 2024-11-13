@@ -3,6 +3,8 @@ package com.ajay.seenu.expensetracker.android.data
 import android.content.Context
 import com.ajay.seenu.expensetracker.AttachmentDataSourceImpl
 import com.ajay.seenu.expensetracker.AttachmentDateSource
+import com.ajay.seenu.expensetracker.CategoryDataSource
+import com.ajay.seenu.expensetracker.CategoryDataSourceImpl
 import com.ajay.seenu.expensetracker.DriverFactory
 import com.ajay.seenu.expensetracker.ExpenseDatabase
 import com.ajay.seenu.expensetracker.TransactionDataSource
@@ -42,6 +44,12 @@ object ModuleProvider {
     @Provides
     fun provideUserConfigsManager(@ApplicationContext context: Context): UserConfigurationsManager {
         return UserConfigurationsManager(context)
+    }
+
+    @Singleton
+    @Provides
+    fun provideCategorySource(database: ExpenseDatabase): CategoryDataSource {
+        return CategoryDataSourceImpl(database)
     }
 
 }
