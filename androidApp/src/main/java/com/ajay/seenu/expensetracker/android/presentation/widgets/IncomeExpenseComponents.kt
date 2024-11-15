@@ -23,8 +23,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -384,118 +386,133 @@ fun AddTransactionForm(
                         .padding(horizontal = 15.dp)
                         .align(Alignment.BottomCenter)
                 ) {
-                    Spacer(modifier = Modifier.height(20.dp))
-                    OutlinedTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        value = selectedPaymentType?.label ?: "",
-                        label = {
-                            Text(text = stringResource(id = R.string.paymentType),
-                                color = LocalContentColor.current.copy(alpha = 0.5F))
-                        },
-                        readOnly = true,
-                        interactionSource = paymentInteractionSource,
-                        textStyle = LocalTextStyle.current,
-                        onValueChange = {},
-                        supportingText = {
-                            if (showPaymentTypeError) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        Spacer(modifier = Modifier.height(20.dp))
+                        OutlinedTextField(
+                            modifier = Modifier.fillMaxWidth(),
+                            value = selectedPaymentType?.label ?: "",
+                            label = {
                                 Text(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(bottom = 10.dp),
-                                    text = "Select a valid Payment Type", // FIXME: String resource
-                                    color = MaterialTheme.colorScheme.error
+                                    text = stringResource(id = R.string.paymentType),
+                                    color = LocalContentColor.current.copy(alpha = 0.5F)
                                 )
-                            }
-                        },
-                        isError = showPaymentTypeError,
-                        shape = RoundedCornerShape(10.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = LocalContentColor.current.copy(alpha = 0.2F)
-                        )
-                    )
-                    OutlinedTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        interactionSource = categoryInteractionSource,
-                        value = selectedCategory?.label ?: "",
-                        readOnly = true,
-                        label = {
-                            Text(text = stringResource(id = R.string.category),
-                                color = LocalContentColor.current.copy(alpha = 0.5F))
-                        },
-                        textStyle = LocalTextStyle.current,
-                        onValueChange = {},
-                        supportingText = {
-                            if (showCategoryError) {
-                                Text(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(bottom = 10.dp),
-                                    text = "Select a valid Category", // FIXME: String resource
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            }
-                        },
-                        isError = showCategoryError,
-                        shape = RoundedCornerShape(10.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = LocalContentColor.current.copy(alpha = 0.2F)
-                        )
-
-                    )
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .focusRequester(focusRequester)
-                            .onFocusChanged {
-                                if (it.isFocused) {
-                                    showDialog = true
+                            },
+                            readOnly = true,
+                            interactionSource = paymentInteractionSource,
+                            textStyle = LocalTextStyle.current,
+                            onValueChange = {},
+                            supportingText = {
+                                if (showPaymentTypeError) {
+                                    Text(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(bottom = 10.dp),
+                                        text = "Select a valid Payment Type", // FIXME: String resource
+                                        color = MaterialTheme.colorScheme.error
+                                    )
                                 }
                             },
-                        value = formatter.format(date),
-                        readOnly = true,
-                        label = {
-                            Text(text = "Date",
-                                color = LocalContentColor.current.copy(alpha = 0.5F))
-                        },
-                        textStyle = LocalTextStyle.current, onValueChange = { /* do nothing */ },
-                        shape = RoundedCornerShape(10.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = LocalContentColor.current.copy(alpha = 0.2F)
+                            isError = showPaymentTypeError,
+                            shape = RoundedCornerShape(10.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                unfocusedBorderColor = LocalContentColor.current.copy(alpha = 0.2F)
+                            )
                         )
-                    )
-                    OutlinedTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        value = description,
-                        maxLines = 4,
-                        minLines = 3,
-                        label = {
-                            Text(text = "Description",
-                                color = LocalContentColor.current.copy(alpha = 0.5F))
-                        },
-                        textStyle = LocalTextStyle.current, onValueChange = {
-                            description = it
-                        },
-                        shape = RoundedCornerShape(10.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = LocalContentColor.current.copy(alpha = 0.2F)
+                        OutlinedTextField(
+                            modifier = Modifier.fillMaxWidth(),
+                            interactionSource = categoryInteractionSource,
+                            value = selectedCategory?.label ?: "",
+                            readOnly = true,
+                            label = {
+                                Text(
+                                    text = stringResource(id = R.string.category),
+                                    color = LocalContentColor.current.copy(alpha = 0.5F)
+                                )
+                            },
+                            textStyle = LocalTextStyle.current,
+                            onValueChange = {},
+                            supportingText = {
+                                if (showCategoryError) {
+                                    Text(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(bottom = 10.dp),
+                                        text = "Select a valid Category", // FIXME: String resource
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            },
+                            isError = showCategoryError,
+                            shape = RoundedCornerShape(10.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                unfocusedBorderColor = LocalContentColor.current.copy(alpha = 0.2F)
+                            )
+
                         )
-                    )
-                    MultiSelectChipsView(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 10.dp),
-                        selectedOptions =  attachments,
-                        onClick = {
-                            showAddAttachmentDialog = true
-                        },
-                        selectionOptionView = {
-                            Text(text = getFileNameFromUri(context, it) ?: "N/A")
-                        },
-                        onOptionCanceled = {
-                            attachments.remove(it)
-                        },
-                        borderColor = LocalContentColor.current.copy(alpha = 0.2F)
-                    )
+                        OutlinedTextField(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .focusRequester(focusRequester)
+                                .onFocusChanged {
+                                    if (it.isFocused) {
+                                        showDialog = true
+                                    }
+                                },
+                            value = formatter.format(date),
+                            readOnly = true,
+                            label = {
+                                Text(
+                                    text = "Date",
+                                    color = LocalContentColor.current.copy(alpha = 0.5F)
+                                )
+                            },
+                            textStyle = LocalTextStyle.current,
+                            onValueChange = { /* do nothing */ },
+                            shape = RoundedCornerShape(10.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                unfocusedBorderColor = LocalContentColor.current.copy(alpha = 0.2F)
+                            )
+                        )
+                        OutlinedTextField(
+                            modifier = Modifier.fillMaxWidth(),
+                            value = description,
+                            maxLines = 4,
+                            minLines = 3,
+                            label = {
+                                Text(
+                                    text = "Description",
+                                    color = LocalContentColor.current.copy(alpha = 0.5F)
+                                )
+                            },
+                            textStyle = LocalTextStyle.current, onValueChange = {
+                                description = it
+                            },
+                            shape = RoundedCornerShape(10.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                unfocusedBorderColor = LocalContentColor.current.copy(alpha = 0.2F)
+                            )
+                        )
+                        MultiSelectChipsView(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 10.dp),
+                            selectedOptions = attachments,
+                            onClick = {
+                                showAddAttachmentDialog = true
+                            },
+                            selectionOptionView = {
+                                Text(text = getFileNameFromUri(context, it) ?: "N/A")
+                            },
+                            onOptionCanceled = {
+                                attachments.remove(it)
+                            },
+                            borderColor = LocalContentColor.current.copy(alpha = 0.2F)
+                        )
+                    }
 
                     Button(
                         onClick = {
