@@ -27,6 +27,7 @@ import com.ajay.seenu.expensetracker.android.presentation.theme.LocalColors
 import com.ajay.seenu.expensetracker.android.presentation.screeens.AddTransactionScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.CategoryDetailScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.CategoryListScreen
+import com.ajay.seenu.expensetracker.android.presentation.screeens.DetailTransactionScreen
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.MainViewModel
 import com.ajay.seenu.expensetracker.entity.Theme
 import dagger.hilt.android.AndroidEntryPoint
@@ -76,6 +77,9 @@ class MainActivity : ComponentActivity() {
                                     onAddTransaction = {
                                         navController.navigate("${Screen.AddTransaction.route}/-1L")
                                     },
+                                    onTransactionClicked = {
+                                        navController.navigate("${Screen.DetailTransaction.route}/${it}")
+                                    },
                                     onCloneTransaction = {
                                         navController.navigate("${Screen.AddTransaction.route}/${it}")
                                     },
@@ -94,6 +98,22 @@ class MainActivity : ComponentActivity() {
                                 var cloneId = it.arguments?.getLong("clone_id")
                                 if (cloneId == -1L) cloneId = null
                                 AddTransactionScreen(
+                                    onNavigateBack = {
+                                        navController.popBackStack()
+                                    },
+                                    cloneId
+                                )
+                            }
+                            composable("${Screen.DetailTransaction.route}/{transaction_id}",
+                                arguments = listOf(
+                                    navArgument("transaction_id") {
+                                        type = NavType.LongType
+                                    }
+                                )
+                            ) {
+                                var cloneId = it.arguments?.getLong("transaction_id")
+                                if (cloneId == -1L) cloneId = null
+                                DetailTransactionScreen(
                                     onNavigateBack = {
                                         navController.popBackStack()
                                     },

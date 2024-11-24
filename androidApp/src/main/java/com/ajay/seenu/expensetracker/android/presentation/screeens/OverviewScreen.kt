@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -60,6 +61,7 @@ import java.util.Locale
 @Composable
 fun OverviewScreen(
     viewModel: OverviewScreenViewModel = hiltViewModel(),
+    onTransactionClicked: (Long) -> Unit,
     onCloneTransaction: (Long) -> Unit,
     onCategoryListScreen: () -> Unit
 ) {
@@ -221,13 +223,16 @@ fun OverviewScreen(
                                 key = { transaction ->
                                     transaction.id
                                 },
-                                itemContent = {
-                                    TransactionPreviewRow(Modifier.fillMaxWidth(), it,
+                                itemContent = { transaction ->
+                                    TransactionPreviewRow(Modifier.fillMaxWidth(), transaction,
+                                        onClick = {
+                                            onTransactionClicked.invoke(transaction.id)
+                                        },
                                         onDelete = {
-                                            viewModel.deleteTransaction(it.id)
+                                            viewModel.deleteTransaction(transaction.id)
                                         },
                                         onClone = {
-                                            onCloneTransaction.invoke(it.id)
+                                            onCloneTransaction.invoke(transaction.id)
                                         }
                                     )
                                 })

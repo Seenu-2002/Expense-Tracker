@@ -4,6 +4,8 @@ import android.icu.text.DecimalFormat
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +28,7 @@ import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -242,6 +245,7 @@ class OverallDataProvider : PreviewParameterProvider<OverallData> {
 fun TransactionPreviewRowPreview(@PreviewParameter(TransactionPreviewDataProvider::class) data: Transaction) {
     PreviewThemeWrapper {
         TransactionPreviewRow(Modifier.fillMaxWidth(), data,
+            onClick = {},
             onDelete = {},
             onClone = {})
     }
@@ -251,6 +255,7 @@ fun TransactionPreviewRowPreview(@PreviewParameter(TransactionPreviewDataProvide
 @Composable
 fun TransactionPreviewRow(modifier: Modifier = Modifier,
                           transaction: Transaction,
+                          onClick: () -> Unit,
                           onDelete: () -> Unit,
                           onClone: () -> Unit) {
     val swipeState = rememberSwipeToDismissBoxState(
@@ -315,6 +320,11 @@ fun TransactionPreviewRow(modifier: Modifier = Modifier,
             modifier
                 .background(MaterialTheme.colorScheme.background)
                 .padding(horizontal = 15.dp, vertical = 8.dp)
+                .clickable(remember { MutableInteractionSource() },
+                    null
+                ) {
+                    onClick.invoke()
+                }
                 .clip(RoundedCornerShape(15.dp))
         ) {
             val (icon, title, paymentType, amount) = createRefs()

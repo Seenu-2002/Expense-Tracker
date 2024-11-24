@@ -38,6 +38,7 @@ import com.ajay.seenu.expensetracker.android.presentation.theme.LocalColors
 @Composable
 fun MainScreen(
     onAddTransaction: () -> Unit,
+    onTransactionClicked: (Long) -> Unit,
     onCloneTransaction: (Long) -> Unit,
     onCategoryListScreen: () -> Unit
 ) {
@@ -112,6 +113,7 @@ fun MainScreen(
         ) {
             composable(Screen.Overview.route) {
                 OverviewScreen(
+                    onTransactionClicked = onTransactionClicked,
                     onCloneTransaction = onCloneTransaction,
                     onCategoryListScreen = onCategoryListScreen
                 )
