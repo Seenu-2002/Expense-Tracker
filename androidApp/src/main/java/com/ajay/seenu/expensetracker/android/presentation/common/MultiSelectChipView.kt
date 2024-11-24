@@ -63,11 +63,13 @@ internal fun <T> MultiSelectChipsView(modifier: Modifier = Modifier,
             .padding(top = 10.dp)) {
             Text(
                 text = "Attachments (${selectedOptions.size})",
-                modifier = Modifier.weight(1f).padding(start = 10.dp)
+                modifier = Modifier.weight(1f).padding(start = 10.dp),
+                color = LocalContentColor.current.copy(alpha = 0.5F)
             )
             Icon(
                 modifier = Modifier.padding(end = 15.dp),
-                painter = painterResource(id = expandIcon), contentDescription = "drop down"
+                painter = painterResource(id = expandIcon), contentDescription = "drop down",
+                tint = LocalContentColor.current.copy(alpha = 0.5F)
             )
         }
         Row(modifier = modifier

@@ -59,6 +59,7 @@ dependencies {
     debugImplementation(libs.compose.ui.tooling)
     implementation(libs.androidx.glance)
     implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.palette)
 
     // Hilt dependencies
     implementation(libs.hilt)

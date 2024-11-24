@@ -1,7 +1,9 @@
 package com.ajay.seenu.expensetracker.android.domain.data
 
+import androidx.annotation.StringRes
 import com.ajay.seenu.expensetracker.Category
 import com.ajay.seenu.expensetracker.TransactionDetail
+import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.entity.PaymentType
 import java.util.Date
 
@@ -15,8 +17,8 @@ data class Transaction constructor(
     val note: String? = null
 ) {
 
-    enum class Type(val value: String) {
-        INCOME("Income"), EXPENSE("Expense")
+    enum class Type(val value: String, @StringRes val resourceId: Int) {
+        INCOME("Income", R.drawable.income), EXPENSE("Expense", R.drawable.expense)
     }
 
     data class Category constructor(
