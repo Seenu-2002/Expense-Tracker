@@ -104,6 +104,9 @@ SELECT paymentType, SUM(amount) AS totalAmount FROM TransactionDetail WHERE type
 getTotalExpenseByCategoryBetween:
 SELECT category, SUM(amount) AS totalAmount FROM TransactionDetail WHERE type = "EXPENSE" AND date >= :startUTCValue AND date <= :endUTCValue GROUP BY category ORDER BY totalAmount DESC;
 
+getTotalAmountByCategoryAndTypeBetween:
+SELECT category, SUM(amount) AS total FROM TransactionDetail WHERE type = :type AND date >= :startUTCValue AND date <= :endUTCValue GROUP BY category ORDER BY category ASC;
+
 getAllAttachmentsForTransaction:
 SELECT * FROM Attachment WHERE transactionId = ?;
 

@@ -30,10 +30,9 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.ajay.seenu.expensetracker.android.presentation.screeens.AnalyticsScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.OverviewScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.SettingsScreen
-import com.ajay.seenu.expensetracker.android.presentation.theme.LocalColors
+import com.ajay.seenu.expensetracker.android.presentation.screeens.SimpleAnalyticsScreen
 
 @Composable
 fun MainScreen(
@@ -119,7 +118,8 @@ fun MainScreen(
                 )
             }
             composable(Screen.Analytics.route) {
-                AnalyticsScreen(navController = navController)
+//                AnalyticsScreen(navController = navController)
+                SimpleAnalyticsScreen(navController = navController)
             }
             composable(Screen.Settings.route) {
                 SettingsScreen(navController = navController)
