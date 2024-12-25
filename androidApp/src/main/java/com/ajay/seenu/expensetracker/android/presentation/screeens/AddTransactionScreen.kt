@@ -37,6 +37,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,15 +66,16 @@ fun AddTransactionScreen(
     cloneId: Long? = null,
     viewModel: AddTransactionViewModel = hiltViewModel(),
 ) {
-    //FIXME: Clone implemented but not updating in form
     LaunchedEffect(Unit) {
-        cloneId?.let {id ->
+        viewModel.getCategories(Transaction.Type.INCOME)
+        cloneId?.let { id ->
             viewModel.getTransaction(id)
         }
     }
     val context = LocalContext.current
     val transaction by viewModel.transaction.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
+    var showForm by rememberSaveable { mutableStateOf(false) }
     var selectedCategory: Transaction.Category? by remember {
         mutableStateOf(null)
     }
@@ -90,45 +92,20 @@ fun AddTransactionScreen(
         mutableStateOf(false)
     }
 
-    LaunchedEffect(key1 = Unit) {
-        viewModel.getCategories(Transaction.Type.INCOME)
-    }
-
-    Scaffold(
-        topBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight(.1F)
-                    .background(Color.Transparent)
-            ) {
-                TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
-                ), title = {
-                    Text(
-                        modifier = Modifier.padding(horizontal = 4.dp),
-                        text = "Add Transaction"
-                    ) // TODO("string resource")
-                }, navigationIcon = {
-                    Icon(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(percent = 50))
-                            .clickable(
-                                onClick = {
-                                    onNavigateBack.invoke()
-                                }
-                            )
-                            .padding(8.dp),
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back"
-                    )
-                })
+    LaunchedEffect(transaction) {
+        if(cloneId == null)
+            showForm = true
+        else {
+            transaction?.let {
+                selectedCategory = it.category
+                showForm = true
             }
         }
-    ) {
+    }
 
+    if(showForm) {
         AddTransactionForm(
             modifier = Modifier
-                .padding(paddingValues = it)
                 .padding(horizontal = 48.dp, vertical = 32.dp),
             transaction = transaction,
             onCategoryClicked = {
@@ -142,55 +119,56 @@ fun AddTransactionScreen(
             },
             onPaymentTypeClicked = {
                 showPaymentTypeBottomSheet = true
-            }
+            },
+            onNavigateBack = onNavigateBack
         ) { transaction, attachments ->
             viewModel.addTransaction(context, transaction, attachments)
             Toast.makeText(context, "Transaction added Successfully!", Toast.LENGTH_SHORT).show()
             onNavigateBack.invoke()
         }
+    }
 
-        val categoriesBottomSheetState = rememberModalBottomSheetState(true)
-        val paymentTypeBottomSheetState = rememberModalBottomSheetState(true)
-        val focusManager = LocalFocusManager.current
-        val scope = rememberCoroutineScope()
+    val categoriesBottomSheetState = rememberModalBottomSheetState(true)
+    val paymentTypeBottomSheetState = rememberModalBottomSheetState(true)
+    val focusManager = LocalFocusManager.current
+    val scope = rememberCoroutineScope()
 
-        LaunchedEffect(categoriesBottomSheetState) {
-            snapshotFlow { categoriesBottomSheetState.isVisible }.collect { it ->
-                showCategoriesBottomSheet = it
+    LaunchedEffect(categoriesBottomSheetState) {
+        snapshotFlow { categoriesBottomSheetState.isVisible }.collect { it ->
+            showCategoriesBottomSheet = it
+        }
+    }
+
+    LaunchedEffect(paymentTypeBottomSheetState) {
+        snapshotFlow { paymentTypeBottomSheetState.isVisible }.collect { it ->
+            showPaymentTypeBottomSheet = it
+        }
+    }
+
+    if (showCategoriesBottomSheet) {
+        CategoryBottomSheet(state = categoriesBottomSheetState, onDismiss = {
+            focusManager.clearFocus(true)
+            showCategoriesBottomSheet = false
+        }, categories = categories) { category ->
+            selectedCategory = category
+            scope.launch {
+                categoriesBottomSheetState.hide()
             }
         }
+    }
 
-        LaunchedEffect(paymentTypeBottomSheetState) {
-            snapshotFlow { paymentTypeBottomSheetState.isVisible }.collect { it ->
-                showPaymentTypeBottomSheet = it
-            }
-        }
-
-        if (showCategoriesBottomSheet) {
-            CategoryBottomSheet(state = categoriesBottomSheetState, onDismiss = {
+    if (showPaymentTypeBottomSheet) {
+        PaymentTypeBottomSheet(
+            state = paymentTypeBottomSheetState,
+            onDismiss = {
                 focusManager.clearFocus(true)
-                showCategoriesBottomSheet = false
-            }, categories = categories) { category ->
-                selectedCategory = category
-                scope.launch {
-                    categoriesBottomSheetState.hide()
-                }
-            }
-        }
-
-        if (showPaymentTypeBottomSheet) {
-            PaymentTypeBottomSheet(
-                state = paymentTypeBottomSheetState,
-                onDismiss = {
-                    focusManager.clearFocus(true)
-                    showPaymentTypeBottomSheet = false
-                },
-                paymentTypes = PaymentType.entries
-            ) { type ->
-                selectedPaymentType = type
-                scope.launch {
-                    paymentTypeBottomSheetState.hide()
-                }
+                showPaymentTypeBottomSheet = false
+            },
+            paymentTypes = PaymentType.entries
+        ) { type ->
+            selectedPaymentType = type
+            scope.launch {
+                paymentTypeBottomSheetState.hide()
             }
         }
     }

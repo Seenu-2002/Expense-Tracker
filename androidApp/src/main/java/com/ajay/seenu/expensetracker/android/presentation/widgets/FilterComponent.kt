@@ -1,11 +1,16 @@
 package com.ajay.seenu.expensetracker.android.presentation.widgets
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePickerDefaults
@@ -13,6 +18,7 @@ import androidx.compose.material3.DateRangePicker
 import androidx.compose.material3.DateRangePickerState
 import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
@@ -52,41 +58,55 @@ fun FilterBottomSheet(
         sheetState = sheetState,
         onDismissRequest = { onDismiss?.invoke() }) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            TextButton(modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    onFilterSelected.invoke(Filter.ThisWeek)
-                }) {
-                Text(text = stringResource(R.string.filter_this_week))
-            }
-            TextButton(modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    onFilterSelected.invoke(Filter.ThisMonth)
-                }) {
-                Text(text = stringResource(R.string.filter_this_month))
-            }
-            TextButton(modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    onFilterSelected.invoke(Filter.ThisYear)
-                }) {
-                Text(text = stringResource(R.string.filter_this_year))
-            }
-            TextButton(modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    onFilterSelected.invoke(Filter.CUSTOM_MOCK)
-                }) {
+            FilterBottomSheetRow(modifier = Modifier.clickable {
+                onFilterSelected.invoke(Filter.ThisWeek)
+            },
+                isSelected = filter == Filter.ThisWeek,
+                text = stringResource(R.string.filter_this_week))
 
-                val text = if (filter is Filter.Custom) {
-                    val arg = context.getString(
-                        R.string.filter_custom_arg_format, formatter.format(
-                            Date(filter.startDate)
-                        ), formatter.format(Date(filter.endDate))
-                    )
-                    stringResource(R.string.filter_custom_arg, arg)
-                } else {
-                    stringResource(R.string.filter_custom)
-                }
-                Text(text = text)
+            FilterBottomSheetRow(modifier = Modifier.clickable {
+                onFilterSelected.invoke(Filter.ThisMonth)
+            },
+                isSelected = filter == Filter.ThisMonth,
+                text = stringResource(R.string.filter_this_month))
+
+            FilterBottomSheetRow(modifier = Modifier.clickable {
+                onFilterSelected.invoke(Filter.ThisYear)
+            },
+                isSelected = filter == Filter.ThisYear,
+                text = stringResource(R.string.filter_this_year))
+
+            val text = if (filter is Filter.Custom) {
+                val arg = context.getString(
+                    R.string.filter_custom_arg_format, formatter.format(
+                        Date(filter.startDate)
+                    ), formatter.format(Date(filter.endDate))
+                )
+                stringResource(R.string.filter_custom_arg, arg)
+            } else {
+                stringResource(R.string.filter_custom)
             }
+
+            FilterBottomSheetRow(modifier = Modifier.clickable {
+                onFilterSelected.invoke(Filter.CUSTOM_MOCK)
+            },
+                isSelected = filter is Filter.Custom,
+                text = text)
+        }
+    }
+}
+
+@Composable
+fun FilterBottomSheetRow(modifier: Modifier = Modifier,
+                         isSelected: Boolean,
+                         text: String) {
+    Row(modifier = modifier.fillMaxWidth()
+        .padding(horizontal = 15.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically) {
+        Text(text = text)
+        if(isSelected) {
+            Spacer(modifier = Modifier.weight(1f))
+            Icon(Icons.Default.Check, contentDescription = "selected")
         }
     }
 }
@@ -180,7 +200,7 @@ fun DateRangePickerBottomSheet(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun SelectedDateTextPreview() {
     SelectedDateText(
