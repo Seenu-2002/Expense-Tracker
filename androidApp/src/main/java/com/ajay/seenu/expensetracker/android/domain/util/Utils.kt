@@ -2,14 +2,13 @@ package com.ajay.seenu.expensetracker.android.domain.util
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.icu.text.NumberFormat
 import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.core.net.toUri
-import kotlinx.datetime.LocalDateTime
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
-import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Locale
 import java.util.UUID
@@ -92,4 +91,9 @@ fun formatDateHeader(inputDate: String): String {
         yesterday.timeInMillis -> "Yesterday"
         else -> inputDate
     }
+}
+
+fun Double.asCurrency(): String {
+    val formatter = NumberFormat.getCurrencyInstance(Locale.getDefault())
+    return formatter.format(this)
 }

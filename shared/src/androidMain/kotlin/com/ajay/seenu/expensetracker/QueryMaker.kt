@@ -4,7 +4,7 @@ package com.ajay.seenu.expensetracker
 object QueryMaker {
 
     private val incomeCategory = (1 .. 10).toList()
-    private val expenseCategory = (11 .. 22).toList() + (32 .. 37).toList()
+    private val expenseCategory = (11 .. 22).toList()
     private val date = (0 .. 10449980000)
     private val paymentTypes = listOf("UPI", "CARD", "CASH")
     private val amount = (1 .. 10)

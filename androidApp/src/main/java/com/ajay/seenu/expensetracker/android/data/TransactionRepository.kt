@@ -1,6 +1,7 @@
 package com.ajay.seenu.expensetracker.android.data
 
 import com.ajay.seenu.expensetracker.Category
+import com.ajay.seenu.expensetracker.GetTotalAmountByCategoryAndTypeBetween
 import com.ajay.seenu.expensetracker.GetTotalExpenseByCategoryBetween
 import com.ajay.seenu.expensetracker.GetTotalExpenseByPaymentTypeBetween
 import com.ajay.seenu.expensetracker.PaginationData
@@ -168,6 +169,12 @@ class TransactionRepository @Inject constructor(private val dataSource: Transact
     suspend fun getExpensePerDayByCategory(range: Pair<Long, Long>): List<GetTotalExpenseByCategoryBetween> {
         return withContext(Dispatchers.IO) {
             dataSource.getExpenseByCategory(range.first, range.second)
+        }
+    }
+
+    suspend fun getTotalAmountByCategory(type: TransactionType, range: Pair<Long, Long>): List<GetTotalAmountByCategoryAndTypeBetween> {
+        return withContext(Dispatchers.IO) {
+            dataSource.getTotalAmountByCategoryAndType(type, range.first, range.second)
         }
     }
 }

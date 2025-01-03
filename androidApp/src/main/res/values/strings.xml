@@ -17,6 +17,11 @@
     <string name="start_date">Start Date</string>
     <string name="end_date">End Date</string>
     <string name="date_format_row">%1$s   ( %2$s )</string>
+    <string name="income_format">+ %1$s</string>
+    <string name="expense_format">- %1$s</string>
+    <string name="analytics">Analytics</string>
+    <string name="income">Income</string>
+    <string name="expense">Expense</string>
 
     <string name="chart_axis_date">Date</string>
     <string name="chart_axis_category">Category</string>
@@ -32,4 +37,7 @@
 
     <string name="onboarding_get_started">Get Started!</string>
     <string name="onboarding_text">Keep your Finances on track!!</string>
+
+    <string name="error_empty_data_on_analytics_title">No Transaction to Calculate Analytics</string>
+    <string name="error_empty_data_on_analytics_message">Kindly add some Transactions or try adjusting the filter.</string>
 </resources>

@@ -126,4 +126,12 @@ class TransactionDataSourceImpl constructor(
     override fun getExpenseByCategory(startDate: Long, endDate: Long): List<GetTotalExpenseByCategoryBetween> {
         return queries.getTotalExpenseByCategoryBetween(startDate, endDate).executeAsList()
     }
+
+    override fun getTotalAmountByCategoryAndType(
+        type: TransactionType,
+        startDate: Long,
+        endDate: Long
+    ): List<GetTotalAmountByCategoryAndTypeBetween> {
+        return queries.getTotalAmountByCategoryAndTypeBetween(type, startDate, endDate).executeAsList()
+    }
 }

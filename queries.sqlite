@@ -1,7 +1,2 @@
 INSERT INTO Category(label,type) VALUES ("Salary or Wages","INCOME"),("Investment Income","INCOME"),("Business Income","INCOME"),("Government Benefits","INCOME"),("Retirement Income","INCOME"),("Side Hustle Income","INCOME"),("Gifts and Inheritances","INCOME"),("Rental Income","INCOME"),("Royalties","INCOME"),("Grants and Scholarships","INCOME");
 INSERT INTO Category(label,type) VALUES ("Housing","EXPENSE"),("Food","EXPENSE"),("Utilities","EXPENSE"),("Healthcare","EXPENSE"),("Insurance","EXPENSE"),("Debt Payments","EXPENSE"),("Personal Care","EXPENSE"),("Entertainment","EXPENSE"),("Clothing and Accessories","EXPENSE"),("Education","EXPENSE"),("Savings and Investments","EXPENSE"),("Taxes","EXPENSE");
-INSERT INTO Category(id,label,type) VALUES (32,"Transportation","EXPENSE");
-
-INSERT INTO Category(id,label,type,parent) VALUES (33,"Fuel","EXPENSE",32);
-INSERT INTO Category(id,label,type,parent) VALUES (34,"Petrol","EXPENSE",33), (35,"CNG","EXPENSE",33);
-INSERT INTO Category(id,label,type,parent) VALUES (36,"Bike","EXPENSE",34),(37,"Car","EXPENSE",35);

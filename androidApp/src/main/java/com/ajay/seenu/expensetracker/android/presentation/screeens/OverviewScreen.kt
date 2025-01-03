@@ -164,6 +164,9 @@ fun OverviewScreen(
                         CircularProgressIndicator()
                     }
                 }
+                is UiState.Failure -> {
+                    // Fixme
+                }
                 is UiState.Success -> {
                     val recentTransactions = state.data
                     if (recentTransactions.isEmpty()) {
@@ -198,7 +201,7 @@ fun OverviewScreen(
                         is UiState.Success -> {
                             OverviewCard(modifier = Modifier.fillMaxWidth(), data = overallDataState.data)
                         }
-                        UiState.Failure -> {}
+                        is UiState.Failure -> {}
                     }
 
                     LazyColumn(
@@ -253,7 +256,6 @@ fun OverviewScreen(
                         }
                     }
                 }
-                UiState.Failure -> {}
             }
         }
     }
