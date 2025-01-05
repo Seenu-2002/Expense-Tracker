@@ -1,37 +1,21 @@
 package com.ajay.seenu.expensetracker.android.domain.mapper
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import com.ajay.seenu.expensetracker.Category
 import com.ajay.seenu.expensetracker.android.domain.data.Transaction
-import com.ajay.seenu.expensetracker.android.domain.mapper.CategoryMapper.map
 import com.ajay.seenu.expensetracker.entity.TransactionType
 
 object CategoryMapper {
 
-    fun mapCategories(categories: List<Category>): List<Transaction.Category> {
-        val mappedCategories = arrayListOf<Transaction.Category>()
-        val parentIdVsCategory = hashMapOf<Long, Transaction.Category>()
-        categories.forEach {
-            val category = Transaction.Category(
-                it.id,
-                it.type.map(),
-                it.label,
-                null
-            )
-
-            if (it.parent != null) {
-                parentIdVsCategory[it.parent!!] = category
-            }
-
-            mappedCategories.add(category)
-        }
-        for(entry in parentIdVsCategory.entries) {
-            val parentId = entry.key
-            val category = entry.value
-            val parent = mappedCategories.find { it.id == parentId } ?: continue
-            category.parent = parent
-        }
-        parentIdVsCategory.clear()
-        return mappedCategories
+    fun mapCategories(categories: List<Category>): List<Transaction.Category> = categories.map {
+        Transaction.Category(
+            it.id,
+            it.type.map(),
+            it.label,
+            Color(it.color),
+            it.iconRes?.toInt()
+        )
     }
 
     fun TransactionType.map(): Transaction.Type {
@@ -46,7 +30,8 @@ object CategoryMapper {
             this.id,
             this.label,
             this.type.map(),
-            this.parent?.id,
+            this.res?.toLong(),
+            this.color.toArgb().toLong(),
         )
     }
 

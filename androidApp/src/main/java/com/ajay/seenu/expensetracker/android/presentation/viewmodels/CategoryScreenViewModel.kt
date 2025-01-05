@@ -3,6 +3,7 @@ package com.ajay.seenu.expensetracker.android.presentation.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ajay.seenu.expensetracker.Category
+import com.ajay.seenu.expensetracker.android.domain.data.Transaction
 import com.ajay.seenu.expensetracker.android.domain.usecases.category.AddCategoryUseCase
 import com.ajay.seenu.expensetracker.android.domain.usecases.category.DeleteCategoryUseCase
 import com.ajay.seenu.expensetracker.android.domain.usecases.category.GetAllCategoriesUseCase
@@ -11,6 +12,7 @@ import com.ajay.seenu.expensetracker.android.domain.usecases.category.UpdateCate
 import com.ajay.seenu.expensetracker.entity.TransactionType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -20,11 +22,14 @@ import javax.inject.Inject
 class CategoryScreenViewModel @Inject constructor(
 ) : ViewModel() {
 
-    private val _categories: MutableStateFlow<List<Category>> = MutableStateFlow(emptyList())
+    private val _categories: MutableStateFlow<List<Transaction.Category>> = MutableStateFlow(emptyList())
     val categories = _categories.asStateFlow()
 
     private val _category: MutableStateFlow<Category?> = MutableStateFlow(null)
     val category = _category.asStateFlow()
+
+    private val _transactionType: MutableStateFlow<Transaction.Type> = MutableStateFlow(Transaction.Type.INCOME)
+    val transactionType: StateFlow<Transaction.Type> = _transactionType.asStateFlow()
 
     @Inject
     internal lateinit var getCategoriesUseCase: GetAllCategoriesUseCase
@@ -41,12 +46,10 @@ class CategoryScreenViewModel @Inject constructor(
     @Inject
     internal lateinit var updateCategoryUseCase: UpdateCategoryUseCase
 
-    fun getAllCategories() {
+    fun getCategories(type: Transaction.Type) {
         viewModelScope.launch {
-            _categories.emit(emptyList())
-            getCategoriesUseCase.invoke().collectLatest {
-                _categories.emit(it)
-            }
+            _categories.emit(emptyList()) // TODO: UIState
+            _categories.emit(getCategoriesUseCase.invoke(type))
         }
     }
 
@@ -72,7 +75,14 @@ class CategoryScreenViewModel @Inject constructor(
 
     fun addCategory( label: String, transactionType: TransactionType ) {
         viewModelScope.launch {
-            addCategoryUseCase.invoke( label, transactionType, null )
+            TODO()
+//            addCategoryUseCase.invoke( label, transactionType, null )
+        }
+    }
+
+    fun changeType(type: Transaction.Type) {
+        viewModelScope.launch {
+            _transactionType.emit(type)
         }
     }
 }

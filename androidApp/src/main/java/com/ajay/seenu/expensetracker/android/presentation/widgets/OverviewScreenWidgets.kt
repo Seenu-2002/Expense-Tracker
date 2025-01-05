@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
@@ -32,7 +31,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalDensity
@@ -417,7 +415,8 @@ class TransactionPreviewDataProvider : PreviewParameterProvider<Transaction> {
                     12L,
                     Transaction.Type.EXPENSE,
                     "Food",
-                    null
+                    Color.Green,
+                    R.drawable.fastfood
                 ),
                 PaymentType.UPI,
                 Date()
@@ -430,7 +429,8 @@ class TransactionPreviewDataProvider : PreviewParameterProvider<Transaction> {
                     12L,
                     Transaction.Type.EXPENSE,
                     "Food",
-                    null
+                    Color.Green,
+                    R.drawable.fastfood
                 ),
 
                 PaymentType.UPI,

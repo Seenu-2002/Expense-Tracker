@@ -120,6 +120,7 @@ fun SlidingSwitch(
     sliderColor: Color = MaterialTheme.colorScheme.primary,
     selectedValueColor: Color = Color.Unspecified,
     unselectedValueColor: Color = Color.Unspecified,
+    animationDuration: Int = 500,
     onSelectedValue: (Transaction.Type) -> Unit
 ) {
     var currentValue by rememberSaveable {
@@ -128,7 +129,7 @@ fun SlidingSwitch(
     var width by remember { mutableFloatStateOf(0f) }
     val offsetAnim by animateFloatAsState(
         targetValue = (width / values.size) * values.indexOf(currentValue),
-        animationSpec = tween(500),
+        animationSpec = tween(animationDuration),
         label = "Offset Value"
     )
     Box(modifier = modifier

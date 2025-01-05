@@ -22,12 +22,12 @@ import com.ajay.seenu.expensetracker.UserConfigurationsManager
 import com.ajay.seenu.expensetracker.android.ExpenseTrackerTheme
 import com.ajay.seenu.expensetracker.android.presentation.navigation.MainScreen
 import com.ajay.seenu.expensetracker.android.presentation.navigation.Screen
-import com.ajay.seenu.expensetracker.android.presentation.theme.AppDefaults
-import com.ajay.seenu.expensetracker.android.presentation.theme.LocalColors
+import com.ajay.seenu.expensetracker.android.presentation.screeens.AddCategoryScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.AddTransactionScreen
-import com.ajay.seenu.expensetracker.android.presentation.screeens.CategoryDetailScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.CategoryListScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.DetailTransactionScreen
+import com.ajay.seenu.expensetracker.android.presentation.theme.AppDefaults
+import com.ajay.seenu.expensetracker.android.presentation.theme.LocalColors
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.MainViewModel
 import com.ajay.seenu.expensetracker.entity.Theme
 import dagger.hilt.android.AndroidEntryPoint
@@ -121,12 +121,12 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                             composable(Screen.CategoryList.route) {
-                                CategoryListScreen (
+                                CategoryListScreen(
                                     categoryDetailScreen = {
-                                        if( it == null ) {
+                                        if (it == null) {
                                             navController.navigate("${Screen.Category.route}/-1L")
                                         } else {
-                                            navController.navigate( "${Screen.Category.route}/${it}")
+                                            navController.navigate("${Screen.Category.route}/${it}")
                                         }
                                     },
                                     onNavigateBack = {
@@ -141,14 +141,15 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             ) {
-                                var cloneId = it.arguments?.getLong("clone_id")
-                                if (cloneId == -1L) cloneId = null
-                                CategoryDetailScreen(
-                                    onNavigateBack = {
-                                        navController.popBackStack()
-                                    },
-                                    cloneId
-                                )
+                                AddCategoryScreen(navController)
+//                                var cloneId = it.arguments?.getLong("clone_id")
+//                                if (cloneId == -1L) cloneId = null
+//                                CategoryDetailScreen(
+//                                    onNavigateBack = {
+//                                        navController.popBackStack()
+//                                    },
+//                                    cloneId
+//                                )
                             }
                         }
                     }

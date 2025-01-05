@@ -6,8 +6,8 @@ class CategoryDataSourceImpl(database: ExpenseDatabase): CategoryDataSource {
 
     private val queries = database.expenseDatabaseQueries
 
-    override fun addCategory(label: String, type: TransactionType, parentId: Long?) {
-        return queries.addCategory(label, type, parentId)
+    override fun addCategory(label: String, type: TransactionType, drawableRes: Long?, color: Long) {
+        return queries.addCategory(label, type, drawableRes, color)
     }
 
     override fun getCategory(id: Long): Category {
@@ -16,6 +16,10 @@ class CategoryDataSourceImpl(database: ExpenseDatabase): CategoryDataSource {
 
     override fun getAllCategories(): List<Category> {
         return queries.getAllCategories().executeAsList()
+    }
+
+    override fun getCategories(type: TransactionType): List<Category> {
+        return queries.getCategories(type).executeAsList()
     }
 
     override fun deleteCategory(id: Long) {

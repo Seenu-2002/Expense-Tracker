@@ -11,10 +11,11 @@ class AddCategoryUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(
         label: String,
-        type: TransactionType,
-        parentId: Long?) {
+        type: TransactionType
+    ) {
         withContext(Dispatchers.IO) {
-            repository.addCategory(label, type, parentId)
+            TODO()
+//            repository.addCategory(label, type, )
         }
     }
 }

@@ -1,10 +1,11 @@
 package com.ajay.seenu.expensetracker.android.presentation.widgets
 
-import android.content.res.Configuration
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -18,7 +19,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -48,13 +48,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -72,16 +71,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.ajay.seenu.expensetracker.Attachment
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.domain.data.Transaction
-import com.ajay.seenu.expensetracker.android.domain.util.getFileInfoFromUri
 import com.ajay.seenu.expensetracker.android.domain.util.getFileNameFromUri
 import com.ajay.seenu.expensetracker.android.domain.util.saveBitmapToFile
 import com.ajay.seenu.expensetracker.android.presentation.common.MultiSelectChipsView
 import com.ajay.seenu.expensetracker.android.presentation.common.PreviewThemeWrapper
 import com.ajay.seenu.expensetracker.entity.PaymentType
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -103,6 +99,7 @@ fun AddTransactionForm(
     onNavigateBack: () -> Unit,
     onAdd: (transaction: Transaction, attachments: List<Uri>) -> Unit,
 ) {
+    val animationDuration = 300
     val context = LocalContext.current
 
     var selectedImageUriList by remember {
@@ -238,7 +235,18 @@ fun AddTransactionForm(
             DatePicker(state = datePickerState)
         }
     }
+    
+    val background = remember { Animatable(Color(0xFFFD3C4A)) }
+    LaunchedEffect(transactionType) {
+        val color = if(transactionType == Transaction.Type.EXPENSE){
+            Color(0xFFFD3C4A)
+        } else {
+            Color(0xFF00A86B)
+        }
+        background.animateTo(color, animationSpec = tween(animationDuration))
+    }
 
+    
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -249,9 +257,7 @@ fun AddTransactionForm(
                 .fillMaxWidth()
                 .fillMaxHeight(0.5F)
                 .background(
-                    color = if(transactionType == Transaction.Type.EXPENSE)
-                        Color(0xFFFD3C4A)
-                    else Color(0xFF00A86B),
+                    color = background.value,
                     shape = RoundedCornerShape(
                         topStart = 0.dp,
                         topEnd = 0.dp,
@@ -326,6 +332,7 @@ fun AddTransactionForm(
                             },
                             containerColor = Color.Transparent,
                             sliderColor = Color.LightGray,
+                            animationDuration = animationDuration,
                         )
                     }
                     Spacer(modifier = Modifier.weight(1f))

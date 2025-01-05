@@ -1,5 +1,6 @@
 package com.ajay.seenu.expensetracker.android.data
 
+import androidx.compose.ui.graphics.Color
 import com.ajay.seenu.expensetracker.Category
 import com.ajay.seenu.expensetracker.CategoryDataSource
 import com.ajay.seenu.expensetracker.entity.TransactionType
@@ -14,9 +15,21 @@ class CategoryRepository @Inject constructor(private val dataSource: CategoryDat
         }
     }
 
-    suspend fun addCategory( label: String, type: TransactionType, parentId: Long? = null) {
+    suspend fun getCategories(type: TransactionType): List<Category> {
+        return withContext(Dispatchers.IO){
+            dataSource.getCategories(type)
+        }
+    }
+
+    suspend fun addCategory(category: Category) {
         return withContext(Dispatchers.IO) {
-            dataSource.addCategory(label, type, parentId)
+            dataSource.addCategory(category.label, category.type, category.iconRes, category.color)
+        }
+    }
+
+    suspend fun addCategory( label: String, type: TransactionType, drawableRes: Int?, color: Color) {
+        return withContext(Dispatchers.IO) {
+            dataSource.addCategory(label, type, drawableRes?.toLong(), color.value.toLong())
         }
     }
 

@@ -22,6 +22,8 @@
     <string name="analytics">Analytics</string>
     <string name="income">Income</string>
     <string name="expense">Expense</string>
+    <string name="categories">Categories</string>
+    <string name="add_transaction">Add Transaction</string>
 
     <string name="chart_axis_date">Date</string>
     <string name="chart_axis_category">Category</string>
@@ -38,6 +40,25 @@
     <string name="onboarding_get_started">Get Started!</string>
     <string name="onboarding_text">Keep your Finances on track!!</string>
 
+    <string name="empty_category">No Categories created. Go ahead and create some using the "+" button!</string>
     <string name="error_empty_data_on_analytics_title">No Transaction to Calculate Analytics</string>
     <string name="error_empty_data_on_analytics_message">Kindly add some Transactions or try adjusting the filter.</string>
+
+    <string name="default_category_salary">Salary</string>
+    <string name="default_category_business">Business</string>
+    <string name="default_category_investments">Investments</string>
+    <string name="default_category_freelance">Freelance</string>
+    <string name="default_category_gifts">Gifts</string>
+    <string name="default_category_others">Others</string>
+    <string name="default_category_housing">Housing</string>
+    <string name="default_category_food">Food</string>
+    <string name="default_category_transportation">Transportation</string>
+    <string name="default_category_health">Health</string>
+    <string name="default_category_education">Education</string>
+    <string name="default_category_entertainment">Entertainment</string>
+    <string name="default_category_personal_care">Personal Care</string>
+    <string name="default_category_savings_investments">Savings/Investments</string>
+    <string name="default_category_debt_repayment">Debt Repayment</string>
+
+
 </resources>
