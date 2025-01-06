@@ -57,4 +57,9 @@ object ChartDefaults {
 
     // FIXME: Would be better if we use static colors from Theme so that we specify theme specific shades of that color 
     val expenseColor = Color(0xFFFF6F61)
+    val incomeColor = Color(0xFF4CAF50)
+
+    fun getDynamicColor(index: Int): Color {
+        return dynamicColors[index % dynamicColors.size]
+    }
 }

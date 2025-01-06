@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.hiltPlugin)
     id("kotlin-kapt")
 }
@@ -91,4 +92,7 @@ dependencies {
 
     // Activity KTX
     implementation(libs.androidx.activity.ktx)
+
+    // Kotlin Serialization
+    implementation(libs.kotlin.json.serialization)
 }

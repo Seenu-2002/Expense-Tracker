@@ -31,23 +31,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.domain.data.Transaction
 
 @Composable
-fun SlidingSwitch(selectedValue: String,
-                  values: List<String>,
-                  containerColor: Color = MaterialTheme.colorScheme.surface,
-                  sliderColor: Color = MaterialTheme.colorScheme.primary,
-                  selectedValueColor: Color = LocalContentColor.current,
-                  unselectedValueColor: Color = LocalContentColor.current,
-                  onSelectedValue: (String) -> Unit) {
+fun SlidingSwitch(
+    selectedValue: String,
+    values: List<String>,
+    modifier: Modifier = Modifier.fillMaxWidth(),
+    containerColor: Color = MaterialTheme.colorScheme.surface,
+    sliderColor: Color = MaterialTheme.colorScheme.primary,
+    selectedValueColor: Color = LocalContentColor.current,
+    unselectedValueColor: Color = LocalContentColor.current,
+    shape: Shape = RoundedCornerShape(10.dp),
+    onSelectedValue: (index: Int, value: String) -> Unit
+) {
     var currentValue by rememberSaveable {
         mutableStateOf(selectedValue)
     }
@@ -57,18 +61,19 @@ fun SlidingSwitch(selectedValue: String,
         animationSpec = tween(500),
         label = "Offset Value"
     )
-    Box(modifier = Modifier
-        .fillMaxWidth()
+    Box(modifier = modifier
         .padding(horizontal = 10.dp)
-        .clip(RoundedCornerShape(10.dp))
+        .clip(shape)
         .background(color = containerColor)
         .padding(horizontal = 5.dp)
 
         .onGloballyPositioned {
             width = it.size.width.toFloat()
         }) {
-        Row(modifier = Modifier.matchParentSize(),
-            verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.matchParentSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Box(
                 modifier = Modifier
                     .width(with(LocalDensity.current) { (width / values.size).toDp() })
@@ -78,9 +83,11 @@ fun SlidingSwitch(selectedValue: String,
                     .background(sliderColor)
             )
         }
-        Row(modifier = Modifier
-            .fillMaxWidth()) {
-            values.forEach {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            values.forEachIndexed { index, it ->
                 Text(text = it,
                     modifier = Modifier
                         .width(with(LocalDensity.current) { (width / values.size).toDp() })
@@ -92,12 +99,12 @@ fun SlidingSwitch(selectedValue: String,
                         ) {
                             if (it != currentValue) {
                                 currentValue = it
-                                onSelectedValue.invoke(it)
+                                onSelectedValue.invoke(index, it)
                             }
                         }
                         .padding(vertical = 10.dp),
                     textAlign = TextAlign.Center,
-                    color = if(it == currentValue) selectedValueColor else unselectedValueColor
+                    color = if (it == currentValue) selectedValueColor else unselectedValueColor
                 )
             }
         }
@@ -105,14 +112,16 @@ fun SlidingSwitch(selectedValue: String,
 }
 
 @Composable
-fun SlidingSwitch(modifier: Modifier = Modifier,
-                  selectedValue: Transaction.Type,
-                  values: List<Transaction.Type>,
-                  containerColor: Color = MaterialTheme.colorScheme.surface,
-                  sliderColor: Color = MaterialTheme.colorScheme.primary,
-                  selectedValueColor: Color = Color.Unspecified,
-                  unselectedValueColor: Color = Color.Unspecified,
-                  onSelectedValue: (Transaction.Type) -> Unit) {
+fun SlidingSwitch(
+    modifier: Modifier = Modifier,
+    selectedValue: Transaction.Type,
+    values: List<Transaction.Type>,
+    containerColor: Color = MaterialTheme.colorScheme.surface,
+    sliderColor: Color = MaterialTheme.colorScheme.primary,
+    selectedValueColor: Color = Color.Unspecified,
+    unselectedValueColor: Color = Color.Unspecified,
+    onSelectedValue: (Transaction.Type) -> Unit
+) {
     var currentValue by rememberSaveable {
         mutableStateOf(selectedValue)
     }
@@ -128,8 +137,10 @@ fun SlidingSwitch(modifier: Modifier = Modifier,
             width = it.size.width.toFloat()
         }
     ) {
-        Row(modifier = Modifier.matchParentSize(),
-            verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.matchParentSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Box(
                 modifier = Modifier
                     .width(with(LocalDensity.current) { (width / values.size).toDp() })
@@ -139,9 +150,11 @@ fun SlidingSwitch(modifier: Modifier = Modifier,
                     .background(sliderColor)
             )
         }
-        Row(modifier = Modifier
-            .fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             values.forEach {
                 Icon(painter = painterResource(it.resourceId),
                     modifier = Modifier
@@ -158,7 +171,7 @@ fun SlidingSwitch(modifier: Modifier = Modifier,
                             }
                         }
                         .padding(vertical = 10.dp),
-                    tint = if(it == currentValue) selectedValueColor else unselectedValueColor,
+                    tint = if (it == currentValue) selectedValueColor else unselectedValueColor,
                     contentDescription = null
                 )
             }
@@ -170,23 +183,31 @@ fun SlidingSwitch(modifier: Modifier = Modifier,
 @Composable
 private fun SlidingSwitchPreview() {
     Column(modifier = Modifier.width(300.dp)) {
-        SlidingSwitch(selectedValue = "One",
-            values = listOf("Three", "Two", "One")) {
+        SlidingSwitch(
+            selectedValue = "One",
+            values = listOf("Three", "Two", "One")
+        ) { _, _ ->
 
         }
         Spacer(modifier = Modifier.height(10.dp))
-        SlidingSwitch(selectedValue = "One",
-            values = listOf("Three", "Two", "One","Four","Five")) {
+        SlidingSwitch(
+            selectedValue = "One",
+            values = listOf("Three", "Two", "One", "Four", "Five")
+        ) { _, _ ->
 
         }
         Spacer(modifier = Modifier.height(10.dp))
-        SlidingSwitch(selectedValue = Transaction.Type.INCOME,
-            values = Transaction.Type.entries) {
+        SlidingSwitch(
+            selectedValue = Transaction.Type.INCOME,
+            values = Transaction.Type.entries
+        ) {
 
         }
         Spacer(modifier = Modifier.height(10.dp))
-        SlidingSwitch(selectedValue = "One",
-            values = listOf("Three", "Two", "One","Four","Five","Six","Seven")) {
+        SlidingSwitch(
+            selectedValue = "One",
+            values = listOf("Three", "Two", "One", "Four", "Five", "Six", "Seven")
+        ) { _, _ ->
 
         }
     }
