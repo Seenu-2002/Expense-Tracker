@@ -91,6 +91,7 @@ import java.util.Locale
 fun AddTransactionForm(
     modifier: Modifier = Modifier,
     transaction: Transaction? = null,
+    existingAttachments: List<Attachment>? = null,  //TODO: must be shown in edit mode
     formatter: SimpleDateFormat = SimpleDateFormat(
         "dd MMM, yyyy",
         Locale.ENGLISH

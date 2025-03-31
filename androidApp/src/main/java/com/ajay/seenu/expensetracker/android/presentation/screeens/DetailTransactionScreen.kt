@@ -77,9 +77,10 @@ import java.util.Locale
 
 @Composable
 fun DetailTransactionScreen(
-    onNavigateBack: () -> Unit,
     transactionId: Long? = null,
-    viewModel: DetailTransactionViewModel = hiltViewModel()
+    viewModel: DetailTransactionViewModel = hiltViewModel(),
+    onEditTransaction: () -> Unit,
+    onNavigateBack: () -> Unit
 ) {
     if(transactionId == null)
         return
@@ -93,6 +94,7 @@ fun DetailTransactionScreen(
     transactionState?.let { transaction ->
         DetailTransactionView(transaction = transaction,
             attachments = attachments,
+            onEditTransaction = onEditTransaction,
             onNavigateBack = onNavigateBack)
     }
 }
@@ -101,6 +103,7 @@ fun DetailTransactionScreen(
 fun DetailTransactionView(modifier: Modifier = Modifier,
                           transaction: Transaction,
                           attachments: List<Attachment>,
+                          onEditTransaction: () -> Unit,
                           onNavigateBack: () -> Unit) {
     val formatter: DateFormat = SimpleDateFormat("EEEE d MMMM yyyy", Locale.getDefault())
     val date = formatter.format(transaction.date)
@@ -267,7 +270,7 @@ fun DetailTransactionView(modifier: Modifier = Modifier,
             Button(modifier = Modifier.fillMaxWidth()
                 .padding(horizontal = 10.dp, vertical = 10.dp),
                 onClick = {
-
+                    onEditTransaction.invoke()
             }) {
                 Text(text = "Edit")
             }
@@ -299,6 +302,7 @@ private fun DetailTransactionScreenPreview() {
                 type = Transaction.Type.INCOME
             ),
             attachments = emptyList(),
+            onEditTransaction = {},
             onNavigateBack = {}
         )
     }

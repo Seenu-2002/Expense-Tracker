@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.ajay.seenu.expensetracker.android.data.TransactionMode
 import com.ajay.seenu.expensetracker.android.domain.CategoryRelationMapper
 import com.ajay.seenu.expensetracker.android.domain.data.Transaction
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.AddTransactionViewModel
@@ -62,18 +63,26 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddTransactionScreen(
-    onNavigateBack: () -> Unit,
-    cloneId: Long? = null,
+    transactionMode: TransactionMode = TransactionMode.New,
     viewModel: AddTransactionViewModel = hiltViewModel(),
+    onNavigateBack: () -> Unit
 ) {
     LaunchedEffect(Unit) {
         viewModel.getCategories(Transaction.Type.INCOME)
-        cloneId?.let { id ->
-            viewModel.getTransaction(id)
+        when(transactionMode) {
+            TransactionMode.New -> {}
+            is TransactionMode.Clone -> {
+                viewModel.getTransaction(transactionMode.id)
+            }
+            is TransactionMode.Edit -> {
+                viewModel.getTransaction(transactionMode.id)
+            }
         }
     }
+
     val context = LocalContext.current
     val transaction by viewModel.transaction.collectAsStateWithLifecycle()
+    val attachments by viewModel.attachments.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     var showForm by rememberSaveable { mutableStateOf(false) }
     var selectedCategory: Transaction.Category? by remember {
@@ -93,12 +102,21 @@ fun AddTransactionScreen(
     }
 
     LaunchedEffect(transaction) {
-        if(cloneId == null)
-            showForm = true
-        else {
-            transaction?.let {
-                selectedCategory = it.category
+        when(transactionMode) {
+            TransactionMode.New -> {
                 showForm = true
+            }
+            is TransactionMode.Clone -> {
+                transaction?.let {
+                    selectedCategory = it.category
+                    showForm = true
+                }
+            }
+            is TransactionMode.Edit -> {
+                transaction?.let {
+                    selectedCategory = it.category
+                    showForm = true
+                }
             }
         }
     }
@@ -108,6 +126,7 @@ fun AddTransactionScreen(
             modifier = Modifier
                 .padding(horizontal = 48.dp, vertical = 32.dp),
             transaction = transaction,
+            existingAttachments = attachments,
             onCategoryClicked = {
                 showCategoriesBottomSheet = true
             },
@@ -121,8 +140,8 @@ fun AddTransactionScreen(
                 showPaymentTypeBottomSheet = true
             },
             onNavigateBack = onNavigateBack
-        ) { transaction, attachments ->
-            viewModel.addTransaction(context, transaction, attachments)
+        ) { newTransaction, attachments ->
+            viewModel.addTransaction(context, newTransaction, attachments)
             Toast.makeText(context, "Transaction added Successfully!", Toast.LENGTH_SHORT).show()
             onNavigateBack.invoke()
         }

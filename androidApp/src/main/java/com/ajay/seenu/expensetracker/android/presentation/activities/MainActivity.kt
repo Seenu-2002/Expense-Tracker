@@ -20,6 +20,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ajay.seenu.expensetracker.UserConfigurationsManager
 import com.ajay.seenu.expensetracker.android.ExpenseTrackerTheme
+import com.ajay.seenu.expensetracker.android.data.TransactionMode
 import com.ajay.seenu.expensetracker.android.presentation.navigation.MainScreen
 import com.ajay.seenu.expensetracker.android.presentation.navigation.Screen
 import com.ajay.seenu.expensetracker.android.presentation.theme.AppDefaults
@@ -75,33 +76,48 @@ class MainActivity : ComponentActivity() {
                             composable(Screen.Default.route) {
                                 MainScreen(
                                     onAddTransaction = {
-                                        navController.navigate("${Screen.AddTransaction.route}/-1L")
+                                        navController.navigate("${Screen.AddTransaction.route}/-1L/new")
                                     },
                                     onTransactionClicked = {
                                         navController.navigate("${Screen.DetailTransaction.route}/${it}")
                                     },
                                     onCloneTransaction = {
-                                        navController.navigate("${Screen.AddTransaction.route}/${it}")
+                                        navController.navigate("${Screen.AddTransaction.route}/${it}/clone")
                                     },
                                     onCategoryListScreen = {
                                         navController.navigate(Screen.CategoryList.route)
                                     }
                                 )
                             }
-                            composable("${Screen.AddTransaction.route}/{clone_id}",
+                            composable("${Screen.AddTransaction.route}/{transaction_id}/{mode}",
                                 arguments = listOf(
-                                    navArgument("clone_id") {
+                                    navArgument("transaction_id") {
                                         type = NavType.LongType
+                                    },
+                                    navArgument("mode") {
+                                        type = NavType.StringType
                                     }
                                 )
                             ) {
-                                var cloneId = it.arguments?.getLong("clone_id")
-                                if (cloneId == -1L) cloneId = null
+                                val transactionId = it.arguments?.getLong("transaction_id")
+                                val mode = it.arguments?.getString("mode")
+                                val transactionMode = if(transactionId == -1L || transactionId == null) {
+                                    TransactionMode.New
+                                } else {
+                                    mode?.let {
+                                        when(mode) {
+                                            "clone" -> TransactionMode.Clone(transactionId)
+                                            "edit" -> TransactionMode.Edit(transactionId)
+                                            "new" -> TransactionMode.New
+                                            else -> TransactionMode.New
+                                        }
+                                    } ?: TransactionMode.New
+                                }
                                 AddTransactionScreen(
+                                    transactionMode,
                                     onNavigateBack = {
                                         navController.popBackStack()
-                                    },
-                                    cloneId
+                                    }
                                 )
                             }
                             composable("${Screen.DetailTransaction.route}/{transaction_id}",
@@ -114,10 +130,13 @@ class MainActivity : ComponentActivity() {
                                 var cloneId = it.arguments?.getLong("transaction_id")
                                 if (cloneId == -1L) cloneId = null
                                 DetailTransactionScreen(
+                                    cloneId,
+                                    onEditTransaction = {
+                                        navController.navigate("${Screen.AddTransaction.route}/$cloneId/edit")
+                                    },
                                     onNavigateBack = {
                                         navController.popBackStack()
-                                    },
-                                    cloneId
+                                    }
                                 )
                             }
                             composable(Screen.CategoryList.route) {
