@@ -98,6 +98,32 @@ class TransactionRepository @Inject constructor(private val dataSource: Transact
         }
     }
 
+    suspend fun updateTransaction(
+        id: Long,
+        type: TransactionType,
+        amount: Double,
+        category: Category,
+        paymentType: PaymentType,
+        date: Long,
+        note: String?,
+        payer: String?,
+        place: String?
+    ): Long {
+        return withContext(Dispatchers.IO) {
+            dataSource.updateTransaction(
+                id = id,
+                type = type,
+                amount = amount,
+                category = category,
+                paymentType = paymentType,
+                date = date,
+                note = note,
+                payer = payer,
+                place = place
+            )
+        }
+    }
+
     suspend fun deleteAllTransactions() {
         withContext(Dispatchers.IO) {
             dataSource.deleteAllTransactions()

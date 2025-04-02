@@ -1,6 +1,5 @@
 package com.ajay.seenu.expensetracker.android.presentation.widgets
 
-import android.content.res.Configuration
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -18,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -54,7 +52,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -81,7 +78,6 @@ import com.ajay.seenu.expensetracker.android.domain.util.saveBitmapToFile
 import com.ajay.seenu.expensetracker.android.presentation.common.MultiSelectChipsView
 import com.ajay.seenu.expensetracker.android.presentation.common.PreviewThemeWrapper
 import com.ajay.seenu.expensetracker.entity.PaymentType
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -102,7 +98,7 @@ fun AddTransactionForm(
     onTransactionTypeChanged: (type: Transaction.Type) -> Unit,
     onPaymentTypeClicked: (type: PaymentType?) -> Unit,
     onNavigateBack: () -> Unit,
-    onAdd: (transaction: Transaction, attachments: List<Uri>) -> Unit,
+    onAdd: (transaction: Transaction, attachments: List<Attachment>) -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -111,14 +107,38 @@ fun AddTransactionForm(
     }
     var imageFile by remember { mutableStateOf<Uri?>(null) }
     val attachments = remember {
-        mutableStateListOf<Uri>()
+        mutableStateListOf<Attachment>().apply {
+            existingAttachments?.let {
+                addAll(it)
+            }
+        }
     }
     LaunchedEffect(selectedImageUriList, imageFile) {
         selectedImageUriList.forEach {
-            if(!attachments.contains(it))
-                attachments.add(it)
+            val fileInfo = getFileInfoFromUri(context, it)
+            val attachment = Attachment(
+                id = 11L,
+                transactionId = transaction?.id ?: 11L,
+                name = fileInfo["fileName"] ?: "N/A",
+                fileType = fileInfo["fileType"] ?: "N/A",
+                filePath = fileInfo["filePath"] ?: "N/A",
+                size = fileInfo["fileSize"]?.toLong() ?: 0L
+            )
+            if(!attachments.contains(attachment))
+                attachments.add(attachment)
         }
-        imageFile?.let { attachments.add(it) }
+        imageFile?.let {
+            val fileInfo = getFileInfoFromUri(context, it)
+            val attachment = Attachment(
+                id = 11L,
+                transactionId = transaction?.id ?: 11L,
+                name = fileInfo["fileName"] ?: "N/A",
+                fileType = fileInfo["fileType"] ?: "N/A",
+                filePath = fileInfo["filePath"] ?: "N/A",
+                size = fileInfo["fileSize"]?.toLong() ?: 0L
+            )
+            attachments.add(attachment)
+        }
     }
     val pickImageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents()
@@ -497,7 +517,7 @@ fun AddTransactionForm(
                                 unfocusedBorderColor = LocalContentColor.current.copy(alpha = 0.2F)
                             )
                         )
-                        MultiSelectChipsView(
+                        MultiSelectChipsView(       //TODO: View attachment on click
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 10.dp),
@@ -506,7 +526,7 @@ fun AddTransactionForm(
                                 showAddAttachmentDialog = true
                             },
                             selectionOptionView = {
-                                Text(text = getFileNameFromUri(context, it) ?: "N/A")
+                                Text(text = it.name)
                             },
                             onOptionCanceled = {
                                 attachments.remove(it)
@@ -531,7 +551,7 @@ fun AddTransactionForm(
                                 return@Button
 
                             val newTransaction = Transaction(
-                                212L,
+                                transaction?.id ?: 212L,
                                 transactionType,
                                 amount = amount.toDoubleOrNull() ?: 0.0,
                                 category = selectedCategory,
