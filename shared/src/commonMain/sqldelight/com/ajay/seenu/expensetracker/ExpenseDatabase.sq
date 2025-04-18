@@ -55,6 +55,10 @@ addTransaction:
 INSERT INTO TransactionDetail(type, amount, category, paymentType, note, date, payer, place)
 VALUES (?,?, ?, ?, ?, ?, ?, ?);
 
+updateTransaction:
+INSERT OR REPLACE INTO TransactionDetail(id, type, amount, category, paymentType, note, date, payer, place)
+VALUES ( ?,?, ?, ?, ?, ?, ?, ?, ?);
+
 getLastInsertTransactionRowId:
 SELECT last_insert_rowid();
 

@@ -16,6 +16,15 @@ interface TransactionDataSource {
                        note: String?,
                        payer: String?,
                        place: String?): Long
+    fun updateTransaction(id: Long,
+                          type: TransactionType,
+                          amount: Double,
+                          category: Category,
+                          paymentType: PaymentType,
+                          date: Long,
+                          note: String?,
+                          payer: String?,
+                          place: String?): Long
     fun deleteAllTransactions()
     fun deleteAllTransactionsByType(type: TransactionType)
     fun deleteTransaction(id: Long)
