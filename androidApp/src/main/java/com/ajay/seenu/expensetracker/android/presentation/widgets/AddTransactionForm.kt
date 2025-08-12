@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -77,6 +78,7 @@ import com.ajay.seenu.expensetracker.android.domain.util.getFileNameFromUri
 import com.ajay.seenu.expensetracker.android.domain.util.saveBitmapToFile
 import com.ajay.seenu.expensetracker.android.presentation.common.MultiSelectChipsView
 import com.ajay.seenu.expensetracker.android.presentation.common.PreviewThemeWrapper
+import com.ajay.seenu.expensetracker.android.presentation.common.TransactionFieldView
 import com.ajay.seenu.expensetracker.entity.PaymentType
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -195,13 +197,6 @@ fun AddTransactionForm(
     }
     val focusManager = LocalFocusManager.current
 
-    val categoryInteractionSource = remember {
-        MutableInteractionSource()
-    }
-    val paymentInteractionSource = remember {
-        MutableInteractionSource()
-    }
-
     var showCategoryError by remember {
         mutableStateOf(false)
     }
@@ -212,17 +207,6 @@ fun AddTransactionForm(
 
     var showAmountError by remember {
         mutableStateOf(false)
-    }
-
-
-    if (categoryInteractionSource.collectIsPressedAsState().value) {
-        showCategoryError = false
-        onCategoryClicked.invoke(selectedCategory)
-    }
-
-    if (paymentInteractionSource.collectIsPressedAsState().value) {
-        showPaymentTypeError = false
-        onPaymentTypeClicked.invoke(selectedPaymentType)
     }
 
     if (showDialog) {
@@ -384,6 +368,7 @@ fun AddTransactionForm(
                                 )
                             }
                         },
+                        singleLine = true,
                         isError = showAmountError,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = Color.Transparent,
@@ -412,21 +397,17 @@ fun AddTransactionForm(
                             .weight(1f)
                             .verticalScroll(rememberScrollState())
                     ) {
-                        Spacer(modifier = Modifier.height(20.dp))
-                        OutlinedTextField(
-                            modifier = Modifier.fillMaxWidth(),
-                            value = selectedPaymentType?.label ?: "",
-                            label = {
-                                Text(
-                                    text = stringResource(id = R.string.paymentType),
-                                    color = LocalContentColor.current.copy(alpha = 0.5F)
-                                )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        TransactionFieldView(
+                            modifier = Modifier.fillMaxWidth()
+                            .padding(vertical = 5.dp),
+                            text = selectedPaymentType?.label ?: stringResource(id = R.string.paymentType),
+                            color = LocalContentColor.current.copy(alpha = selectedPaymentType?.label?.let { 1F } ?: 0.5F),
+                            onClick = {
+                                onPaymentTypeClicked.invoke(selectedPaymentType)
                             },
-                            readOnly = true,
-                            interactionSource = paymentInteractionSource,
-                            textStyle = LocalTextStyle.current,
-                            onValueChange = {},
-                            supportingText = {
+                            isError = showPaymentTypeError,
+                            errorView = {
                                 if (showPaymentTypeError) {
                                     Text(
                                         modifier = Modifier
@@ -436,27 +417,18 @@ fun AddTransactionForm(
                                         color = MaterialTheme.colorScheme.error
                                     )
                                 }
-                            },
-                            isError = showPaymentTypeError,
-                            shape = RoundedCornerShape(10.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                unfocusedBorderColor = LocalContentColor.current.copy(alpha = 0.2F)
-                            )
+                            }
                         )
-                        OutlinedTextField(
-                            modifier = Modifier.fillMaxWidth(),
-                            interactionSource = categoryInteractionSource,
-                            value = selectedCategory?.label ?: "",
-                            readOnly = true,
-                            label = {
-                                Text(
-                                    text = stringResource(id = R.string.category),
-                                    color = LocalContentColor.current.copy(alpha = 0.5F)
-                                )
+                        TransactionFieldView(
+                            modifier = Modifier.fillMaxWidth()
+                                .padding(vertical = 5.dp),
+                            text = selectedCategory?.label ?: stringResource(id = R.string.category),
+                            color = LocalContentColor.current.copy(alpha = selectedCategory?.label?.let { 1F } ?: 0.5F),
+                            onClick = {
+                                onCategoryClicked.invoke(selectedCategory)
                             },
-                            textStyle = LocalTextStyle.current,
-                            onValueChange = {},
-                            supportingText = {
+                            isError = showCategoryError,
+                            errorView = {
                                 if (showCategoryError) {
                                     Text(
                                         modifier = Modifier
@@ -466,13 +438,7 @@ fun AddTransactionForm(
                                         color = MaterialTheme.colorScheme.error
                                     )
                                 }
-                            },
-                            isError = showCategoryError,
-                            shape = RoundedCornerShape(10.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                unfocusedBorderColor = LocalContentColor.current.copy(alpha = 0.2F)
-                            )
-
+                            }
                         )
                         OutlinedTextField(
                             modifier = Modifier
