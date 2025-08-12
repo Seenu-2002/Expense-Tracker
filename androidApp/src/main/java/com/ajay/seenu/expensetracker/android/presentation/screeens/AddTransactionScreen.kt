@@ -46,12 +46,14 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.data.TransactionMode
 import com.ajay.seenu.expensetracker.android.domain.CategoryRelationMapper
 import com.ajay.seenu.expensetracker.android.domain.data.Transaction
@@ -153,19 +155,6 @@ fun AddTransactionScreen(
     val categoriesBottomSheetState = rememberModalBottomSheetState(true)
     val paymentTypeBottomSheetState = rememberModalBottomSheetState(true)
     val focusManager = LocalFocusManager.current
-    val scope = rememberCoroutineScope()
-
-    LaunchedEffect(categoriesBottomSheetState) {
-        snapshotFlow { categoriesBottomSheetState.isVisible }.collect { it ->
-            showCategoriesBottomSheet = it
-        }
-    }
-
-    LaunchedEffect(paymentTypeBottomSheetState) {
-        snapshotFlow { paymentTypeBottomSheetState.isVisible }.collect { it ->
-            showPaymentTypeBottomSheet = it
-        }
-    }
 
     if (showCategoriesBottomSheet) {
         CategoryBottomSheet(state = categoriesBottomSheetState, onDismiss = {
@@ -173,14 +162,13 @@ fun AddTransactionScreen(
             showCategoriesBottomSheet = false
         }, categories = categories) { category ->
             selectedCategory = category
-            scope.launch {
-                categoriesBottomSheetState.hide()
-            }
+            showCategoriesBottomSheet = false
         }
     }
 
     if (showPaymentTypeBottomSheet) {
         PaymentTypeBottomSheet(
+            selectedPaymentType = selectedPaymentType,
             state = paymentTypeBottomSheetState,
             onDismiss = {
                 focusManager.clearFocus(true)
@@ -189,9 +177,7 @@ fun AddTransactionScreen(
             paymentTypes = PaymentType.entries
         ) { type ->
             selectedPaymentType = type
-            scope.launch {
-                paymentTypeBottomSheetState.hide()
-            }
+            showPaymentTypeBottomSheet = false
         }
     }
 }
@@ -353,6 +339,7 @@ fun ExpandableRow(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaymentTypeBottomSheet(
+    selectedPaymentType: PaymentType,
     state: SheetState,
     onDismiss: () -> Unit,
     paymentTypes: List<PaymentType>,
@@ -365,16 +352,26 @@ fun PaymentTypeBottomSheet(
         LazyColumn {
             items(paymentTypes.size) {
                 val type = paymentTypes[it]
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            onPaymentTypeSelected(type)
-                        }
-                        .padding(vertical = 6.dp)
-                        .padding(start = 12.dp),
-                    text = type.label,
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                    .clickable {
+                        onPaymentTypeSelected(type)
+                    }
+                    .padding(vertical = 6.dp)
+                    .padding(horizontal = 15.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = type.label)
+                    if(type.label == selectedPaymentType.label) {
+                        Icon(
+                            painter = painterResource(R.drawable.icon_done),
+                            contentDescription = "Selected",
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+                        )
+                    }
+                }
             }
         }
     }
