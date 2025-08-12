@@ -5,10 +5,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -72,9 +69,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.ajay.seenu.expensetracker.Attachment
 import com.ajay.seenu.expensetracker.android.R
+import com.ajay.seenu.expensetracker.android.data.TransactionMode
 import com.ajay.seenu.expensetracker.android.domain.data.Transaction
 import com.ajay.seenu.expensetracker.android.domain.util.getFileInfoFromUri
-import com.ajay.seenu.expensetracker.android.domain.util.getFileNameFromUri
 import com.ajay.seenu.expensetracker.android.domain.util.saveBitmapToFile
 import com.ajay.seenu.expensetracker.android.presentation.common.MultiSelectChipsView
 import com.ajay.seenu.expensetracker.android.presentation.common.PreviewThemeWrapper
@@ -86,8 +83,9 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddTransactionForm(
+fun TransactionForm(
     modifier: Modifier = Modifier,
+    transactionMode: TransactionMode,
     transaction: Transaction? = null,
     existingAttachments: List<Attachment>? = null,  //TODO: must be shown in edit mode
     formatter: SimpleDateFormat = SimpleDateFormat(
@@ -534,7 +532,8 @@ fun AddTransactionForm(
                             containerColor = MaterialTheme.colorScheme.primary
                         )
                     ) {
-                        Text(text = "Add")
+                        val text = if(transactionMode is TransactionMode.Edit) "Save" else "Add"
+                        Text(text = text)
                     }
                 }
             }
@@ -599,7 +598,8 @@ fun AddTransactionForm(
 @Composable
 private fun AddTransactionFormPreview() {
     PreviewThemeWrapper {
-        AddTransactionForm(
+        TransactionForm(
+            transactionMode = TransactionMode.New,
             onCategoryClicked = {},
             onTransactionTypeChanged = {},
             onPaymentTypeClicked = {},
