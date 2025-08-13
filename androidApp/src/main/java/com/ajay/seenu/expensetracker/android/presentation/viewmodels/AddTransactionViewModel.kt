@@ -58,7 +58,8 @@ class AddTransactionViewModel @Inject constructor(
                         name = attachment.name,
                         fileType = attachment.fileType,
                         filePath = attachment.filePath,
-                        size = attachment.size
+                        size = attachment.size,
+                        imageUri = attachment.imageUri
                     )
                 }
             } catch (exp: Exception) {
@@ -79,7 +80,8 @@ class AddTransactionViewModel @Inject constructor(
                         name = attachment.name,
                         fileType = attachment.fileType,
                         filePath = attachment.filePath,
-                        size = attachment.size
+                        size = attachment.size,
+                        imageUri = attachment.imageUri
                     )
                 }
             } catch (exp: Exception) {

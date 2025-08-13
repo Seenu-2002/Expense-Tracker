@@ -1,6 +1,8 @@
 package com.ajay.seenu.expensetracker.android.presentation.widgets
 
+import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -67,10 +69,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.core.content.FileProvider
 import com.ajay.seenu.expensetracker.Attachment
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.data.TransactionMode
 import com.ajay.seenu.expensetracker.android.domain.data.Transaction
+import com.ajay.seenu.expensetracker.android.domain.util.getFileInfoFromCamImageUri
 import com.ajay.seenu.expensetracker.android.domain.util.getFileInfoFromUri
 import com.ajay.seenu.expensetracker.android.domain.util.saveBitmapToFile
 import com.ajay.seenu.expensetracker.android.presentation.common.MultiSelectChipsView
@@ -80,6 +84,9 @@ import com.ajay.seenu.expensetracker.entity.PaymentType
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.core.net.toUri
+import com.ajay.seenu.expensetracker.android.domain.util.generateImageFileName
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -106,6 +113,19 @@ fun TransactionForm(
         mutableStateOf<List<Uri>>(emptyList())
     }
     var imageFile by remember { mutableStateOf<Uri?>(null) }
+    val tempImageUri: Uri by remember {
+        val file = File(context.cacheDir, "IMG_${generateImageFileName()}.jpg").apply {
+            createNewFile()
+        }
+        mutableStateOf(
+            FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                file
+            )
+        )
+    }
+
     val attachments = remember {
         mutableStateListOf<Attachment>().apply {
             existingAttachments?.let {
@@ -122,20 +142,22 @@ fun TransactionForm(
                 name = fileInfo["fileName"] ?: "N/A",
                 fileType = fileInfo["fileType"] ?: "N/A",
                 filePath = fileInfo["filePath"] ?: "N/A",
-                size = fileInfo["fileSize"]?.toLong() ?: 0L
+                size = fileInfo["fileSize"]?.toLong() ?: 0L,
+                imageUri = it.toString()
             )
             if(!attachments.contains(attachment))
                 attachments.add(attachment)
         }
         imageFile?.let {
-            val fileInfo = getFileInfoFromUri(context, it)
+            val fileInfo = getFileInfoFromCamImageUri(context, it)
             val attachment = Attachment(
                 id = 11L,
                 transactionId = transaction?.id ?: 11L,
                 name = fileInfo["fileName"] ?: "N/A",
                 fileType = fileInfo["fileType"] ?: "N/A",
                 filePath = fileInfo["filePath"] ?: "N/A",
-                size = fileInfo["fileSize"]?.toLong() ?: 0L
+                size = fileInfo["fileSize"]?.toLong() ?: 0L,
+                imageUri = it.toString()
             )
             attachments.add(attachment)
         }
@@ -156,16 +178,30 @@ fun TransactionForm(
         }
     }
     val takePictureLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicturePreview()
-    ) { bitmap ->
-        bitmap?.let {
-            if(attachments.size >= 5)
-                Toast.makeText(context, "Cannot add more than 5 attachments", Toast.LENGTH_SHORT).show()
-            else
-                imageFile = saveBitmapToFile(context, bitmap)
-            //viewModel.addAttachmentFromFile(transactionId, imageFile)
+        contract = ActivityResultContracts.TakePicture(),
+        onResult = { isSuccess ->
+            if (isSuccess) {
+                if(attachments.size >= 5)
+                    Toast.makeText(context, "Cannot add more than 5 attachments", Toast.LENGTH_SHORT).show()
+                else
+                    imageFile = tempImageUri
+                Log.d("CameraCapture", "Image captured: $imageFile")
+            } else {
+                Log.d("CameraCapture", "Image capture failed or cancelled")
+            }
         }
-    }
+    )
+//    val takePictureLauncher = rememberLauncherForActivityResult(
+//        contract = ActivityResultContracts.TakePicturePreview()
+//    ) { bitmap ->
+//        bitmap?.let {
+//            if(attachments.size >= 5)
+//                Toast.makeText(context, "Cannot add more than 5 attachments", Toast.LENGTH_SHORT).show()
+//            else
+//                imageFile = saveBitmapToFile(context, bitmap)
+//            //viewModel.addAttachmentFromFile(transactionId, imageFile)
+//        }
+//    }
     var showAddAttachmentDialog by rememberSaveable {
         mutableStateOf(false)
     }
@@ -489,6 +525,13 @@ fun TransactionForm(
                             onClick = {
                                 showAddAttachmentDialog = true
                             },
+                            onChipClick = {
+                                val intent = Intent(Intent.ACTION_VIEW).apply {
+                                    setDataAndType(it.imageUri.toUri(), "image/*")
+                                    flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                }
+                                context.startActivity(intent)
+                            },
                             selectionOptionView = {
                                 Text(text = it.name)
                             },
@@ -576,7 +619,7 @@ fun TransactionForm(
                     .fillMaxWidth()
                     .padding(horizontal = 10.dp, vertical = 5.dp)
                     .clickable {
-                        takePictureLauncher.launch(null)
+                        takePictureLauncher.launch(tempImageUri)
                         showAddAttachmentDialog = false
                     }) {
                     Icon(

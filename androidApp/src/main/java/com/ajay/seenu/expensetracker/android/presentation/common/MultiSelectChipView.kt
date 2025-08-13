@@ -42,6 +42,7 @@ internal fun <T> MultiSelectChipsView(modifier: Modifier = Modifier,
                                       selectionOptionView: @Composable (T) -> Unit,
                                       onOptionCanceled: (T) -> Unit,
                                       onClick: () -> Unit,
+                                      onChipClick: (T) -> Unit,
                                       expandIcon: Int = R.drawable.outline_arrow_drop_down_24,
                                       chipTrailingIcon: Int = R.drawable.baseline_close_24,
                                       borderColor: Color = LocalContentColor.current,
@@ -59,11 +60,14 @@ internal fun <T> MultiSelectChipsView(modifier: Modifier = Modifier,
             onClick.invoke()
         }
         .border(1.dp, borderColor, RoundedCornerShape(10.dp))) {
-        Row(modifier = Modifier.fillMaxWidth()
+        Row(modifier = Modifier
+            .fillMaxWidth()
             .padding(top = 10.dp)) {
             Text(
                 text = "Attachments (${selectedOptions.size})",
-                modifier = Modifier.weight(1f).padding(start = 10.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 10.dp),
                 color = LocalContentColor.current.copy(alpha = 0.5F)
             )
             Icon(
@@ -90,7 +94,9 @@ internal fun <T> MultiSelectChipsView(modifier: Modifier = Modifier,
                         modifier = Modifier,
                         selected = false,
                         enabled = true,
-                        onClick = {},
+                        onClick = {
+                            onChipClick.invoke(it)
+                        },
                         label = {
                             selectionOptionView.invoke(it)
                         },
@@ -144,6 +150,9 @@ private fun MultiSelectChipPreview() {
 
                 },
                 onClick = {
+
+                },
+                onChipClick = {
 
                 }
             )
