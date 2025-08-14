@@ -76,15 +76,13 @@ import com.ajay.seenu.expensetracker.android.data.TransactionMode
 import com.ajay.seenu.expensetracker.android.domain.data.Transaction
 import com.ajay.seenu.expensetracker.android.domain.util.getFileInfoFromCamImageUri
 import com.ajay.seenu.expensetracker.android.domain.util.getFileInfoFromUri
-import com.ajay.seenu.expensetracker.android.domain.util.saveBitmapToFile
-import com.ajay.seenu.expensetracker.android.presentation.common.MultiSelectChipsView
+import com.ajay.seenu.expensetracker.android.presentation.screeens.AttachmentsView
 import com.ajay.seenu.expensetracker.android.presentation.common.PreviewThemeWrapper
 import com.ajay.seenu.expensetracker.android.presentation.common.TransactionFieldView
 import com.ajay.seenu.expensetracker.entity.PaymentType
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import androidx.core.net.toUri
 import com.ajay.seenu.expensetracker.android.domain.util.generateImageFileName
 import java.io.File
 
@@ -172,6 +170,12 @@ fun TransactionForm(
             if (uriList.size > availableSpace) {
                 Toast.makeText(context, "Cannot add more than 5 attachments", Toast.LENGTH_SHORT).show()
             } else {
+                uriList.forEach {
+                    context.contentResolver.takePersistableUriPermission(
+                        it,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    )
+                }
                 selectedImageUriList = uriList
                 //viewModel.addAttachmentFromUri(transactionId, uri, context)
             }
@@ -509,7 +513,8 @@ fun TransactionForm(
                                     color = LocalContentColor.current.copy(alpha = 0.5F)
                                 )
                             },
-                            textStyle = LocalTextStyle.current, onValueChange = {
+                            textStyle = LocalTextStyle.current,
+                            onValueChange = {
                                 description = it
                             },
                             shape = RoundedCornerShape(10.dp),
@@ -517,28 +522,17 @@ fun TransactionForm(
                                 unfocusedBorderColor = LocalContentColor.current.copy(alpha = 0.2F)
                             )
                         )
-                        MultiSelectChipsView(       //TODO: View attachment on click
+                        AttachmentsView(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 10.dp),
-                            selectedOptions = attachments,
+                            attachments = attachments,
                             onClick = {
                                 showAddAttachmentDialog = true
                             },
-                            onChipClick = {
-                                val intent = Intent(Intent.ACTION_VIEW).apply {
-                                    setDataAndType(it.imageUri.toUri(), "image/*")
-                                    flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                                }
-                                context.startActivity(intent)
-                            },
-                            selectionOptionView = {
-                                Text(text = it.name)
-                            },
-                            onOptionCanceled = {
+                            onAttachmentCanceled = {
                                 attachments.remove(it)
                             },
-                            borderColor = LocalContentColor.current.copy(alpha = 0.2F)
                         )
                     }
 
@@ -564,7 +558,7 @@ fun TransactionForm(
                                 category = selectedCategory,
                                 paymentType = selectedPaymentType,
                                 date = date,
-                                note = description,
+                                note = description.ifBlank { null },
                             )
 
                             onAdd(newTransaction, attachments)
