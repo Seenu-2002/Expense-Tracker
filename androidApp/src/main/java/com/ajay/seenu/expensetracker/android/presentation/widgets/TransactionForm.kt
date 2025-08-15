@@ -6,6 +6,8 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -46,10 +48,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -105,6 +107,7 @@ fun TransactionForm(
     onNavigateBack: () -> Unit,
     onAdd: (transaction: Transaction, attachments: List<Attachment>) -> Unit,
 ) {
+    val animationDuration = 300
     val context = LocalContext.current
 
     var selectedImageUriList by remember {
@@ -282,6 +285,17 @@ fun TransactionForm(
         }
     }
 
+    val background = remember { Animatable(Color(0xFFFD3C4A)) }
+    LaunchedEffect(transactionType) {
+        val color = if(transactionType == Transaction.Type.EXPENSE){
+            Color(0xFFFD3C4A)
+        } else {
+            Color(0xFF00A86B)
+        }
+        background.animateTo(color, animationSpec = tween(animationDuration))
+    }
+
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -292,9 +306,7 @@ fun TransactionForm(
                 .fillMaxWidth()
                 .fillMaxHeight(0.5F)
                 .background(
-                    color = if(transactionType == Transaction.Type.EXPENSE)
-                        Color(0xFFFD3C4A)
-                    else Color(0xFF00A86B),
+                    color = background.value,
                     shape = RoundedCornerShape(
                         topStart = 0.dp,
                         topEnd = 0.dp,
@@ -369,6 +381,7 @@ fun TransactionForm(
                             },
                             containerColor = Color.Transparent,
                             sliderColor = Color.LightGray,
+                            animationDuration = animationDuration,
                         )
                     }
                     Spacer(modifier = Modifier.weight(1f))

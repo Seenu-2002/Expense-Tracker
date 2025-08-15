@@ -18,13 +18,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,7 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalDensity
@@ -47,8 +47,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import androidx.wear.compose.material.Icon
-import androidx.wear.compose.material.Text
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.domain.data.Transaction
 import com.ajay.seenu.expensetracker.android.presentation.common.PreviewThemeWrapper
@@ -417,7 +415,8 @@ class TransactionPreviewDataProvider : PreviewParameterProvider<Transaction> {
                     12L,
                     Transaction.Type.EXPENSE,
                     "Food",
-                    null
+                    Color.Green,
+                    R.drawable.fastfood
                 ),
                 PaymentType.UPI,
                 Date()
@@ -430,7 +429,8 @@ class TransactionPreviewDataProvider : PreviewParameterProvider<Transaction> {
                     12L,
                     Transaction.Type.EXPENSE,
                     "Food",
-                    null
+                    Color.Green,
+                    R.drawable.fastfood
                 ),
 
                 PaymentType.UPI,

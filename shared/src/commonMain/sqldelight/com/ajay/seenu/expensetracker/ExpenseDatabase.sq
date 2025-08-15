@@ -18,8 +18,9 @@ CREATE TABLE Category (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     label TEXT NOT NULL,
     type TEXT AS TransactionType NOT NULL,
-    parent INTEGER,
-    FOREIGN KEY(parent) REFERENCES Category(id)
+    iconRes INTEGER NOT NULL,
+    color INTEGER NOT NULL ,
+    UNIQUE (label, type) ON CONFLICT REPLACE
 );
 
 CREATE TABLE Attachment (
@@ -89,16 +90,19 @@ deleteCategory:
 DELETE FROM Category WHERE id = ?;
 
 addCategory:
-INSERT INTO Category(label, type, parent)
-VALUES (?,?,?);
+INSERT INTO Category(label, type, iconRes, color)
+VALUES (?,?, ?, ?);
 
 getCategory:
 SELECT * FROM Category WHERE id = ?;
 
 updateCategory:
 UPDATE Category
-SET label = ?, type = ?
+SET label = ?, iconRes = ?, color = ?
 WHERE id = ?;
+
+searchCategory:
+SELECT * FROM Category WHERE label = :label AND type = :type;
 
 getTotalTransactionPerDayByTypeBetween:
 SELECT date, category, SUM(amount) AS totalAmount FROM TransactionDetail WHERE type = :type AND date >= :startUTCValue AND date <= :endUTCValue GROUP BY date, category ORDER BY date DESC;

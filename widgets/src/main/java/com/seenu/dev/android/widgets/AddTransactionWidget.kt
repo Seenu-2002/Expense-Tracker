@@ -1,8 +1,7 @@
-package com.ajay.seenu.expensetracker.android.presentation.widgets
+package com.seenu.dev.android.widgets
 
 import android.content.Context
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
@@ -28,7 +27,7 @@ class AddTransactionWidgetReceiver: GlanceAppWidgetReceiver() {
 }
 
 @Composable
-fun AddTransactionWidgetView(modifier: Modifier = Modifier) {
+fun AddTransactionWidgetView(modifier: GlanceModifier = GlanceModifier) {
     Column(modifier = GlanceModifier.fillMaxSize()
         .background(Color.Gray)) {
         Text(text = "Add Transaction")

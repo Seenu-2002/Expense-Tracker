@@ -156,7 +156,7 @@ fun OverviewScreen(
                 .padding(paddingValues)
         ) {
             when(val state = recentTransactionsUiState) {
-                UiState.Loading -> {
+                UiState.Loading, UiState.Empty -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
@@ -191,7 +191,7 @@ fun OverviewScreen(
                     }
 
                     when(val overallDataState = overallDataUiState) {
-                        UiState.Loading -> {
+                        UiState.Loading, UiState. Empty -> {
                             Box(modifier = Modifier.fillMaxWidth()
                                 .height(120.dp),
                                 contentAlignment = Alignment.Center) {

@@ -1,6 +1,5 @@
 package com.ajay.seenu.expensetracker.android.presentation.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.ajay.seenu.expensetracker.UserConfigurationsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,10 +13,6 @@ class SplashViewModel @Inject constructor(userConfigurationsManager: UserConfigu
 
     private val _isUserLoggedIn: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isUserLoggedIn = _isUserLoggedIn.asStateFlow()
-
-    init {
-        Log.e("TAG", "INSTANCE")
-    }
 
     override fun init() {
         super.init()

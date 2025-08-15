@@ -23,3 +23,4 @@ dependencyResolutionManagement {
 rootProject.name = "Expense_Tracker"
 include(":androidApp")
 include(":shared")
+include(":widgets")

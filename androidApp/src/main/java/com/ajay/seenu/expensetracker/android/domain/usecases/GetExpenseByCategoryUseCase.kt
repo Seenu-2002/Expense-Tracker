@@ -18,14 +18,7 @@ class GetExpenseByCategoryUseCase @Inject constructor(
         }
         val range = filter.getDateRange(startDayOfTheWeek)
         return repository.getExpensePerDayByCategory(range).map {
-            val category = categories.find { category -> category.id == it.category }!!.let { category ->
-                Transaction.Category(
-                    category.id,
-                    category.type,
-                    category.label,
-                    category.parent
-                )
-            }
+            val category = categories.find { category -> category.id == it.category }!!
             TotalExpensePerCategory(category, it.totalAmount ?: 0.0)
         }
     }

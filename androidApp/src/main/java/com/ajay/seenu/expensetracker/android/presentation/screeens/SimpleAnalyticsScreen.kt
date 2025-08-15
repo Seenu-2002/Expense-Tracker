@@ -62,9 +62,13 @@ import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.PieCha
 import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.PieChartStyle
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.SimpleAnalyticsViewModel
 import com.ajay.seenu.expensetracker.android.presentation.widgets.SlidingSwitch
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlin.random.Random
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3WindowSizeClassApi::class)
+@OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalMaterial3WindowSizeClassApi::class,
+    ExperimentalSerializationApi::class
+)
 @Composable
 fun SimpleAnalyticsScreen(
     navController: NavController,
@@ -78,7 +82,7 @@ fun SimpleAnalyticsScreen(
         viewmodel.changeType(Transaction.Type.EXPENSE)
     }
 
-    var selectedCategory: Transaction.Category? by rememberSaveable(state /*saver*/) {
+    var selectedCategory: Transaction.Category? by rememberSaveable(state /*saver*/) { // TODO: Custom Saver Implementation
         mutableStateOf(null)
     }
 
@@ -99,7 +103,7 @@ fun SimpleAnalyticsScreen(
     ) { paddingValues ->
 
         when (val uiState = state) {
-            UiState.Loading -> {
+            UiState.Loading, UiState.Empty -> {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -365,7 +369,13 @@ private fun AnalyticsLegendRowDataPreview() {
         (10..100000).random().toDouble(),
         ChartDefaults.getDynamicColor((0..100).random()),
         (0..100).random().toFloat(),
-        Transaction.Category(212L, Transaction.Type.entries.random(), "Random", null)
+        Transaction.Category(
+            212L,
+            Transaction.Type.entries.random(),
+            "Random",
+            Color.Red,
+            R.drawable.monetization_on
+        )
     )
     AnalyticsLegendRow(data = data, isSelected = Random.nextBoolean())
 }
