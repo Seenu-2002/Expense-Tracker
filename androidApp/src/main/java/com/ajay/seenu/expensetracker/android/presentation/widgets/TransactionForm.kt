@@ -1,6 +1,8 @@
 package com.ajay.seenu.expensetracker.android.presentation.widgets
 
+import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -8,8 +10,6 @@ import androidx.compose.animation.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -71,22 +71,30 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.core.content.FileProvider
+import com.ajay.seenu.expensetracker.Attachment
 import com.ajay.seenu.expensetracker.android.R
+import com.ajay.seenu.expensetracker.android.data.TransactionMode
 import com.ajay.seenu.expensetracker.android.domain.data.Transaction
-import com.ajay.seenu.expensetracker.android.domain.util.getFileNameFromUri
-import com.ajay.seenu.expensetracker.android.domain.util.saveBitmapToFile
-import com.ajay.seenu.expensetracker.android.presentation.common.MultiSelectChipsView
+import com.ajay.seenu.expensetracker.android.domain.util.getFileInfoFromCamImageUri
+import com.ajay.seenu.expensetracker.android.domain.util.getFileInfoFromUri
+import com.ajay.seenu.expensetracker.android.presentation.screeens.AttachmentsView
 import com.ajay.seenu.expensetracker.android.presentation.common.PreviewThemeWrapper
+import com.ajay.seenu.expensetracker.android.presentation.common.TransactionFieldView
 import com.ajay.seenu.expensetracker.entity.PaymentType
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.ajay.seenu.expensetracker.android.domain.util.generateImageFileName
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddTransactionForm(
+fun TransactionForm(
     modifier: Modifier = Modifier,
+    transactionMode: TransactionMode,
     transaction: Transaction? = null,
+    existingAttachments: List<Attachment>? = null,  //TODO: must be shown in edit mode
     formatter: SimpleDateFormat = SimpleDateFormat(
         "dd MMM, yyyy",
         Locale.ENGLISH
@@ -97,7 +105,7 @@ fun AddTransactionForm(
     onTransactionTypeChanged: (type: Transaction.Type) -> Unit,
     onPaymentTypeClicked: (type: PaymentType?) -> Unit,
     onNavigateBack: () -> Unit,
-    onAdd: (transaction: Transaction, attachments: List<Uri>) -> Unit,
+    onAdd: (transaction: Transaction, attachments: List<Attachment>) -> Unit,
 ) {
     val animationDuration = 300
     val context = LocalContext.current
@@ -106,15 +114,54 @@ fun AddTransactionForm(
         mutableStateOf<List<Uri>>(emptyList())
     }
     var imageFile by remember { mutableStateOf<Uri?>(null) }
+    val tempImageUri: Uri by remember {
+        val file = File(context.cacheDir, "IMG_${generateImageFileName()}.jpg").apply {
+            createNewFile()
+        }
+        mutableStateOf(
+            FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                file
+            )
+        )
+    }
+
     val attachments = remember {
-        mutableStateListOf<Uri>()
+        mutableStateListOf<Attachment>().apply {
+            existingAttachments?.let {
+                addAll(it)
+            }
+        }
     }
     LaunchedEffect(selectedImageUriList, imageFile) {
         selectedImageUriList.forEach {
-            if(!attachments.contains(it))
-                attachments.add(it)
+            val fileInfo = getFileInfoFromUri(context, it)
+            val attachment = Attachment(
+                id = 11L,
+                transactionId = transaction?.id ?: 11L,
+                name = fileInfo["fileName"] ?: "N/A",
+                fileType = fileInfo["fileType"] ?: "N/A",
+                filePath = fileInfo["filePath"] ?: "N/A",
+                size = fileInfo["fileSize"]?.toLong() ?: 0L,
+                imageUri = it.toString()
+            )
+            if(!attachments.contains(attachment))
+                attachments.add(attachment)
         }
-        imageFile?.let { attachments.add(it) }
+        imageFile?.let {
+            val fileInfo = getFileInfoFromCamImageUri(context, it)
+            val attachment = Attachment(
+                id = 11L,
+                transactionId = transaction?.id ?: 11L,
+                name = fileInfo["fileName"] ?: "N/A",
+                fileType = fileInfo["fileType"] ?: "N/A",
+                filePath = fileInfo["filePath"] ?: "N/A",
+                size = fileInfo["fileSize"]?.toLong() ?: 0L,
+                imageUri = it.toString()
+            )
+            attachments.add(attachment)
+        }
     }
     val pickImageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents()
@@ -126,22 +173,42 @@ fun AddTransactionForm(
             if (uriList.size > availableSpace) {
                 Toast.makeText(context, "Cannot add more than 5 attachments", Toast.LENGTH_SHORT).show()
             } else {
+                uriList.forEach {
+                    context.contentResolver.takePersistableUriPermission(
+                        it,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    )
+                }
                 selectedImageUriList = uriList
                 //viewModel.addAttachmentFromUri(transactionId, uri, context)
             }
         }
     }
     val takePictureLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicturePreview()
-    ) { bitmap ->
-        bitmap?.let {
-            if(attachments.size >= 5)
-                Toast.makeText(context, "Cannot add more than 5 attachments", Toast.LENGTH_SHORT).show()
-            else
-                imageFile = saveBitmapToFile(context, bitmap)
-            //viewModel.addAttachmentFromFile(transactionId, imageFile)
+        contract = ActivityResultContracts.TakePicture(),
+        onResult = { isSuccess ->
+            if (isSuccess) {
+                if(attachments.size >= 5)
+                    Toast.makeText(context, "Cannot add more than 5 attachments", Toast.LENGTH_SHORT).show()
+                else
+                    imageFile = tempImageUri
+                Log.d("CameraCapture", "Image captured: $imageFile")
+            } else {
+                Log.d("CameraCapture", "Image capture failed or cancelled")
+            }
         }
-    }
+    )
+//    val takePictureLauncher = rememberLauncherForActivityResult(
+//        contract = ActivityResultContracts.TakePicturePreview()
+//    ) { bitmap ->
+//        bitmap?.let {
+//            if(attachments.size >= 5)
+//                Toast.makeText(context, "Cannot add more than 5 attachments", Toast.LENGTH_SHORT).show()
+//            else
+//                imageFile = saveBitmapToFile(context, bitmap)
+//            //viewModel.addAttachmentFromFile(transactionId, imageFile)
+//        }
+//    }
     var showAddAttachmentDialog by rememberSaveable {
         mutableStateOf(false)
     }
@@ -171,13 +238,6 @@ fun AddTransactionForm(
     }
     val focusManager = LocalFocusManager.current
 
-    val categoryInteractionSource = remember {
-        MutableInteractionSource()
-    }
-    val paymentInteractionSource = remember {
-        MutableInteractionSource()
-    }
-
     var showCategoryError by remember {
         mutableStateOf(false)
     }
@@ -188,17 +248,6 @@ fun AddTransactionForm(
 
     var showAmountError by remember {
         mutableStateOf(false)
-    }
-
-
-    if (categoryInteractionSource.collectIsPressedAsState().value) {
-        showCategoryError = false
-        onCategoryClicked.invoke(selectedCategory)
-    }
-
-    if (paymentInteractionSource.collectIsPressedAsState().value) {
-        showPaymentTypeError = false
-        onPaymentTypeClicked.invoke(selectedPaymentType)
     }
 
     if (showDialog) {
@@ -235,7 +284,7 @@ fun AddTransactionForm(
             DatePicker(state = datePickerState)
         }
     }
-    
+
     val background = remember { Animatable(Color(0xFFFD3C4A)) }
     LaunchedEffect(transactionType) {
         val color = if(transactionType == Transaction.Type.EXPENSE){
@@ -246,7 +295,7 @@ fun AddTransactionForm(
         background.animateTo(color, animationSpec = tween(animationDuration))
     }
 
-    
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -370,6 +419,7 @@ fun AddTransactionForm(
                                 )
                             }
                         },
+                        singleLine = true,
                         isError = showAmountError,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = Color.Transparent,
@@ -398,21 +448,17 @@ fun AddTransactionForm(
                             .weight(1f)
                             .verticalScroll(rememberScrollState())
                     ) {
-                        Spacer(modifier = Modifier.height(20.dp))
-                        OutlinedTextField(
-                            modifier = Modifier.fillMaxWidth(),
-                            value = selectedPaymentType?.label ?: "",
-                            label = {
-                                Text(
-                                    text = stringResource(id = R.string.paymentType),
-                                    color = LocalContentColor.current.copy(alpha = 0.5F)
-                                )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        TransactionFieldView(
+                            modifier = Modifier.fillMaxWidth()
+                            .padding(vertical = 5.dp),
+                            text = selectedPaymentType?.label ?: stringResource(id = R.string.paymentType),
+                            color = LocalContentColor.current.copy(alpha = selectedPaymentType?.label?.let { 1F } ?: 0.5F),
+                            onClick = {
+                                onPaymentTypeClicked.invoke(selectedPaymentType)
                             },
-                            readOnly = true,
-                            interactionSource = paymentInteractionSource,
-                            textStyle = LocalTextStyle.current,
-                            onValueChange = {},
-                            supportingText = {
+                            isError = showPaymentTypeError,
+                            errorView = {
                                 if (showPaymentTypeError) {
                                     Text(
                                         modifier = Modifier
@@ -422,27 +468,18 @@ fun AddTransactionForm(
                                         color = MaterialTheme.colorScheme.error
                                     )
                                 }
-                            },
-                            isError = showPaymentTypeError,
-                            shape = RoundedCornerShape(10.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                unfocusedBorderColor = LocalContentColor.current.copy(alpha = 0.2F)
-                            )
+                            }
                         )
-                        OutlinedTextField(
-                            modifier = Modifier.fillMaxWidth(),
-                            interactionSource = categoryInteractionSource,
-                            value = selectedCategory?.label ?: "",
-                            readOnly = true,
-                            label = {
-                                Text(
-                                    text = stringResource(id = R.string.category),
-                                    color = LocalContentColor.current.copy(alpha = 0.5F)
-                                )
+                        TransactionFieldView(
+                            modifier = Modifier.fillMaxWidth()
+                                .padding(vertical = 5.dp),
+                            text = selectedCategory?.label ?: stringResource(id = R.string.category),
+                            color = LocalContentColor.current.copy(alpha = selectedCategory?.label?.let { 1F } ?: 0.5F),
+                            onClick = {
+                                onCategoryClicked.invoke(selectedCategory)
                             },
-                            textStyle = LocalTextStyle.current,
-                            onValueChange = {},
-                            supportingText = {
+                            isError = showCategoryError,
+                            errorView = {
                                 if (showCategoryError) {
                                     Text(
                                         modifier = Modifier
@@ -452,13 +489,7 @@ fun AddTransactionForm(
                                         color = MaterialTheme.colorScheme.error
                                     )
                                 }
-                            },
-                            isError = showCategoryError,
-                            shape = RoundedCornerShape(10.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                unfocusedBorderColor = LocalContentColor.current.copy(alpha = 0.2F)
-                            )
-
+                            }
                         )
                         OutlinedTextField(
                             modifier = Modifier
@@ -495,7 +526,8 @@ fun AddTransactionForm(
                                     color = LocalContentColor.current.copy(alpha = 0.5F)
                                 )
                             },
-                            textStyle = LocalTextStyle.current, onValueChange = {
+                            textStyle = LocalTextStyle.current,
+                            onValueChange = {
                                 description = it
                             },
                             shape = RoundedCornerShape(10.dp),
@@ -503,21 +535,17 @@ fun AddTransactionForm(
                                 unfocusedBorderColor = LocalContentColor.current.copy(alpha = 0.2F)
                             )
                         )
-                        MultiSelectChipsView(
+                        AttachmentsView(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 10.dp),
-                            selectedOptions = attachments,
+                            attachments = attachments,
                             onClick = {
                                 showAddAttachmentDialog = true
                             },
-                            selectionOptionView = {
-                                Text(text = getFileNameFromUri(context, it) ?: "N/A")
-                            },
-                            onOptionCanceled = {
+                            onAttachmentCanceled = {
                                 attachments.remove(it)
                             },
-                            borderColor = LocalContentColor.current.copy(alpha = 0.2F)
                         )
                     }
 
@@ -537,13 +565,13 @@ fun AddTransactionForm(
                                 return@Button
 
                             val newTransaction = Transaction(
-                                212L,
+                                transaction?.id ?: 212L,
                                 transactionType,
                                 amount = amount.toDoubleOrNull() ?: 0.0,
                                 category = selectedCategory,
                                 paymentType = selectedPaymentType,
                                 date = date,
-                                note = description,
+                                note = description.ifBlank { null },
                             )
 
                             onAdd(newTransaction, attachments)
@@ -554,7 +582,8 @@ fun AddTransactionForm(
                             containerColor = MaterialTheme.colorScheme.primary
                         )
                     ) {
-                        Text(text = "Add")
+                        val text = if(transactionMode is TransactionMode.Edit) "Save" else "Add"
+                        Text(text = text)
                     }
                 }
             }
@@ -597,7 +626,7 @@ fun AddTransactionForm(
                     .fillMaxWidth()
                     .padding(horizontal = 10.dp, vertical = 5.dp)
                     .clickable {
-                        takePictureLauncher.launch(null)
+                        takePictureLauncher.launch(tempImageUri)
                         showAddAttachmentDialog = false
                     }) {
                     Icon(
@@ -619,7 +648,8 @@ fun AddTransactionForm(
 @Composable
 private fun AddTransactionFormPreview() {
     PreviewThemeWrapper {
-        AddTransactionForm(
+        TransactionForm(
+            transactionMode = TransactionMode.New,
             onCategoryClicked = {},
             onTransactionTypeChanged = {},
             onPaymentTypeClicked = {},

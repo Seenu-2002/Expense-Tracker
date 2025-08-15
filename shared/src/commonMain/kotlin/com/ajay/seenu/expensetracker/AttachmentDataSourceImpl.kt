@@ -14,14 +14,16 @@ class AttachmentDataSourceImpl(
         name: String,
         filePath: String,
         fileType: String,
-        size: Long
+        size: Long,
+        imageUri: String
     ) {
         queries.insertAttachment(
             transactionId = transactionId,
             name = name,
             filePath = filePath,
             fileType = fileType,
-            size = size
+            size = size,
+            imageUri = imageUri
         )
     }
 

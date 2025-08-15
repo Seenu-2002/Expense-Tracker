@@ -6,7 +6,8 @@ interface AttachmentDateSource {
                          name: String,
                          filePath: String,
                          fileType: String,
-                         size: Long)
+                         size: Long,
+                         imageUri: String)
     fun deleteAttachmentById(id: Long)
     fun deleteAttachmentsByTransactionId(id: Long)
 }

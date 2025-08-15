@@ -30,6 +30,7 @@ CREATE TABLE Attachment (
     filePath TEXT NOT NULL,
     fileType TEXT NOT NULL,
     size INTEGER NOT NULL,
+    imageUri TEXT NOT NULL,
     FOREIGN KEY (transactionId) REFERENCES TransactionDetail(id) ON DELETE CASCADE
 );
 
@@ -55,6 +56,10 @@ FROM TransactionDetail WHERE id = :id;
 addTransaction:
 INSERT INTO TransactionDetail(type, amount, category, paymentType, note, date, payer, place)
 VALUES (?,?, ?, ?, ?, ?, ?, ?);
+
+updateTransaction:
+INSERT OR REPLACE INTO TransactionDetail(id, type, amount, category, paymentType, note, date, payer, place)
+VALUES ( ?,?, ?, ?, ?, ?, ?, ?, ?);
 
 getLastInsertTransactionRowId:
 SELECT last_insert_rowid();
@@ -115,8 +120,8 @@ getAllAttachmentsForTransaction:
 SELECT * FROM Attachment WHERE transactionId = ?;
 
 insertAttachment:
-INSERT INTO Attachment (transactionId, name, filePath, fileType, size)
-VALUES (?, ?, ?, ?, ?);
+INSERT INTO Attachment (transactionId, name, filePath, fileType, size, imageUri)
+VALUES (?, ?, ?, ?, ?, ?);
 
 deleteAttachmentById:
 DELETE FROM Attachment WHERE id = ?;

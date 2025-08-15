@@ -12,6 +12,8 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import java.util.UUID
+import kotlin.text.format
+import kotlin.toString
 
 fun saveBitmapToFile(context: Context, bitmap: Bitmap): Uri {
     val fileName = "${System.currentTimeMillis()}_${UUID.randomUUID()}.jpg"
@@ -47,6 +49,41 @@ fun getFileInfoFromUri(context: Context, uri: Uri): Map<String, String?> {
     fileInfo["filePath"] = filePath
 
     return fileInfo
+}
+
+fun getFileInfoFromCamImageUri(context: Context, uri: Uri): Map<String, String?> {
+    val fileInfo = mutableMapOf<String, String?>()
+    var fileSize: String? = null
+
+    val cursor = context.contentResolver.query(uri, null, null, null, null)
+    if (cursor != null && cursor.moveToFirst()) {
+        val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+        if (sizeIndex != -1) {
+            fileSize = cursor.getLong(sizeIndex).toString()
+        }
+        cursor.close()
+    }
+
+    // Fallback for file:// Uris
+    if (fileSize == null) {
+        val path = uri.path
+        if (path != null) {
+            val file = File(path)
+            if (file.exists()) fileSize = file.length().toString()
+        }
+    }
+
+    fileInfo["fileName"] = generateImageFileName()
+    fileInfo["fileSize"] = fileSize
+    fileInfo["fileType"] = context.contentResolver.getType(uri)
+    fileInfo["filePath"] = uri.path
+
+    return fileInfo
+}
+
+fun generateImageFileName(): String {
+    val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(System.currentTimeMillis())
+    return "${timeStamp}.jpg"
 }
 
 fun getFileNameFromUri(context: Context, uri: Uri): String? {

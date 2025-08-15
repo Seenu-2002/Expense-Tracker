@@ -79,6 +79,30 @@ class TransactionDataSourceImpl constructor(
         return queries.getLastInsertTransactionRowId().executeAsOne()
     }
 
+    override fun updateTransaction(
+        id: Long,
+        type: TransactionType,
+        amount: Double,
+        category: Category,
+        paymentType: PaymentType,
+        date: Long,
+        note: String?,
+        payer: String?,
+        place: String?
+    ): Long {
+        queries.updateTransaction(
+            id = id,
+            type = type,
+            amount = amount,
+            category = category.id,
+            paymentType = paymentType,
+            note = note,
+            date = date,
+            payer = payer,
+            place = place)
+        return queries.getLastInsertTransactionRowId().executeAsOne()
+    }
+
     override fun deleteAllTransactions() {
         queries.deleteAllTransactions()
     }

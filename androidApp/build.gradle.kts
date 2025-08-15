@@ -96,6 +96,9 @@ dependencies {
     // Kotlin Serialization
     implementation(libs.kotlin.json.serialization)
 
+    //Coil
+    implementation(libs.coil.compose)
+
     // Timber
     implementation(libs.timber)
 }
