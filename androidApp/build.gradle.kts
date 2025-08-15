@@ -55,11 +55,8 @@ dependencies {
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.compose.material)
     implementation(libs.androidx.lifecycle.runtime.compose)
     debugImplementation(libs.compose.ui.tooling)
-    implementation(libs.androidx.glance)
-    implementation(libs.androidx.glance.appwidget)
     implementation(libs.androidx.palette)
 
     // Hilt dependencies
@@ -80,9 +77,6 @@ dependencies {
 
     // Kotlinx DateTime
     implementation(libs.kotlinx.datetime)
-
-    // Compose bottom sheet
-    implementation(libs.compose.bottomsheet)
 
     // Vico Charts
     implementation(libs.vico.compose)
