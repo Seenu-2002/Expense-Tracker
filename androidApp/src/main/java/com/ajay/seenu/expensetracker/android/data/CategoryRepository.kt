@@ -1,22 +1,30 @@
 package com.ajay.seenu.expensetracker.android.data
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import com.ajay.seenu.expensetracker.Category
 import com.ajay.seenu.expensetracker.CategoryDataSource
 import com.ajay.seenu.expensetracker.entity.TransactionType
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class CategoryRepository @Inject constructor(private val dataSource: CategoryDataSource) {
     suspend fun getAllCategories(): List<Category> {
-        return withContext(Dispatchers.IO){
+        return withContext(Dispatchers.IO) {
             dataSource.getAllCategories()
         }
     }
 
-    suspend fun getCategories(type: TransactionType): List<Category> {
-        return withContext(Dispatchers.IO){
+    suspend fun searchCategories(label: String, type: TransactionType): List<Category> {
+        return withContext(Dispatchers.IO) {
+            dataSource.searchCategory(label, type)
+        }
+    }
+
+    suspend fun getCategories(type: TransactionType): Flow<List<Category>> {
+        return withContext(Dispatchers.IO) {
             dataSource.getCategories(type)
         }
     }
@@ -27,9 +35,9 @@ class CategoryRepository @Inject constructor(private val dataSource: CategoryDat
         }
     }
 
-    suspend fun addCategory( label: String, type: TransactionType, drawableRes: Int?, color: Color) {
+    suspend fun addCategory(label: String, type: TransactionType, drawableRes: Int, color: Color) {
         return withContext(Dispatchers.IO) {
-            dataSource.addCategory(label, type, drawableRes?.toLong(), color.value.toLong())
+            dataSource.addCategory(label, type, drawableRes.toLong(), color.toArgb().toLong())
         }
     }
 
@@ -45,9 +53,9 @@ class CategoryRepository @Inject constructor(private val dataSource: CategoryDat
         }
     }
 
-    suspend fun updateCategory(id: Long, label: String, type: TransactionType) {
+    suspend fun updateCategory(id: Long, label: String, res: Int, color: Long) {
         return withContext(Dispatchers.IO) {
-            dataSource.updateCategory(id, label, type)
+            dataSource.updateCategory(id, label, res, color)
         }
     }
 }

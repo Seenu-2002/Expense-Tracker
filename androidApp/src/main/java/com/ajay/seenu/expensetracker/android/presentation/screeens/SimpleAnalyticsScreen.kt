@@ -103,7 +103,7 @@ fun SimpleAnalyticsScreen(
     ) { paddingValues ->
 
         when (val uiState = state) {
-            UiState.Loading -> {
+            UiState.Loading, UiState.Empty -> {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()

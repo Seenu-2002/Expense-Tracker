@@ -37,6 +37,7 @@ import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.domain.data.Transaction
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.AddTransactionViewModel
 import com.ajay.seenu.expensetracker.android.presentation.widgets.AddTransactionForm
+import com.ajay.seenu.expensetracker.android.presentation.widgets.CategoryRow
 import com.ajay.seenu.expensetracker.entity.PaymentType
 import kotlinx.coroutines.launch
 
@@ -181,6 +182,8 @@ fun CategoryBottomSheet(
                         .fillMaxWidth()
                         .padding(vertical = 4.dp, horizontal = 8.dp),
                     category,
+                    iconBoxSize = 42.dp,
+                    iconSize = 20.dp,
                 ) { selectedCategory ->
                     onCategorySelected(selectedCategory)
                 }

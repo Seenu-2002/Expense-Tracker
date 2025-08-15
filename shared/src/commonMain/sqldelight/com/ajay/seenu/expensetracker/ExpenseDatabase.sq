@@ -18,7 +18,7 @@ CREATE TABLE Category (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     label TEXT NOT NULL,
     type TEXT AS TransactionType NOT NULL,
-    iconRes INTEGER,
+    iconRes INTEGER NOT NULL,
     color INTEGER NOT NULL ,
     UNIQUE (label, type) ON CONFLICT REPLACE
 );
@@ -93,8 +93,11 @@ SELECT * FROM Category WHERE id = ?;
 
 updateCategory:
 UPDATE Category
-SET label = ?, type = ?
+SET label = ?, iconRes = ?, color = ?
 WHERE id = ?;
+
+searchCategory:
+SELECT * FROM Category WHERE label = :label AND type = :type;
 
 getTotalTransactionPerDayByTypeBetween:
 SELECT date, category, SUM(amount) AS totalAmount FROM TransactionDetail WHERE type = :type AND date >= :startUTCValue AND date <= :endUTCValue GROUP BY date, category ORDER BY date DESC;

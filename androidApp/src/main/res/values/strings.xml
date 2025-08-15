@@ -60,5 +60,26 @@
     <string name="default_category_savings_investments">Savings/Investments</string>
     <string name="default_category_debt_repayment">Debt Repayment</string>
 
+    <string name="icons">Icons</string>
+    <string name="colors">Colors</string>
+    <string name="category_name">Category Name</string>
+    <string name="create_category_title">Create a New Category</string>
+    <string name="update_category_title">Update Category</string>
+    <string name="create">Create</string>
+    <string name="update">Update</string>
+
+    <string name="error_empty_category_title">Category name cannot be empty!</string>
+    <string name="category_created">Category %1$s has been created!</string>
+    <string name="error_category_already_exists">Category with this name already exists!</string>
+    <string name="category_updated">Category %1$s has been updated!</string>
+    <string name="category_deleted">Category %1$s has been deleted!</string>
+    <string name="error_category_not_created">Category could not be created!</string>
+    <string name="error_category_not_found">Category not found!</string>
+    <string name="dialog_discard_changes_title">Discard changes?</string>
+    <string name="dialog_discard_changes_message">You have unsaved changes. If you go back now, your edits will be lost.</string>
+    <string name="dialog_discard_changes_positive">Discard</string>
+    <string name="dialog_discard_changes_negative">Cancel</string>
+    <string name="no_changes_made">No changes has been made!</string>
+    <string name="error_last_category_to_delete">At least 1 category should be present to delete others.</string>
 
 </resources>

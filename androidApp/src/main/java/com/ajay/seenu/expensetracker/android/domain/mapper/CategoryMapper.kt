@@ -9,14 +9,16 @@ import com.ajay.seenu.expensetracker.entity.TransactionType
 object CategoryMapper {
 
     fun mapCategories(categories: List<Category>): List<Transaction.Category> = categories.map {
-        Transaction.Category(
-            it.id,
-            it.type.map(),
-            it.label,
-            Color(it.color),
-            it.iconRes?.toInt()
-        )
+        mapCategory(it)
     }
+
+    fun mapCategory(category: Category): Transaction.Category = Transaction.Category(
+        category.id,
+        category.type.map(),
+        category.label,
+        Color(category.color),
+        category.iconRes.toInt()
+    )
 
     fun TransactionType.map(): Transaction.Type {
         return when (this) {
@@ -30,7 +32,7 @@ object CategoryMapper {
             this.id,
             this.label,
             this.type.map(),
-            this.res?.toLong(),
+            this.res.toLong(),
             this.color.toArgb().toLong(),
         )
     }

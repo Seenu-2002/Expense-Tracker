@@ -20,9 +20,11 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ajay.seenu.expensetracker.UserConfigurationsManager
 import com.ajay.seenu.expensetracker.android.ExpenseTrackerTheme
+import com.ajay.seenu.expensetracker.android.domain.data.Transaction
 import com.ajay.seenu.expensetracker.android.presentation.navigation.MainScreen
 import com.ajay.seenu.expensetracker.android.presentation.navigation.Screen
-import com.ajay.seenu.expensetracker.android.presentation.screeens.AddCategoryScreen
+import com.ajay.seenu.expensetracker.android.presentation.screeens.AddEditCategoryScreen
+import com.ajay.seenu.expensetracker.android.presentation.screeens.AddEditScreenArg
 import com.ajay.seenu.expensetracker.android.presentation.screeens.AddTransactionScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.CategoryListScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.DetailTransactionScreen
@@ -88,7 +90,8 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             }
-                            composable("${Screen.AddTransaction.route}/{clone_id}",
+                            composable(
+                                "${Screen.AddTransaction.route}/{clone_id}",
                                 arguments = listOf(
                                     navArgument("clone_id") {
                                         type = NavType.LongType
@@ -104,7 +107,8 @@ class MainActivity : ComponentActivity() {
                                     cloneId
                                 )
                             }
-                            composable("${Screen.DetailTransaction.route}/{transaction_id}",
+                            composable(
+                                "${Screen.DetailTransaction.route}/{transaction_id}",
                                 arguments = listOf(
                                     navArgument("transaction_id") {
                                         type = NavType.LongType
@@ -122,34 +126,46 @@ class MainActivity : ComponentActivity() {
                             }
                             composable(Screen.CategoryList.route) {
                                 CategoryListScreen(
-                                    categoryDetailScreen = {
-                                        if (it == null) {
-                                            navController.navigate("${Screen.Category.route}/-1L")
-                                        } else {
-                                            navController.navigate("${Screen.Category.route}/${it}")
-                                        }
+                                    onCreateCategory = { type ->
+                                        navController.navigate("${Screen.Category.route}/-1/${type.name.uppercase()}")
+                                    },
+                                    onCategoryEdit = { id ->
+                                        navController.navigate("${Screen.Category.route}/$id/${Transaction.Type.EXPENSE.name.uppercase()}")
                                     },
                                     onNavigateBack = {
                                         navController.popBackStack()
                                     }
                                 )
                             }
-                            composable("${Screen.Category.route}/{clone_id}",
+                            composable(
+                                "${Screen.Category.route}/{id}/{type}",
                                 arguments = listOf(
-                                    navArgument("clone_id") {
+                                    navArgument("id") {
                                         type = NavType.LongType
+                                    },
+                                    navArgument("type") {
+                                        type = NavType.StringType
                                     }
                                 )
                             ) {
-                                AddCategoryScreen(navController)
-//                                var cloneId = it.arguments?.getLong("clone_id")
-//                                if (cloneId == -1L) cloneId = null
-//                                CategoryDetailScreen(
-//                                    onNavigateBack = {
-//                                        navController.popBackStack()
-//                                    },
-//                                    cloneId
-//                                )
+                                var id = it.arguments?.getLong("id", -1L)
+                                if (id == -1L) {
+                                    id = null
+                                }
+                                val type = it.arguments?.getString("type")
+                                    ?.let { Transaction.Type.valueOf(it.uppercase()) }
+
+                                val arg = if (id != null) {
+                                    AddEditScreenArg.Edit(id)
+                                } else {
+                                    AddEditScreenArg.Create(type ?: Transaction.Type.EXPENSE)
+                                }
+                                AddEditCategoryScreen(
+                                    arg = arg,
+                                    onNavigateBack = {
+                                        navController.popBackStack()
+                                    }
+                                )
                             }
                         }
                     }

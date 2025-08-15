@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.Color
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.presentation.common.ChartDefaults
 import com.ajay.seenu.expensetracker.entity.PaymentType
+import kotlinx.serialization.Serializable
 import java.util.Date
 
 data class Transaction constructor(
@@ -18,6 +19,7 @@ data class Transaction constructor(
     val note: String? = null
 ) {
 
+    @Serializable
     enum class Type(
         val value: String,
         @StringRes val stringRes: Int,
@@ -49,7 +51,7 @@ data class Transaction constructor(
         val type: Type,
         val label: String,
         val color: Color,
-        val res: Int?,
+        val res: Int,
     )
 }
 
