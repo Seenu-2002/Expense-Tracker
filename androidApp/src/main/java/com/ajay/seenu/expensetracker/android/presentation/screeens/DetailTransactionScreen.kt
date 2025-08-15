@@ -1,5 +1,7 @@
 package com.ajay.seenu.expensetracker.android.presentation.screeens
 
+import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -7,6 +9,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -50,6 +54,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -61,8 +66,11 @@ import androidx.compose.ui.tooling.preview.PreviewFontScale
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.compose.AsyncImage
+import coil3.compose.AsyncImagePainter
 import com.ajay.seenu.expensetracker.Attachment
 import com.ajay.seenu.expensetracker.android.ExpenseTrackerTheme
 import com.ajay.seenu.expensetracker.android.R
@@ -99,12 +107,14 @@ fun DetailTransactionScreen(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DetailTransactionView(modifier: Modifier = Modifier,
                           transaction: Transaction,
                           attachments: List<Attachment>,
                           onEditTransaction: () -> Unit,
                           onNavigateBack: () -> Unit) {
+    val context = LocalContext.current
     val formatter: DateFormat = SimpleDateFormat("EEEE d MMMM yyyy", Locale.getDefault())
     val date = formatter.format(transaction.date)
 
@@ -234,7 +244,8 @@ fun DetailTransactionView(modifier: Modifier = Modifier,
                 .verticalScroll(rememberScrollState())) {
                 Text(modifier = Modifier.padding(vertical = 15.dp),
                     text = "Description",
-                    style = MaterialTheme.typography.bodyLarge)
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.SemiBold)
                 transaction.note?.let {
                     Text(text = transaction.note)
                 }?: run {
@@ -251,7 +262,8 @@ fun DetailTransactionView(modifier: Modifier = Modifier,
                 }
                 Text(modifier = Modifier.padding(vertical = 15.dp),
                     text = "Attachments",
-                    style = MaterialTheme.typography.bodyLarge)
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.SemiBold)
                 if(attachments.isEmpty()) {
                     Column (modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -260,8 +272,44 @@ fun DetailTransactionView(modifier: Modifier = Modifier,
                             color = LocalContentColor.current.copy(alpha = 0.5F))
                     }
                 } else {
-                    attachments.forEach {
-                        Text(text = it.name)
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(7.dp),
+                        verticalArrangement = Arrangement.spacedBy(7.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(10.dp)
+                    ) {
+                        attachments.forEach { attachment ->
+                            Box(modifier = Modifier.padding(10.dp)
+                                .size(100.dp)
+                                .border(1.dp, LocalContentColor.current.copy(alpha = 0.2F))
+                                .clickable {
+                                    val intent = Intent(Intent.ACTION_VIEW).apply {
+                                        setDataAndType(attachment.imageUri.toUri(), "image/*")
+                                        flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                    }
+                                    context.startActivity(intent)
+                                }) {
+                                AsyncImage(
+                                    model = attachment.imageUri.toUri(),
+                                    contentDescription = null,
+                                    modifier = Modifier.fillMaxSize(),
+                                    onState = {
+                                        when(it) {
+                                            is AsyncImagePainter.State.Error -> {
+                                                Log.e("DetailTransactionView", "Error loading image: ${it.result.throwable.message}")
+                                            }
+                                            is AsyncImagePainter.State.Success -> {
+                                                Log.d("DetailTransactionView", "Image loaded successfully")
+                                            }
+                                            else -> {
+                                                Log.d("DetailTransactionView", "Loading image...")
+                                            }
+                                        }
+                                    }
+                                )
+                            }
+                        }
                     }
                 }
 
@@ -283,7 +331,7 @@ fun DetailTransactionView(modifier: Modifier = Modifier,
     }
 }
 
-@Preview
+@Preview()
 @Composable
 private fun DetailTransactionScreenPreview() {
     PreviewThemeWrapper {

@@ -24,17 +24,19 @@ class AttachmentsViewModel @Inject constructor(): ViewModel() {
     }
 
     fun insertAttachment(transactionId: Long,
-                      name: String,
-                      filePath: String,
-                      fileType: String,
-                      size: Long) {
+                         name: String,
+                         filePath: String,
+                         fileType: String,
+                         size: Long,
+                         imageUri: String) {
         viewModelScope.launch {
             addAttachmentUseCase.invoke(
                 transactionId = transactionId,
                 name = name,
                 filePath = filePath,
                 fileType = fileType,
-                size = size
+                size = size,
+                imageUri = imageUri
             )
         }
     }

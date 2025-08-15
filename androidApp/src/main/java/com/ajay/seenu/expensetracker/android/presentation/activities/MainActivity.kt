@@ -25,7 +25,7 @@ import com.ajay.seenu.expensetracker.android.presentation.navigation.MainScreen
 import com.ajay.seenu.expensetracker.android.presentation.navigation.Screen
 import com.ajay.seenu.expensetracker.android.presentation.theme.AppDefaults
 import com.ajay.seenu.expensetracker.android.presentation.theme.LocalColors
-import com.ajay.seenu.expensetracker.android.presentation.screeens.AddTransactionScreen
+import com.ajay.seenu.expensetracker.android.presentation.screeens.TransactionScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.CategoryDetailScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.CategoryListScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.DetailTransactionScreen
@@ -113,7 +113,7 @@ class MainActivity : ComponentActivity() {
                                         }
                                     } ?: TransactionMode.New
                                 }
-                                AddTransactionScreen(
+                                TransactionScreen(
                                     transactionMode,
                                     onNavigateBack = {
                                         navController.popBackStack()

@@ -29,6 +29,7 @@ CREATE TABLE Attachment (
     filePath TEXT NOT NULL,
     fileType TEXT NOT NULL,
     size INTEGER NOT NULL,
+    imageUri TEXT NOT NULL,
     FOREIGN KEY (transactionId) REFERENCES TransactionDetail(id) ON DELETE CASCADE
 );
 
@@ -115,8 +116,8 @@ getAllAttachmentsForTransaction:
 SELECT * FROM Attachment WHERE transactionId = ?;
 
 insertAttachment:
-INSERT INTO Attachment (transactionId, name, filePath, fileType, size)
-VALUES (?, ?, ?, ?, ?);
+INSERT INTO Attachment (transactionId, name, filePath, fileType, size, imageUri)
+VALUES (?, ?, ?, ?, ?, ?);
 
 deleteAttachmentById:
 DELETE FROM Attachment WHERE id = ?;

@@ -12,14 +12,16 @@ class AddAttachmentUseCase@Inject constructor(
                                 name: String,
                                 filePath: String,
                                 fileType: String,
-                                size: Long) {
+                                size: Long,
+                                imageUri: String) {
         withContext(Dispatchers.IO) {
             repository.insertAttachment(
                 transactionId = transactionId,
                 name = name,
                 filePath = filePath,
                 fileType = fileType,
-                size = size
+                size = size,
+                imageUri = imageUri
             )
         }
     }

@@ -17,7 +17,8 @@ class AttachmentRepository @Inject constructor(private val dataSource: Attachmen
                                  name: String,
                                  filePath: String,
                                  fileType: String,
-                                 size: Long): Boolean {
+                                 size: Long,
+                                 imageUri: String): Boolean {
         withContext(Dispatchers.IO) {
             val currentAttachments = dataSource.getAllAttachmentsForTransaction(transactionId)
             if(currentAttachments.size < 5) {
@@ -26,7 +27,8 @@ class AttachmentRepository @Inject constructor(private val dataSource: Attachmen
                     name = name,
                     filePath = filePath,
                     fileType = fileType,
-                    size = size
+                    size = size,
+                    imageUri = imageUri
                 )
                 true
             } else
