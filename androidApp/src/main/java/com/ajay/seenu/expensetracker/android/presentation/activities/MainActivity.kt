@@ -26,15 +26,11 @@ import com.ajay.seenu.expensetracker.android.presentation.navigation.MainScreen
 import com.ajay.seenu.expensetracker.android.presentation.navigation.Screen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.AddEditCategoryScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.AddEditScreenArg
-import com.ajay.seenu.expensetracker.android.presentation.screeens.AddTransactionScreen
 import com.ajay.seenu.expensetracker.android.presentation.theme.AppDefaults
 import com.ajay.seenu.expensetracker.android.presentation.theme.LocalColors
 import com.ajay.seenu.expensetracker.android.presentation.screeens.TransactionScreen
-import com.ajay.seenu.expensetracker.android.presentation.screeens.CategoryDetailScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.CategoryListScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.DetailTransactionScreen
-import com.ajay.seenu.expensetracker.android.presentation.theme.AppDefaults
-import com.ajay.seenu.expensetracker.android.presentation.theme.LocalColors
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.MainViewModel
 import com.ajay.seenu.expensetracker.entity.Theme
 import dagger.hilt.android.AndroidEntryPoint
