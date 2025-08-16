@@ -179,9 +179,12 @@ fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel = 
                         Icons.Filled.Lock,
                         "App Lock",
                         configs.isAppLockEnabled,
-                        onClick = { viewModel.shouldEnableAppLock(!configs.isAppLockEnabled) }) {
+                        isClickable = false,
+                        onClick = { }
+                    ) {
                         viewModel.shouldEnableAppLock(it)
-                        showToBeImplementedToast(context)
+                        val enabled = if(it) "enabled" else "disabled"
+                        Toast.makeText(context, "App lock is $enabled", Toast.LENGTH_SHORT).show()
                     }
                     SettingsRow(
                         Modifier,
@@ -347,6 +350,7 @@ fun SettingsRowWithSwitch(
     icon: ImageVector,
     label: String,
     isChecked: Boolean,
+    isClickable: Boolean = true,
     onClick: () -> Unit,
     listener: (Boolean) -> Unit,
 ) {
@@ -355,7 +359,7 @@ fun SettingsRowWithSwitch(
             Modifier
                 .fillMaxWidth()
                 .height(52.dp)
-                .clickable(onClick = onClick)
+                .clickable(enabled = isClickable, onClick = onClick)
         )
     ) {
         val (iconRef, labelRef, switchRef) = createRefs()

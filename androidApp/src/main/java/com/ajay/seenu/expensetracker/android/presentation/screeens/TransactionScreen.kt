@@ -191,6 +191,7 @@ fun CategoryBottomSheet(
                         .padding(vertical = 4.dp, horizontal = 8.dp),
                     category,
                     iconBoxSize = 42.dp,
+                    clickable = true,
                     iconSize = 20.dp,
                 ) { selectedCategory ->
                     onCategorySelected(selectedCategory)
