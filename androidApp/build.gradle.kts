@@ -50,6 +50,7 @@ tasks.withType<KotlinCompile>().configureEach {
 }
 
 dependencies {
+    implementation(libs.androidx.appcompat)
     implementation(projects.shared)
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.tooling.preview)
@@ -95,4 +96,7 @@ dependencies {
 
     // Timber
     implementation(libs.timber)
+
+    //Biometric
+    implementation(libs.androidx.biometric)
 }
