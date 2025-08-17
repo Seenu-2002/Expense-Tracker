@@ -27,7 +27,11 @@ class CategoryDataSourceImpl(database: ExpenseDatabase) : CategoryDataSource {
         return queries.getAllCategories().executeAsList()
     }
 
-    override fun getCategories(type: TransactionType): Flow<List<Category>> {
+    override fun getCategories(type: TransactionType): List<Category> {
+        return queries.getCategories(type).executeAsList()
+    }
+
+    override fun getCategoriesAsFlow(type: TransactionType): Flow<List<Category>> {
         return queries.getCategories(type).asFlow().mapToList(Dispatchers.IO)
     }
 

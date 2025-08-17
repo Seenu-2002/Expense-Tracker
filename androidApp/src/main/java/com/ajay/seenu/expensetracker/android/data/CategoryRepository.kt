@@ -23,9 +23,15 @@ class CategoryRepository @Inject constructor(private val dataSource: CategoryDat
         }
     }
 
-    suspend fun getCategories(type: TransactionType): Flow<List<Category>> {
+    suspend fun getCategories(type: TransactionType): List<Category> {
         return withContext(Dispatchers.IO) {
             dataSource.getCategories(type)
+        }
+    }
+
+    suspend fun getCategoriesAsFlow(type: TransactionType): Flow<List<Category>> {
+        return withContext(Dispatchers.IO) {
+            dataSource.getCategoriesAsFlow(type)
         }
     }
 

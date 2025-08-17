@@ -33,7 +33,7 @@
             android:name=".presentation.activities.OnboardingActivity"
             android:exported="false" />
         <receiver
-            android:name="com.seenu.dev.android.widgets.AddTransactionWidgetReceiver"
+            android:name="com.ajay.seenu.expensetracker.android.AddTransactionWidget"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

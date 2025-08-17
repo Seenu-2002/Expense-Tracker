@@ -8,7 +8,8 @@ interface CategoryDataSource {
     fun addCategory(label: String, type: TransactionType, drawableRes: Long, color: Long)
     fun getCategory(id: Long): Category
     fun getAllCategories(): List<Category>
-    fun getCategories(type: TransactionType): Flow<List<Category>>
+    fun getCategories(type: TransactionType): List<Category>
+    fun getCategoriesAsFlow(type: TransactionType): Flow<List<Category>>
     fun deleteCategory(id: Long)
     fun updateCategory(id: Long, label: String, res: Int, color: Long)
 }

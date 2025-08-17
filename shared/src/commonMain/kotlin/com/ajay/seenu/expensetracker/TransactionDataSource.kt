@@ -36,4 +36,6 @@ interface TransactionDataSource {
     fun getExpenseByPaymentType(startDate: Long, endDate: Long): List<GetTotalExpenseByPaymentTypeBetween>
     fun getExpenseByCategory(startDate: Long, endDate: Long): List<GetTotalExpenseByCategoryBetween>
     fun getTotalAmountByCategoryAndType(type: TransactionType, startDate: Long, endDate: Long): List<GetTotalAmountByCategoryAndTypeBetween>
+    fun replaceCategory(oldCategory: Long, newCategory: Long)
+    fun getTransactionCountByCategory(categoryId: Long): Long
 }

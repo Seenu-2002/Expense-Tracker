@@ -5,14 +5,18 @@ import com.ajay.seenu.expensetracker.entity.TransactionType
 
 class TransactionDataSourceImpl constructor(
     private val database: ExpenseDatabase
-): TransactionDataSource {
+) : TransactionDataSource {
     private val queries = database.expenseDatabaseQueries
 
-    override fun getAllTransactions(pageNo: Int, count: Int): PaginationData<List<TransactionDetail>> {
+    override fun getAllTransactions(
+        pageNo: Int,
+        count: Int
+    ): PaginationData<List<TransactionDetail>> {
         if (pageNo == 0) {
             return PaginationData(emptyList(), false)
         }
-        return queries.getAllTransactions((count + 1).toLong(), (pageNo - 1L) * count).executeAsList().let {
+        return queries.getAllTransactions((count + 1).toLong(), (pageNo - 1L) * count)
+            .executeAsList().let {
             val hasMoreData = it.size > count
             val data = if (hasMoreData) {
                 it.subList(0, count)
@@ -32,10 +36,12 @@ class TransactionDataSourceImpl constructor(
         if (pageNo == 0) {
             return PaginationData(emptyList(), false)
         }
-        return queries.getAllTransactionsBetween(startUTCValue = fromValue,
+        return queries.getAllTransactionsBetween(
+            startUTCValue = fromValue,
             endUTCValue = toValue,
             limit = (count + 1).toLong(),
-            offset = (pageNo - 1L) * count).executeAsList().let {
+            offset = (pageNo - 1L) * count
+        ).executeAsList().let {
             val hasMoreData = it.size > count
             val data = if (hasMoreData) {
                 it.subList(0, count)
@@ -46,11 +52,16 @@ class TransactionDataSourceImpl constructor(
         }
     }
 
-    override fun getAllTransactionsByType(type: TransactionType, pageNo: Int, count: Int): List<TransactionDetail> {
+    override fun getAllTransactionsByType(
+        type: TransactionType,
+        pageNo: Int,
+        count: Int
+    ): List<TransactionDetail> {
         if (pageNo == 0) {
             return emptyList()
         }
-        return queries.getAllTransactionsByType(type, count.toLong(), (pageNo - 1L) * count).executeAsList()
+        return queries.getAllTransactionsByType(type, count.toLong(), (pageNo - 1L) * count)
+            .executeAsList()
     }
 
     override fun getTransaction(id: Long): TransactionDetail {
@@ -75,7 +86,8 @@ class TransactionDataSourceImpl constructor(
             note = note,
             date = date,
             payer = payer,
-            place = place)
+            place = place
+        )
         return queries.getLastInsertTransactionRowId().executeAsOne()
     }
 
@@ -99,7 +111,8 @@ class TransactionDataSourceImpl constructor(
             note = note,
             date = date,
             payer = payer,
-            place = place)
+            place = place
+        )
         return queries.getLastInsertTransactionRowId().executeAsOne()
     }
 
@@ -139,15 +152,26 @@ class TransactionDataSourceImpl constructor(
         return queries.getCategories(type).executeAsList()
     }
 
-    override fun getTotalTransactionPerDayByType(type: TransactionType, startDate: Long, endDate: Long): List<GetTotalTransactionPerDayByTypeBetween> {
-        return queries.getTotalTransactionPerDayByTypeBetween(type, startDate, endDate).executeAsList()
+    override fun getTotalTransactionPerDayByType(
+        type: TransactionType,
+        startDate: Long,
+        endDate: Long
+    ): List<GetTotalTransactionPerDayByTypeBetween> {
+        return queries.getTotalTransactionPerDayByTypeBetween(type, startDate, endDate)
+            .executeAsList()
     }
 
-    override fun getExpenseByPaymentType(startDate: Long, endDate: Long): List<GetTotalExpenseByPaymentTypeBetween> {
+    override fun getExpenseByPaymentType(
+        startDate: Long,
+        endDate: Long
+    ): List<GetTotalExpenseByPaymentTypeBetween> {
         return queries.getTotalExpenseByPaymentTypeBetween(startDate, endDate).executeAsList()
     }
 
-    override fun getExpenseByCategory(startDate: Long, endDate: Long): List<GetTotalExpenseByCategoryBetween> {
+    override fun getExpenseByCategory(
+        startDate: Long,
+        endDate: Long
+    ): List<GetTotalExpenseByCategoryBetween> {
         return queries.getTotalExpenseByCategoryBetween(startDate, endDate).executeAsList()
     }
 
@@ -156,6 +180,16 @@ class TransactionDataSourceImpl constructor(
         startDate: Long,
         endDate: Long
     ): List<GetTotalAmountByCategoryAndTypeBetween> {
-        return queries.getTotalAmountByCategoryAndTypeBetween(type, startDate, endDate).executeAsList()
+        return queries.getTotalAmountByCategoryAndTypeBetween(type, startDate, endDate)
+            .executeAsList()
     }
+
+    override fun replaceCategory(oldCategory: Long, newCategory: Long) {
+        return queries.changeCategory(oldCategory = oldCategory, newCategory = newCategory)
+    }
+
+    override fun getTransactionCountByCategory(categoryId: Long): Long {
+        return queries.numberOfTransactionsByCategory(categoryId).executeAsOne()
+    }
+
 }
