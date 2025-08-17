@@ -50,6 +50,7 @@ import androidx.constraintlayout.compose.Dimension
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.domain.data.Transaction
 import com.ajay.seenu.expensetracker.android.presentation.common.PreviewThemeWrapper
+import com.ajay.seenu.expensetracker.android.presentation.screeens.CategoryIconItem
 import com.ajay.seenu.expensetracker.android.presentation.theme.LocalColors
 import com.ajay.seenu.expensetracker.entity.PaymentType
 import kotlinx.coroutines.delay
@@ -342,7 +343,7 @@ fun TransactionPreviewRow(modifier: Modifier = Modifier,
                 Triple(90F, LocalColors.current.incomeColor, R.drawable.income)
             }
 
-            Box(
+            CategoryIconItem(
                 modifier = Modifier
                     .size(60.dp)
                     .constrainAs(icon) {
@@ -350,17 +351,11 @@ fun TransactionPreviewRow(modifier: Modifier = Modifier,
                         start.linkTo(parent.start)
                         bottom.linkTo(parent.bottom)
                     }
-                    .background(color = color, shape = RoundedCornerShape(15.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = painterResource(id = iconSource),
-                    modifier = Modifier
-                        .size(30.dp),
-                    tint = Color.White,
-                    contentDescription = "Icon",
-                )
-            }
+                    .padding(4.dp),
+                iconSize = 24.dp,
+                res = transaction.category.res,
+                iconBackground = transaction.category.color
+            )
 
             Text(
                 modifier = Modifier.constrainAs(title) {
