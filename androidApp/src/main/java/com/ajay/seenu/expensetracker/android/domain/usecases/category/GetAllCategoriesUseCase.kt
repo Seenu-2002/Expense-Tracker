@@ -1,19 +1,18 @@
 package com.ajay.seenu.expensetracker.android.domain.usecases.category
 
-import com.ajay.seenu.expensetracker.android.data.CategoryRepository
+import com.ajay.seenu.expensetracker.android.data.TransactionRepository
 import com.ajay.seenu.expensetracker.android.domain.data.Transaction
 import com.ajay.seenu.expensetracker.android.domain.mapper.CategoryMapper
-import com.ajay.seenu.expensetracker.android.domain.mapper.CategoryMapper.map
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class GetAllCategoriesUseCase @Inject constructor(
-    private val repository: CategoryRepository,
+    private val repository: TransactionRepository
 ) {
-    suspend operator fun invoke(type: Transaction.Type): Flow<List<Transaction.Category>> {
-        return repository.getCategories(type.map()).map {
-            CategoryMapper.mapCategories(it)
-        }
+
+    suspend operator fun invoke(type: Transaction.Type): List<Transaction.Category> {
+        return repository.getCategories(
+            type
+        ).map { CategoryMapper.mapCategory(it) }
     }
+
 }

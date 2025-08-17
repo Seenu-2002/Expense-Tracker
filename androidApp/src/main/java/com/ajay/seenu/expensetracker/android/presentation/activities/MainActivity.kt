@@ -43,18 +43,20 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ajay.seenu.expensetracker.UserConfigurationsManager
 import com.ajay.seenu.expensetracker.android.ExpenseTrackerTheme
-import com.ajay.seenu.expensetracker.android.domain.data.Transaction
 import com.ajay.seenu.expensetracker.android.data.TransactionMode
 import com.ajay.seenu.expensetracker.android.domain.security.BiometricPromptManager
+import com.ajay.seenu.expensetracker.android.domain.data.Transaction
 import com.ajay.seenu.expensetracker.android.presentation.navigation.MainScreen
 import com.ajay.seenu.expensetracker.android.presentation.navigation.Screen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.AddEditCategoryScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.AddEditScreenArg
+import com.ajay.seenu.expensetracker.android.presentation.screeens.CategoryListScreen
+import com.ajay.seenu.expensetracker.android.presentation.screeens.ChangeCategoryInTransactionScreen
+import com.ajay.seenu.expensetracker.android.presentation.screeens.ChangeCategoryInTransactionScreen
+import com.ajay.seenu.expensetracker.android.presentation.screeens.DetailTransactionScreen
+import com.ajay.seenu.expensetracker.android.presentation.screeens.TransactionScreen
 import com.ajay.seenu.expensetracker.android.presentation.theme.AppDefaults
 import com.ajay.seenu.expensetracker.android.presentation.theme.LocalColors
-import com.ajay.seenu.expensetracker.android.presentation.screeens.TransactionScreen
-import com.ajay.seenu.expensetracker.android.presentation.screeens.CategoryListScreen
-import com.ajay.seenu.expensetracker.android.presentation.screeens.DetailTransactionScreen
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.MainViewModel
 import com.ajay.seenu.expensetracker.entity.Theme
 import dagger.hilt.android.AndroidEntryPoint
@@ -267,6 +269,9 @@ class MainActivity : AppCompatActivity() {
                     onCategoryEdit = { id ->
                         navController.navigate("${Screen.Category.route}/$id/${Transaction.Type.EXPENSE.name.uppercase()}")
                     },
+                    onDeleteCategory = { id, type, count ->
+                        navController.navigate("${Screen.ChangeCategoryInTransaction.route}/$id/${type.name}/${count}")
+                    },
                     onNavigateBack = {
                         navController.popBackStack()
                     }
@@ -300,6 +305,34 @@ class MainActivity : AppCompatActivity() {
                     onNavigateBack = {
                         navController.popBackStack()
                     }
+                )
+            }
+            composable(
+                route = "${Screen.ChangeCategoryInTransaction.route}/{id}/{type}/{count}",
+                arguments = listOf(
+                    navArgument("id") {
+                        type = NavType.LongType
+                    },
+                    navArgument("type") {
+                        type = NavType.StringType
+                    },
+                    navArgument("count") {
+                        type = NavType.LongType
+                    }
+                )
+            ) {
+                val id = it.arguments?.getLong("id")!!
+                val type = it.arguments?.getString("type")
+                    ?.let { Transaction.Type.valueOf(it.uppercase()) }
+                    ?: Transaction.Type.EXPENSE
+                val count = it.arguments?.getLong("count") ?: 0L
+                ChangeCategoryInTransactionScreen(
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    },
+                    categoryIdToBeDeleted = id,
+                    type = type,
+                    transactionCount = count
                 )
             }
         }

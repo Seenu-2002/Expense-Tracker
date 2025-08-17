@@ -22,7 +22,12 @@ fun CategoryRow(
     clickable: Boolean = false,
     onClicked: (Transaction.Category) -> Unit = {}
 ) {
-    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = modifier
+        .clickable(clickable) {
+            onClicked(category)
+        }, verticalAlignment = Alignment.CenterVertically
+    ) {
         CategoryIconItem(
             modifier = Modifier
                 .size(iconBoxSize)
@@ -34,10 +39,7 @@ fun CategoryRow(
         Text(
             modifier = Modifier
                 .weight(1F)
-                .padding(horizontal = 12.dp, vertical = 8.dp)
-                .clickable(clickable) {
-                    onClicked(category)
-                },
+                .padding(horizontal = 12.dp, vertical = 8.dp),
             text = category.label
         )
     }

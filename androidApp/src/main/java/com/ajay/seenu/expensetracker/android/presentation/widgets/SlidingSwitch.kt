@@ -55,7 +55,7 @@ fun SlidingSwitch(
     shape: Shape = RoundedCornerShape(10.dp),
     onSelectedValue: (index: Int, value: String) -> Unit
 ) {
-    var currentValue by rememberSaveable {
+    var currentValue by rememberSaveable(selectedValue) {
         mutableStateOf(selectedValue)
     }
     var width by remember { mutableFloatStateOf(0f) }
@@ -69,7 +69,6 @@ fun SlidingSwitch(
         .clip(shape)
         .background(color = containerColor)
         .padding(horizontal = 5.dp)
-
         .onGloballyPositioned {
             width = it.size.width.toFloat()
         }) {

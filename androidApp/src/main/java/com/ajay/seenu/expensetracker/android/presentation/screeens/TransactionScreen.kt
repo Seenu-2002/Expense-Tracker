@@ -192,7 +192,7 @@ fun CategoryBottomSheet(
                     category,
                     iconBoxSize = 42.dp,
                     clickable = true,
-                    iconSize = 20.dp,
+                    iconSize = 20.dp
                 ) { selectedCategory ->
                     onCategorySelected(selectedCategory)
                 }

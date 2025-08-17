@@ -82,4 +82,16 @@
     <string name="no_changes_made">No changes has been made!</string>
     <string name="error_last_category_to_delete">At least 1 category should be present to delete others.</string>
 
+    <string name="replace_category_title">Replace Category</string>
+    <string name="replace_category_message">Are you sure to delete <b>%1$s</b> category and replace transactions with <b>%2$s</b> ?</string>
+    <string name="delete_category_message">Are you sure to delete <b>%1$s</b> category ?</string>
+    <string name="replace_category_info">You are deleting the category "%1$s" which has been linked in %2$s records. To keep your expenses organized, please choose another category to move all existing transactions.</string>
+    <string name="replace_category_hint">Select a category</string>
+    <string name="replace_category_warning">All expenses under "%1$s" will be reassigned to the selected category.</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_replace_delete">Replace &amp; Delete</string>
+    <string name="change_category">Change Category</string>
+    <string name="delete_category_success">Category %1$s has been deleted successfully!</string>
+
+
 </resources>

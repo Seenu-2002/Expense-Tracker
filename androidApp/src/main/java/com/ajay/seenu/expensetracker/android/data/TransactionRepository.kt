@@ -203,4 +203,16 @@ class TransactionRepository @Inject constructor(private val dataSource: Transact
             dataSource.getTotalAmountByCategoryAndType(type, range.first, range.second)
         }
     }
+
+    suspend fun replaceCategory(oldCategory: Long, newCategory: Long) {
+        withContext(Dispatchers.IO) {
+            dataSource.replaceCategory(oldCategory, newCategory)
+        }
+    }
+
+    suspend fun getTransactionCountByCategory(categoryId: Long): Long {
+        return withContext(Dispatchers.IO) {
+            dataSource.getTransactionCountByCategory(categoryId)
+        }
+    }
 }

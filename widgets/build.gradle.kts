@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.seenu.dev.android.widgets"
+    namespace = "com.ajay.seenu.expensetracker.android.widgets"
     compileSdk = 34
 
     defaultConfig {

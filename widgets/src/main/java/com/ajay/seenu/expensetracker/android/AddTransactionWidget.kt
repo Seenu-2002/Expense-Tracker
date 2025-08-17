@@ -1,4 +1,4 @@
-package com.seenu.dev.android.widgets
+package com.ajay.seenu.expensetracker.android
 
 import android.content.Context
 import androidx.compose.runtime.Composable

@@ -10,15 +10,16 @@ plugins {
 
 android {
     namespace = "com.ajay.seenu.expensetracker.android"
-    compileSdk = 34
+    compileSdk = 36
     defaultConfig {
         applicationId = "com.ajay.seenu.expensetracker.android"
         minSdk = 25
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
     composeOptions {
@@ -99,4 +100,7 @@ dependencies {
 
     //Biometric
     implementation(libs.androidx.biometric)
+
+    // Widgets module
+    implementation(project(":widgets"))
 }

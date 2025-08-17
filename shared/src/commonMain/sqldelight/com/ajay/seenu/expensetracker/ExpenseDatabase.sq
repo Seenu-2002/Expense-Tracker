@@ -12,6 +12,8 @@ CREATE TABLE TransactionDetail (
     payer TEXT,
     place TEXT,
     FOREIGN KEY(category) REFERENCES Category(id)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
 );
 
 CREATE TABLE Category (
@@ -72,6 +74,12 @@ DELETE FROM TransactionDetail WHERE type = :type;
 
 deleteTransaction:
 DELETE FROM TransactionDetail WHERE id = :id;
+
+changeCategory:
+UPDATE TransactionDetail SET category = :newCategory WHERE category = :oldCategory;
+
+numberOfTransactionsByCategory:
+SELECT COUNT(*) AS count FROM TransactionDetail WHERE category = :category;
 
 getSumOfAmountByType:
 SELECT SUM(amount) AS sum FROM TransactionDetail WHERE type = :type;
