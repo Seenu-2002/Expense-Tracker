@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.implementation
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
@@ -33,6 +35,9 @@ kotlin {
             implementation(libs.sqldelight.extensions.paging)
             implementation(libs.sqldelight.extensions.coroutines)
             implementation(libs.androidx.datastore.preferences.core)
+            implementation(libs.kotlin.json.serialization)
+            implementation(libs.kotlinx.datetime)
+            implementation(libs.kotlinx.coroutines.core)
         }
         commonTest{
             dependencies {
@@ -46,6 +51,7 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.sqldelight.android.driver)
             implementation(libs.security.crypto)
+            implementation(libs.core.ktx)
 
         }
         val androidUnitTest by getting {

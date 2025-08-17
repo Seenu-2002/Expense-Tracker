@@ -26,6 +26,8 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +35,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -49,6 +52,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -59,16 +63,22 @@ import androidx.constraintlayout.compose.Visibility
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.ajay.seenu.expensetracker.entity.ExportFormat
 import com.ajay.seenu.expensetracker.android.R
+import com.ajay.seenu.expensetracker.android.presentation.viewmodels.ExportViewModel
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.SettingsViewModel
+import com.ajay.seenu.expensetracker.entity.ExportState
 import com.ajay.seenu.expensetracker.entity.StartDayOfTheWeek
 import com.ajay.seenu.expensetracker.entity.Theme
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel = hiltViewModel()) {
+fun SettingsScreen(navController: NavController,
+                   viewModel: SettingsViewModel = hiltViewModel(),
+                   exportViewModel: ExportViewModel = hiltViewModel()) {
     val configs by viewModel.userConfigs.collectAsStateWithLifecycle()
+    val exportUiState by exportViewModel.uiState.collectAsStateWithLifecycle()
 
     val context = LocalContext.current.applicationContext
     var showWeekStartsFromBottomSheet by remember { mutableStateOf(false) }
@@ -203,9 +213,28 @@ fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel = 
             }
             SettingsRowContainer(modifier = Modifier.fillMaxWidth(), title = "Data") { modifier ->
                 Column(modifier.fillMaxWidth()) {
-                    SettingsRow(
-                        Modifier, Icons.Filled.KeyboardArrowUp, "Export", showArrow = false
-                    ) { showToBeImplementedToast(context) }
+                    Row(modifier = Modifier.fillMaxWidth()
+                        .height(52.dp)
+                        .clickable(enabled = exportUiState.exportState !is ExportState.Loading, onClick = {
+                            exportViewModel.selectFormat(ExportFormat.CSV)
+                            exportViewModel.exportAndSave()
+                        }),
+                        verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            modifier = Modifier.padding(start = 12.dp),
+                            painter = painterResource(R.drawable.baseline_import_export_24),
+                            contentDescription = "Export Icon",
+                        )
+                        Text(
+                            modifier = Modifier.padding(start = 12.dp),
+                            text = "Export",
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        if (exportUiState.exportState is ExportState.Loading) {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        }
+                    }
                     ConstraintLayout(
                         Modifier.then(
                             Modifier
@@ -240,6 +269,18 @@ fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel = 
                 }
             }
         }
+    }
+    if (exportUiState.showSuccessDialog) {
+        AlertDialog(
+            onDismissRequest = { exportViewModel.dismissSuccessDialog() },
+            title = { Text("Export Successful") },
+            text = { Text("Your data has been exported successfully.") },
+            confirmButton = {
+                TextButton(onClick = { exportViewModel.dismissSuccessDialog() }) {
+                    Text("OK")
+                }
+            }
+        )
     }
 }
 
@@ -283,6 +324,7 @@ fun SettingsRow(
     label: String,
     value: String? = null,
     showArrow: Boolean = true,
+    isClickable: Boolean = true,
     onClick: () -> Unit,
 ) {
     ConstraintLayout(
@@ -290,7 +332,7 @@ fun SettingsRow(
             Modifier
                 .fillMaxWidth()
                 .height(52.dp)
-                .clickable(onClick = onClick)
+                .clickable(enabled = isClickable, onClick = onClick)
         )
     ) {
         val (iconRef, labelRef, valueRef, arrowRef) = createRefs()
