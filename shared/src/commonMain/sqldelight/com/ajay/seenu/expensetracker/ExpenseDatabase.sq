@@ -42,6 +42,9 @@ getAllTransactions:
 SELECT *
 FROM TransactionDetail ORDER BY date DESC LIMIT :limit OFFSET :offset;
 
+getTransactionsCount:
+SELECT COUNT(*) FROM TransactionDetail;
+
 getAllTransactionsBetween:
 SELECT *
 FROM TransactionDetail WHERE date >= :startUTCValue AND date <= :endUTCValue

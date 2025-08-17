@@ -7,10 +7,14 @@ import com.ajay.seenu.expensetracker.CategoryDataSource
 import com.ajay.seenu.expensetracker.CategoryDataSourceImpl
 import com.ajay.seenu.expensetracker.DriverFactory
 import com.ajay.seenu.expensetracker.ExpenseDatabase
+import com.ajay.seenu.expensetracker.ExportDataSource
+import com.ajay.seenu.expensetracker.ExportDataSourceImpl
 import com.ajay.seenu.expensetracker.TransactionDataSource
 import com.ajay.seenu.expensetracker.TransactionDataSourceImpl
 import com.ajay.seenu.expensetracker.UserConfigurationsManager
 import com.ajay.seenu.expensetracker.createDatabase
+import com.ajay.seenu.expensetracker.entity.AndroidFileManager
+import com.ajay.seenu.expensetracker.entity.FileManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -50,6 +54,18 @@ object ModuleProvider {
     @Provides
     fun provideCategorySource(database: ExpenseDatabase): CategoryDataSource {
         return CategoryDataSourceImpl(database)
+    }
+
+    @Singleton
+    @Provides
+    fun provideExportSource(database: ExpenseDatabase): ExportDataSource {
+        return ExportDataSourceImpl(database)
+    }
+
+    @Singleton
+    @Provides
+    fun provideFileManager(@ApplicationContext context: Context): FileManager {
+        return AndroidFileManager(context)
     }
 
 }
