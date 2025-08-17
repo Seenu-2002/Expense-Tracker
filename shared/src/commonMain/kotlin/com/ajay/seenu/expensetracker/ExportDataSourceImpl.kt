@@ -8,6 +8,7 @@ import com.ajay.seenu.expensetracker.entity.TransactionExport
 import com.ajay.seenu.expensetracker.entity.TransactionType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -25,7 +26,7 @@ class ExportDataSourceImpl(
     }
 
     private val _exportState = MutableStateFlow<ExportState>(ExportState.Idle)
-    override val exportState: StateFlow<ExportState> = _exportState
+    override val exportState: StateFlow<ExportState> = _exportState.asStateFlow()
 
     override suspend fun exportData(format: ExportFormat): ExportResult {
         return try {
@@ -40,7 +41,7 @@ class ExportDataSourceImpl(
                     description = transaction.note,
                     category = transaction.category,
                     date = formatDate(transaction.date),
-                    type = if (transaction.type == TransactionType.INCOME) "income" else "expense"
+                    type = transaction.type
                 )
             }
 

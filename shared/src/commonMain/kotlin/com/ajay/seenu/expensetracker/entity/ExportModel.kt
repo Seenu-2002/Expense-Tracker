@@ -9,7 +9,7 @@ data class TransactionExport(
     val description: String?,
     val category: Long,
     val date: String,
-    val type: String
+    val type: TransactionType
 )
 
 @Serializable
