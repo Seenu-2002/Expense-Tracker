@@ -130,6 +130,7 @@ fun CategoryListScreen(
                         onCreateCategory.invoke(type)
                     },
                     shape = CircleShape,
+                    containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = Color.White
                 ) {
                     Icon(

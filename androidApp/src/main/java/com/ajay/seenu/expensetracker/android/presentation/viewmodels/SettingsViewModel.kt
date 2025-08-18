@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ajay.seenu.expensetracker.UserConfigurationsManager
+import com.ajay.seenu.expensetracker.android.domain.usecases.transaction.DeleteAllTransactionsUseCase
 import com.ajay.seenu.expensetracker.domain.DateFormats
 import com.ajay.seenu.expensetracker.entity.StartDayOfTheWeek
 import com.ajay.seenu.expensetracker.entity.Theme
@@ -22,8 +23,10 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val configurationManager: UserConfigurationsManager,
-) :
-    ViewModel() {
+) : ViewModel() {
+
+    @Inject
+    internal lateinit var deleteAllTransactionsUseCase: DeleteAllTransactionsUseCase
 
     private val defaultConfig = UserConfigs(
         "",
@@ -95,6 +98,12 @@ class SettingsViewModel @Inject constructor(
             val newConfigs = _userConfigs.value.copy(weekStartsFrom = day)
             configurationManager.storeConfigs(newConfigs)
             _userConfigs.emit(newConfigs)
+        }
+    }
+
+    fun deleteAllTransactions() {
+        viewModelScope.launch {
+            deleteAllTransactionsUseCase.invoke()
         }
     }
 
