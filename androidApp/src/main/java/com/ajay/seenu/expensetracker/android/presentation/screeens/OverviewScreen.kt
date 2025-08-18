@@ -1,5 +1,6 @@
 package com.ajay.seenu.expensetracker.android.presentation.screeens
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -210,24 +211,25 @@ fun OverviewScreen(
                             .fillMaxSize()
                     ) {
 
-                        recentTransactions.forEach {
+                        recentTransactions.forEach { transactionsByDate ->
                             stickyHeader {
                                 Text(
                                     modifier = Modifier
                                         .fillParentMaxWidth()
                                         .background(MaterialTheme.colorScheme.background)
                                         .padding(horizontal = 15.dp, vertical = 8.dp),
-                                    text = formatDateHeader(it.dateLabel),
+                                    text = formatDateHeader(transactionsByDate.dateLabel),
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight.W500
                                 )
                             }
-                            items(it.transactions,
+                            items(transactionsByDate.transactions,
                                 key = { transaction ->
                                     transaction.id
                                 },
                                 itemContent = { transaction ->
-                                    TransactionPreviewRow(Modifier.fillMaxWidth(), transaction,
+                                    TransactionPreviewRow(Modifier.fillMaxWidth()
+                                        .animateContentSize(), transaction,
                                         onClick = {
                                             onTransactionClicked.invoke(transaction.id)
                                         },
