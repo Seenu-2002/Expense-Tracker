@@ -280,7 +280,8 @@ fun SettingsScreen(navController: NavController,
                     viewModel.deleteAllTransactions()
                     showDeleteAllTransactionDialog = false
                 }) {
-                    Text("Delete")
+                    Text("Delete",
+                        color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
