@@ -84,6 +84,7 @@ fun SettingsScreen(navController: NavController,
     var showWeekStartsFromBottomSheet by remember { mutableStateOf(false) }
     var showDateFormatBottomSheet by remember { mutableStateOf(false) }
     var showThemeBottomSheet by remember { mutableStateOf(false) }
+    var showDeleteAllTransactionDialog by remember { mutableStateOf(false) }
     val weekStartsFromBottomSheet = rememberModalBottomSheetState()
     val dateFormatBottomSheet = rememberModalBottomSheetState()
     val themeBottomSheet = rememberModalBottomSheetState()
@@ -182,7 +183,6 @@ fun SettingsScreen(navController: NavController,
                     SettingsRow(
                         Modifier, Icons.Filled.Settings, "Theme", stringResource(themeStringRes)
                     ) {
-                        showToBeImplementedToast(context)
                         showThemeBottomSheet = true
                     }
                     SettingsRowWithSwitch(Modifier,
@@ -235,32 +235,20 @@ fun SettingsScreen(navController: NavController,
                             CircularProgressIndicator(modifier = Modifier.size(24.dp))
                         }
                     }
-                    ConstraintLayout(
-                        Modifier.then(
-                            Modifier
-                                .fillMaxWidth()
-                                .height(52.dp)
-                                .clickable {
-                                    showToBeImplementedToast(context)
-                                })
-                    ) {
-                        val (iconRef, labelRef) = createRefs()
+                    Row(modifier = Modifier.fillMaxWidth()
+                        .height(52.dp)
+                        .clickable(onClick = {
+                            showDeleteAllTransactionDialog = true
+                        }),
+                        verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            modifier = Modifier.constrainAs(iconRef) {
-                                top.linkTo(parent.top, 8.dp)
-                                bottom.linkTo(parent.bottom, 8.dp)
-                                start.linkTo(parent.start, 12.dp)
-                            },
+                            modifier = Modifier.padding(start = 12.dp),
                             imageVector = Icons.Filled.Delete,
-                            contentDescription = "",
+                            contentDescription = "Delete all data",
                             tint = MaterialTheme.colorScheme.error
                         )
                         Text(
-                            modifier = Modifier.constrainAs(labelRef) {
-                                start.linkTo(iconRef.end, 12.dp)
-                                top.linkTo(parent.top, 8.dp)
-                                bottom.linkTo(parent.bottom, 8.dp)
-                            },
+                            modifier = Modifier.padding(start = 12.dp),
                             text = "Delete all data",
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.error
@@ -278,6 +266,27 @@ fun SettingsScreen(navController: NavController,
             confirmButton = {
                 TextButton(onClick = { exportViewModel.dismissSuccessDialog() }) {
                     Text("OK")
+                }
+            }
+        )
+    }
+    if(showDeleteAllTransactionDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteAllTransactionDialog = false },
+            title = { Text("Delete All Transactions") },
+            text = { Text("Are you sure you want to delete all transactions? This action cannot be undone.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.deleteAllTransactions()
+                    showDeleteAllTransactionDialog = false
+                }) {
+                    Text("Delete",
+                        color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteAllTransactionDialog = false }) {
+                    Text("Cancel")
                 }
             }
         )
