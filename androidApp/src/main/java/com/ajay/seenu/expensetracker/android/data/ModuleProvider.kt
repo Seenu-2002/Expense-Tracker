@@ -3,6 +3,7 @@ package com.ajay.seenu.expensetracker.android.data
 import android.content.Context
 import com.ajay.seenu.expensetracker.AttachmentDataSourceImpl
 import com.ajay.seenu.expensetracker.AttachmentDateSource
+import com.ajay.seenu.expensetracker.BudgetRepository
 import com.ajay.seenu.expensetracker.CategoryDataSource
 import com.ajay.seenu.expensetracker.CategoryDataSourceImpl
 import com.ajay.seenu.expensetracker.DriverFactory
@@ -66,6 +67,12 @@ object ModuleProvider {
     @Provides
     fun provideFileManager(@ApplicationContext context: Context): FileManager {
         return AndroidFileManager(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideBudgetRepository(database: ExpenseDatabase): BudgetRepository {
+        return BudgetRepository(database)
     }
 
 }

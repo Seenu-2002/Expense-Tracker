@@ -18,7 +18,6 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -35,13 +34,18 @@ import androidx.navigation.compose.rememberNavController
 import com.ajay.seenu.expensetracker.android.presentation.screeens.OverviewScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.SettingsScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.SimpleAnalyticsScreen
+import com.ajay.seenu.expensetracker.android.presentation.screeens.budget.BudgetScreen
+import com.ajay.seenu.expensetracker.android.presentation.viewmodels.BudgetViewModel
 
 @Composable
 fun MainScreen(
+    budgetViewModel: BudgetViewModel,   //shared ViewModel for budgets
     onAddTransaction: () -> Unit,
     onTransactionClicked: (Long) -> Unit,
     onCloneTransaction: (Long) -> Unit,
-    onCategoryListScreen: () -> Unit
+    onCategoryListScreen: () -> Unit,
+    onCreateBudget: () -> Unit,
+    onBudgetClick: (Long) -> Unit,
 ) {
     var navigationSelectedItem by remember {
         mutableIntStateOf(0)
@@ -127,6 +131,13 @@ fun MainScreen(
             }
             composable(Screen.Settings.route) {
                 SettingsScreen(navController = navController)
+            }
+            composable(Screen.Budget.route) {
+                BudgetScreen(
+                    budgetViewModel = budgetViewModel,
+                    onCreateBudget = onCreateBudget,
+                    onBudgetClick = onBudgetClick,
+                )
             }
         }
     }

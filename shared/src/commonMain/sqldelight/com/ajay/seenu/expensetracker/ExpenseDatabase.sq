@@ -139,3 +139,83 @@ DELETE FROM Attachment WHERE id = ?;
 
 deleteAttachmentsByTransactionId:
 DELETE FROM Attachment WHERE transactionId = ?;
+
+CREATE TABLE Budget (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    name TEXT NOT NULL,
+    categoryId INTEGER,  -- NULL for overall budget, specific category_id for category budget
+    amount REAL NOT NULL,
+    periodType TEXT NOT NULL, -- 'MONTHLY', 'WEEKLY', 'YEARLY', 'CUSTOM'
+    startDate INTEGER NOT NULL,
+    endDate INTEGER,  -- NULL for recurring budgets, specific date for custom period
+    isRecurring INTEGER NOT NULL DEFAULT 1, -- 0 for false, 1 for true
+    createdAt INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+    updatedAt INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+    isActive INTEGER NOT NULL DEFAULT 1
+);
+
+-- Index for better query performance
+CREATE INDEX idx_budget_category ON Budget(categoryId);
+CREATE INDEX idx_budget_active ON Budget(isActive);
+CREATE INDEX idx_budget_period ON Budget(startDate, endDate);
+
+-- Queries for Budget operations
+selectAllActiveBudgets:
+SELECT * FROM Budget
+WHERE isActive = 1
+ORDER BY createdAt DESC;
+
+selectBudgetsByCategory:
+SELECT * FROM Budget
+WHERE categoryId = ? AND isActive = 1;
+
+selectOverallBudgets:
+SELECT * FROM Budget
+WHERE categoryId IS NULL AND isActive = 1;
+
+selectBudgetById:
+SELECT * FROM Budget
+WHERE id = ?;
+
+selectActiveBudgetsForPeriod:
+SELECT * FROM Budget
+WHERE isActive = 1
+AND (
+    (isRecurring = 1) OR
+    (startDate <= ? AND (endDate IS NULL OR endDate >= ?))
+);
+
+insertBudget:
+INSERT INTO Budget (name, categoryId, amount, periodType, startDate, endDate, isRecurring)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+updateBudget:
+UPDATE Budget
+SET name = ?, categoryId = ?, amount = ?, periodType = ?,
+    startDate = ?, endDate = ?, isRecurring = ?,
+    updatedAt = strftime('%s', 'now')
+WHERE id = ?;
+
+deleteBudget:
+UPDATE Budget
+SET isActive = 0, updatedAt = strftime('%s', 'now')
+WHERE id = ?;
+
+-- Query to get budget spending for a specific period
+getBudgetSpendingForPeriod:
+SELECT
+    b.id,
+    b.name,
+    b.amount,
+    b.categoryId,
+    COALESCE(SUM(CASE WHEN t.type = 'EXPENSE' THEN t.amount ELSE 0 END), 0)
+FROM Budget b
+LEFT JOIN TransactionDetail t ON (
+    (b.categoryId IS NULL OR b.categoryId = t.category)
+    AND t.date >= ?
+    AND t.date <= ?
+    AND t.type = 'EXPENSE'
+)
+WHERE b.isActive = 1
+AND b.id = ?
+GROUP BY b.id;
