@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,6 +30,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -91,14 +93,14 @@ fun BudgetListScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.background
             )
+            .padding(horizontal = 16.dp)
     ) {
         CenterAlignedTopAppBar(
             title = {
                 Text(
                     "May",
-                    color = Color.White,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -108,7 +110,6 @@ fun BudgetListScreen(
                     Icon(
                         Icons.Default.ArrowBack,
                         contentDescription = "Back",
-                        tint = Color.White
                     )
                 }
             },
@@ -117,19 +118,18 @@ fun BudgetListScreen(
                     Icon(
                         Icons.Default.ChevronRight,
                         contentDescription = "Next",
-                        tint = Color.White
                     )
                 }
             },
             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                 containerColor = Color.Transparent
-            )
+            ),
+            windowInsets = WindowInsets()
         )
 
         if(budgets.isEmpty()) {
             Spacer(modifier = Modifier.weight(1f))
 
-            // Empty state content
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -138,14 +138,13 @@ fun BudgetListScreen(
             ) {
                 Text(
                     "You don't have a budget.",
-                    color = Color.White,
                     fontSize = 18.sp,
                     textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     "Let's create one so you can control\nyour spendings.",
-                    color = Color.White.copy(alpha = 0.8f),
+                    color = LocalContentColor.current.copy(alpha = 0.8f),
                     fontSize = 16.sp,
                     textAlign = TextAlign.Center,
                     lineHeight = 22.sp
@@ -153,73 +152,44 @@ fun BudgetListScreen(
             }
 
             Spacer(modifier = Modifier.weight(1f))
-
-            // Create Budget Button
-            Button(
+            Button(modifier = Modifier.fillMaxWidth()
+                .padding(bottom = 10.dp),
                 onClick = onCreateBudget,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-                    .padding(bottom = 32.dp)
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                ),
-                shape = RoundedCornerShape(16.dp)
-            ) {
+                contentPadding = PaddingValues(vertical = 15.dp)) {
                 Text(
                     "Create a budget",
-                    color = Color.White,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Medium
                 )
             }
-
-            // Bottom Navigation Placeholder
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(80.dp)
-                    .background(Color.White)
-            )
-        } else {
-
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(budgets) { budgetWithSpending ->
-                    BudgetCard(
-                        budgetWithSpending = budgetWithSpending,
-                        onClick = { onBudgetClick(budgetWithSpending.budget.id) }
-                    )
-                }
-
-                item {
-                    // Create Budget Card
-                    Card(
-                        onClick = onCreateBudget,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(120.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
-                        shape = RoundedCornerShape(24.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                "Create a budget",
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
+        }
+        else {
+            Column(modifier = Modifier.fillMaxSize()) {
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    contentPadding = PaddingValues(vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(budgets) { budgetWithSpending ->
+                        BudgetCard(
+                            budgetWithSpending = budgetWithSpending,
+                            onClick = { onBudgetClick(budgetWithSpending.budget.id) }
+                        )
                     }
+                }
+                Button(modifier = Modifier.fillMaxWidth()
+                    .padding(bottom = 10.dp),
+                    onClick = onCreateBudget,
+                    contentPadding = PaddingValues(vertical = 15.dp)) {
+                    Text(
+                        "Create a budget",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
             }
         }
+
     }
 }
 
@@ -236,7 +206,8 @@ fun BudgetCard(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
+        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
         shape = RoundedCornerShape(24.dp)
     ) {
         Column(
@@ -250,7 +221,6 @@ fun BudgetCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    // Category Icon
                     Box(
                         modifier = Modifier
                             .size(14.dp)
@@ -261,20 +231,21 @@ fun BudgetCard(
                     Text(
                         budget.name,
                         fontSize = 14.sp,
-                        color = Gray600
                     )
                 }
 
                 if (isOverBudget) {
-                    Surface(
-                        color = MaterialTheme.colorScheme.error,
-                        shape = RoundedCornerShape(12.dp)
+                    Box(
+                        modifier = Modifier
+                            .size(25.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.error),
+                        contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            "You've exceed the limit",
-                            color = Color.White,
+                            "!",
                             fontSize = 10.sp,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            color = Color.White,
                         )
                     }
                 }
@@ -286,14 +257,12 @@ fun BudgetCard(
                 "Remaining $${String.format("%.0f", budgetWithSpending.remainingAmount.coerceAtLeast(0.0))}",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = Gray800
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Progress Bar
             LinearProgressIndicator(
-                progress = progress,
+                progress = { progress },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(8.dp)
@@ -307,7 +276,12 @@ fun BudgetCard(
             Text(
                 "$${String.format("%.0f", budgetWithSpending.spentAmount)} of $${String.format("%.0f", budget.amount)}",
                 fontSize = 12.sp,
-                color = Gray600
+            )
+            Text(
+                "You've exceeded the limit",
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 12.sp,
+                modifier = Modifier.padding(vertical = 4.dp)
             )
         }
     }

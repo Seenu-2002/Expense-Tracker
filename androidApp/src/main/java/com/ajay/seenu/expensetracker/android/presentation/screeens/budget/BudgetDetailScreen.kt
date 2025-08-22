@@ -3,6 +3,7 @@ package com.ajay.seenu.expensetracker.android.presentation.screeens.budget
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,11 +18,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -52,15 +55,13 @@ fun BudgetDetailScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.background
             )
     ) {
-        // Top App Bar
         CenterAlignedTopAppBar(
             title = {
                 Text(
                     "Detail Budget",
-                    color = Color.White,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -70,7 +71,6 @@ fun BudgetDetailScreen(
                     Icon(
                         Icons.Default.ArrowBack,
                         contentDescription = "Back",
-                        tint = Color.White
                     )
                 }
             },
@@ -79,7 +79,6 @@ fun BudgetDetailScreen(
                     Icon(
                         Icons.Default.Delete,
                         contentDescription = "Delete",
-                        tint = Color.White
                     )
                 }
             },
@@ -88,7 +87,6 @@ fun BudgetDetailScreen(
             )
         )
 
-        // Budget Info Section
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -105,7 +103,6 @@ fun BudgetDetailScreen(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     budget.name,
-                    color = Color.White,
                     fontSize = 14.sp
                 )
             }
@@ -114,7 +111,7 @@ fun BudgetDetailScreen(
 
             Text(
                 "Remaining",
-                color = Color.White.copy(alpha = 0.8f),
+                color = LocalContentColor.current.copy(alpha = 0.8f),
                 fontSize = 24.sp
             )
 
@@ -122,22 +119,20 @@ fun BudgetDetailScreen(
 
             Text(
                 "$${String.format("%.0f", budgetWithSpending.remainingAmount.coerceAtLeast(0.0))}",
-                color = Color.White,
-                fontSize = 64.sp,
-                fontWeight = FontWeight.Bold
+                fontSize = 60.sp,
+                fontWeight = FontWeight.SemiBold
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Progress Bar
             LinearProgressIndicator(
-                progress = progress,
+                progress = { progress },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(8.dp)
                     .clip(RoundedCornerShape(4.dp)),
                 color = Orange,
-                trackColor = Color.White.copy(alpha = 0.3f)
+                trackColor = LocalContentColor.current.copy(alpha = 0.3f)
             )
 
             if (isOverBudget) {
@@ -147,8 +142,7 @@ fun BudgetDetailScreen(
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-                        "You've exceed the limit",
-                        color = Color.White,
+                        "You've exceeded the limit",
                         fontSize = 14.sp,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                     )
@@ -158,19 +152,17 @@ fun BudgetDetailScreen(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // Edit Button
         Button(
             onClick = onEdit,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 32.dp)
-                .height(56.dp),
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 32.dp),
+            contentPadding = PaddingValues(vertical = 15.dp),
             shape = RoundedCornerShape(16.dp)
         ) {
             Text(
                 "Edit",
-                color = Color.White,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Medium
             )

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.ajay.seenu.expensetracker.BudgetRepository
 import com.ajay.seenu.expensetracker.Category
 import com.ajay.seenu.expensetracker.android.data.CategoryRepository
+import com.ajay.seenu.expensetracker.entity.TransactionType
 import com.ajay.seenu.expensetracker.entity.budget.BudgetRequest
 import com.ajay.seenu.expensetracker.entity.budget.BudgetWithSpending
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,7 +35,7 @@ class BudgetViewModel @Inject constructor(
     )
 
     val categories: StateFlow<List<Category>> = flow {
-            emit(categoryRepository.getAllCategories())
+            emit(categoryRepository.getCategories(TransactionType.EXPENSE))
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
