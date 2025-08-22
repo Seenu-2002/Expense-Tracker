@@ -277,12 +277,14 @@ fun BudgetCard(
                 "$${String.format("%.0f", budgetWithSpending.spentAmount)} of $${String.format("%.0f", budget.amount)}",
                 fontSize = 12.sp,
             )
-            Text(
-                "You've exceeded the limit",
-                color = MaterialTheme.colorScheme.error,
-                fontSize = 12.sp,
-                modifier = Modifier.padding(vertical = 4.dp)
-            )
+            if (isOverBudget) {
+                Text(
+                    "You've exceeded the limit",
+                    color = MaterialTheme.colorScheme.error,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(vertical = 4.dp)
+                )
+            }
         }
     }
 }
