@@ -46,14 +46,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.data.FilterPreference
-import com.ajay.seenu.expensetracker.android.domain.data.Filter
-import com.ajay.seenu.expensetracker.android.domain.data.UiState
-import com.ajay.seenu.expensetracker.android.domain.util.formatDateHeader
+import com.ajay.seenu.expensetracker.android.util.formatDateHeader
+import com.ajay.seenu.expensetracker.android.presentation.state.UiState
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.OverviewScreenViewModel
-import com.ajay.seenu.expensetracker.android.presentation.widgets.DateRangePickerBottomSheet
-import com.ajay.seenu.expensetracker.android.presentation.widgets.FilterBottomSheet
-import com.ajay.seenu.expensetracker.android.presentation.widgets.OverviewCard
-import com.ajay.seenu.expensetracker.android.presentation.widgets.TransactionPreviewRow
+import com.ajay.seenu.expensetracker.android.presentation.components.DateRangePickerBottomSheet
+import com.ajay.seenu.expensetracker.android.presentation.components.FilterBottomSheet
+import com.ajay.seenu.expensetracker.android.presentation.components.OverviewCard
+import com.ajay.seenu.expensetracker.android.presentation.components.TransactionPreviewRow
+import com.ajay.seenu.expensetracker.domain.model.DateFilter
+import com.ajay.seenu.expensetracker.util.getDateLabel
+import com.ajay.seenu.expensetracker.util.toLocalDate
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -99,8 +101,8 @@ fun OverviewScreen(
 
     LaunchedEffect(currentFilter) {
         val filter = currentFilter
-        if (filter is Filter.Custom) {
-            dateRangePickerState.setSelection(filter.startDate, filter.endDate)
+        if (filter is DateFilter.Custom) {
+            dateRangePickerState.setSelection(filter.startDateInMillis, filter.endDateInMillis)
         }
     }
 
@@ -119,7 +121,7 @@ fun OverviewScreen(
                 Spacer(modifier = Modifier.weight(1f))
                 BadgedBox(
                     badge = {
-                        if (currentFilter != Filter.ThisMonth) {
+                        if (currentFilter != DateFilter.ThisMonth) {
                             Box(
                                 modifier = Modifier
                                     .size(10.dp)
@@ -217,7 +219,8 @@ fun OverviewScreen(
                                         .fillParentMaxWidth()
                                         .background(MaterialTheme.colorScheme.background)
                                         .padding(horizontal = 15.dp, vertical = 8.dp),
-                                    text = formatDateHeader(it.dateLabel),
+                                    // TODO: User config format
+                                    text = formatDateHeader(it.rawDate.getDateLabel()),
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight.W500
                                 )
@@ -263,7 +266,7 @@ fun OverviewScreen(
     if (openFilterBottomSheet) {
         FilterBottomSheet(sheetState = sheetState, filter = currentFilter, formatter = formatter, onFilterSelected = { filter ->
             when (filter) {
-                Filter.CUSTOM_MOCK -> {
+                DateFilter.Custom.MOCK -> {
                     openDateRangePicker = true
                     openFilterBottomSheet = false
                 }
@@ -287,7 +290,9 @@ fun OverviewScreen(
             formatter = formatter,
             onDateSelected = { startDate, endDate ->
                 openDateRangePicker = false
-                viewModel.setFilter(context, Filter.Custom(startDate, endDate))
+                val startDate = startDate.toLocalDate()
+                val endDate = endDate.toLocalDate()
+                viewModel.setFilter(context, DateFilter.Custom(startDate, endDate))
             })
     }
 }

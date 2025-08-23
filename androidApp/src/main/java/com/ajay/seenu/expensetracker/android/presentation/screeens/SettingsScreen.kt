@@ -61,9 +61,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.SettingsViewModel
-import com.ajay.seenu.expensetracker.entity.StartDayOfTheWeek
-import com.ajay.seenu.expensetracker.entity.Theme
+import com.ajay.seenu.expensetracker.domain.model.Theme
 import kotlinx.coroutines.launch
+import kotlinx.datetime.DayOfWeek
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,8 +79,13 @@ fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel = 
     val themeBottomSheet = rememberModalBottomSheetState()
 
     val weekStartsFromStringRes = when (configs.weekStartsFrom) {
-        StartDayOfTheWeek.SUNDAY -> R.string.sunday
-        StartDayOfTheWeek.MONDAY -> R.string.monday
+        DayOfWeek.SUNDAY -> R.string.sunday
+        DayOfWeek.MONDAY -> R.string.monday
+        DayOfWeek.TUESDAY -> R.string.tuesday
+        DayOfWeek.WEDNESDAY -> R.string.wednesday
+        DayOfWeek.THURSDAY -> R.string.tuesday
+        DayOfWeek.FRIDAY -> R.string.friday
+        DayOfWeek.SATURDAY -> R.string.saturday
     }
 
     val themeStringRes = when (configs.theme) {
@@ -113,14 +118,22 @@ fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel = 
     val scope = rememberCoroutineScope()
 
     if (showWeekStartsFromBottomSheet) {
-        val options = listOf(stringResource(R.string.sunday), stringResource(R.string.monday))
+        val options = listOf(
+            stringResource(R.string.sunday),
+            stringResource(R.string.monday),
+            stringResource(R.string.tuesday),
+            stringResource(R.string.wednesday),
+            stringResource(R.string.thursday),
+            stringResource(R.string.friday),
+            stringResource(R.string.saturday),
+        )
         ListBottomSheet(state = weekStartsFromBottomSheet, items = options, selectedItem = stringResource(weekStartsFromStringRes), onDismiss = {
             showWeekStartsFromBottomSheet = false
         }) { index, _ ->
             scope.launch {
                 weekStartsFromBottomSheet.hide()
             }
-            val newValue = StartDayOfTheWeek.entries[index]
+            val newValue = DayOfWeek.entries[index]
             viewModel.changeWeekStartFromPref(newValue)
         }
     }

@@ -3,11 +3,11 @@ package com.ajay.seenu.expensetracker.android.presentation.viewmodels.chart_view
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ajay.seenu.expensetracker.UserConfigurationsManager
-import com.ajay.seenu.expensetracker.android.data.getDateFormat
-import com.ajay.seenu.expensetracker.android.data.getStartDayOfTheWeek
-import com.ajay.seenu.expensetracker.android.domain.data.Filter
-import com.ajay.seenu.expensetracker.android.domain.usecases.GetTotalTransactionPerDayByCategoryUseCase
+import com.ajay.seenu.expensetracker.android.util.getDateFormat
 import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.ChartState
+import com.ajay.seenu.expensetracker.domain.model.DateFilter
+import com.ajay.seenu.expensetracker.domain.usecase.DateRangeCalculatorUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.data_filter.GetTotalTransactionPerDayByCategoryUseCase
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
@@ -28,6 +28,9 @@ class TotalExpensePerDayChartViewModel @Inject constructor(
     private val userConfigurationsManager: UserConfigurationsManager
 ) : ViewModel() {
 
+    @Inject
+    internal lateinit var dateRangeCalculatorUseCase: DateRangeCalculatorUseCase
+
     private val _chartState: MutableStateFlow<ChartState> = MutableStateFlow(ChartState.Empty)
     val chartState: StateFlow<ChartState> = _chartState.asStateFlow()
 
@@ -39,7 +42,7 @@ class TotalExpensePerDayChartViewModel @Inject constructor(
     private val _updatedDateFormat: MutableStateFlow<String> = MutableStateFlow("dd MMM, yyyy")
     val updatedDateFormat = _updatedDateFormat.asStateFlow()
 
-    private lateinit var filter: Filter
+    private lateinit var filter: DateFilter
 
     fun init() {
         viewModelScope.launch {
@@ -49,13 +52,13 @@ class TotalExpensePerDayChartViewModel @Inject constructor(
         }
     }
 
-    private fun getData(filter: Filter) {
+    private fun getData(filter: DateFilter) {
         viewModelScope.launch {
             _chartState.emit(ChartState.Fetching)
             val data = async(Dispatchers.Default) {
                 delay((0 .. 400L).random())
-                val startDayOfTheWeek = userConfigurationsManager.getConfigs().getStartDayOfTheWeek()
-                useCase(startDayOfTheWeek, filter)
+                val dateRange= dateRangeCalculatorUseCase(filter)
+                useCase(dateRange)
             }.await()
 
             if (data.isEmpty()) {
@@ -80,7 +83,7 @@ class TotalExpensePerDayChartViewModel @Inject constructor(
         }
     }
 
-    fun setFilter(filter: Filter) {
+    fun setFilter(filter: DateFilter) {
         this.filter = filter
         getData(filter)
     }

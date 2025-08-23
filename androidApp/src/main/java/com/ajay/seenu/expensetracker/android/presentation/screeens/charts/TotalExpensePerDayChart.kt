@@ -16,12 +16,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ajay.seenu.expensetracker.android.R
-import com.ajay.seenu.expensetracker.android.domain.data.Filter
 import com.ajay.seenu.expensetracker.android.presentation.common.ChartDefaults
 import com.ajay.seenu.expensetracker.android.presentation.common.rememberMarker
 import com.ajay.seenu.expensetracker.android.presentation.screeens.InsufficientDataCard
 import com.ajay.seenu.expensetracker.android.presentation.screeens.Loader
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.chart_viewmodels.TotalExpensePerDayChartViewModel
+import com.ajay.seenu.expensetracker.domain.model.DateFilter
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottomAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStartAxis
@@ -48,7 +48,7 @@ import com.patrykandpatrick.vico.core.common.shape.Shape
 @Composable
 fun TotalExpensePerDayChart(
     modifier: Modifier = Modifier,
-    filter: Filter = Filter.ThisMonth,
+    filter: DateFilter = DateFilter.ThisMonth,
     viewModel: TotalExpensePerDayChartViewModel = hiltViewModel(),
 ) {
     val isChartLoadingCompleted by viewModel.chartState.collectAsStateWithLifecycle()

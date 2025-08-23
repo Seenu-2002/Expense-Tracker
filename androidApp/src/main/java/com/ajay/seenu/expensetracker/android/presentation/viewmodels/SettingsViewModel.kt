@@ -5,14 +5,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ajay.seenu.expensetracker.UserConfigurationsManager
 import com.ajay.seenu.expensetracker.domain.DateFormats
-import com.ajay.seenu.expensetracker.entity.StartDayOfTheWeek
-import com.ajay.seenu.expensetracker.entity.Theme
-import com.ajay.seenu.expensetracker.entity.UserConfigs
+import com.ajay.seenu.expensetracker.domain.model.Theme
+import com.ajay.seenu.expensetracker.domain.model.UserConfigs
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.datetime.DayOfWeek
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -29,7 +29,7 @@ class SettingsViewModel @Inject constructor(
         "",
         null,
         Theme.SYSTEM_THEME,
-        StartDayOfTheWeek.MONDAY,
+        DayOfWeek.MONDAY,
         "dd MMM, yyyy",
         isAppLockEnabled = false
     )
@@ -87,7 +87,7 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun changeWeekStartFromPref(day: StartDayOfTheWeek) {
+    fun changeWeekStartFromPref(day: DayOfWeek) {
         if (_userConfigs.value.weekStartsFrom == day) {
             return
         }

@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
@@ -7,10 +9,8 @@ plugins {
 
 kotlin {
     androidTarget {
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = "17"
-            }
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
         }
     }
     
@@ -33,6 +33,8 @@ kotlin {
             implementation(libs.sqldelight.extensions.paging)
             implementation(libs.sqldelight.extensions.coroutines)
             implementation(libs.androidx.datastore.preferences.core)
+            // Multiplatform logging library
+            implementation(libs.kermit)
         }
         commonTest{
             dependencies {

@@ -38,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -51,17 +52,21 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.ajay.seenu.expensetracker.android.R
-import com.ajay.seenu.expensetracker.android.domain.data.Error
-import com.ajay.seenu.expensetracker.android.domain.data.Transaction
-import com.ajay.seenu.expensetracker.android.domain.data.UiState
-import com.ajay.seenu.expensetracker.android.domain.util.asCurrency
+import com.ajay.seenu.expensetracker.android.util.asCurrency
 import com.ajay.seenu.expensetracker.android.presentation.common.ChartDefaults
 import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.PieChart
 import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.PieChartData
 import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.PieChartEvent
 import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.PieChartStyle
+import com.ajay.seenu.expensetracker.android.presentation.state.Error
+import com.ajay.seenu.expensetracker.android.presentation.state.UiState
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.SimpleAnalyticsViewModel
-import com.ajay.seenu.expensetracker.android.presentation.widgets.SlidingSwitch
+import com.ajay.seenu.expensetracker.android.presentation.components.SlidingSwitch
+import com.ajay.seenu.expensetracker.android.util.getColor
+import com.ajay.seenu.expensetracker.android.util.getPlaceHolderRes
+import com.ajay.seenu.expensetracker.android.util.getStringRes
+import com.ajay.seenu.expensetracker.domain.model.Category
+import com.ajay.seenu.expensetracker.domain.model.TransactionType
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlin.random.Random
 
@@ -79,10 +84,10 @@ fun SimpleAnalyticsScreen(
     val state by viewmodel.data.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
-        viewmodel.changeType(Transaction.Type.EXPENSE)
+        viewmodel.changeType(TransactionType.EXPENSE)
     }
 
-    var selectedCategory: Transaction.Category? by rememberSaveable(state /*saver*/) { // TODO: Custom Saver Implementation
+    var selectedCategory: Category? by rememberSaveable(state /*saver*/) { // TODO: Custom Saver Implementation
         mutableStateOf(null)
     }
 
@@ -140,7 +145,7 @@ fun SimpleAnalyticsScreen(
                                 .fillMaxHeight(.4F)
                         ) { event ->
                             selectedCategory = if (event is PieChartEvent.Selected) {
-                                event.entry.extras as Transaction.Category
+                                event.entry.extras as Category
                             } else {
                                 null
                             }
@@ -169,7 +174,7 @@ fun SimpleAnalyticsScreen(
                                 .weight(1F)
                         ) { event ->
                             selectedCategory = if (event is PieChartEvent.Selected) {
-                                event.entry.extras as Transaction.Category
+                                event.entry.extras as Category
                             } else {
                                 null
                             }
@@ -200,7 +205,7 @@ fun SimpleAnalyticsScreen(
 @Composable
 fun PieChartContainer(
     chartData: PieChartData,
-    selectedCategory: Transaction.Category?,
+    selectedCategory: Category?,
     modifier: Modifier = Modifier,
     onChartEvent: (event: PieChartEvent) -> Unit
 ) {
@@ -233,25 +238,25 @@ fun PieChartContainer(
 @Composable
 fun PieChartLegendContainer(
     legendData: List<AnalyticsLegendRowData>,
-    selectedCategory: Transaction.Category?,
-    selectedType: Transaction.Type,
+    selectedCategory: Category?,
+    selectedType: TransactionType,
     modifier: Modifier = Modifier,
-    onTypeChanged: (Transaction.Type) -> Unit,
-    onTapped: (Transaction.Category?) -> Unit
+    onTypeChanged: (TransactionType) -> Unit,
+    onTapped: (Category?) -> Unit
 ) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        val values = Transaction.Type.entries.map { stringResource(it.stringRes) }
+        val values = TransactionType.entries.map { stringResource(it.getStringRes()) }
         SlidingSwitch(
-            selectedValue = stringResource(selectedType.stringRes),
+            selectedValue = stringResource(selectedType.getStringRes()),
             values = values,
             modifier = Modifier.widthIn(max = 600.dp),
             shape = RoundedCornerShape(12.dp)
         ) { index, _ ->
-            val type = Transaction.Type.entries[index]
+            val type = TransactionType.entries[index]
             onTypeChanged(type)
         }
         val listState = rememberLazyListState()
@@ -324,7 +329,7 @@ fun AnalyticsLegendRow(
                     .background(data.color, shape)
             )
 
-            val amount = stringResource(data.category.type.placeHolderRes, data.amount.asCurrency())
+            val amount = stringResource(data.category.type.getPlaceHolderRes(), data.amount.asCurrency())
             val color = data.category.type.getColor()
 
             Text(
@@ -369,11 +374,11 @@ private fun AnalyticsLegendRowDataPreview() {
         (10..100000).random().toDouble(),
         ChartDefaults.getDynamicColor((0..100).random()),
         (0..100).random().toFloat(),
-        Transaction.Category(
+        Category(
             212L,
-            Transaction.Type.entries.random(),
+            TransactionType.entries.random(),
             "Random",
-            Color.Red,
+            Color.Red.toArgb().toLong(),
             R.drawable.monetization_on
         )
     )
@@ -386,7 +391,7 @@ data class AnalyticsLegendRowData constructor(
     val color: Color,
     @FloatRange(0.0, 100.0)
     val percentage: Float,
-    val category: Transaction.Category
+    val category: Category
 )
 
 data class AnalyticsScreenData(

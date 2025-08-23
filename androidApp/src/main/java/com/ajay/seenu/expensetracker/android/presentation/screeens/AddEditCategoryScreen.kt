@@ -57,15 +57,17 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ajay.seenu.expensetracker.android.R
-import com.ajay.seenu.expensetracker.android.domain.data.Error
-import com.ajay.seenu.expensetracker.android.domain.data.Transaction
-import com.ajay.seenu.expensetracker.android.domain.data.UiState
 import com.ajay.seenu.expensetracker.android.presentation.common.CategoryDefaults
+import com.ajay.seenu.expensetracker.android.presentation.components.AdaptiveVerticalGrid
+import com.ajay.seenu.expensetracker.android.presentation.components.DiscardChangesDialog
+import com.ajay.seenu.expensetracker.android.presentation.components.ProgressDialog
+import com.ajay.seenu.expensetracker.android.presentation.components.SlidingSwitch
+import com.ajay.seenu.expensetracker.android.presentation.state.Error
+import com.ajay.seenu.expensetracker.android.presentation.state.UiState
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.AddEditCategoryViewModel
-import com.ajay.seenu.expensetracker.android.presentation.widgets.AdaptiveVerticalGrid
-import com.ajay.seenu.expensetracker.android.presentation.widgets.DiscardChangesDialog
-import com.ajay.seenu.expensetracker.android.presentation.widgets.ProgressDialog
-import com.ajay.seenu.expensetracker.android.presentation.widgets.SlidingSwitch
+import com.ajay.seenu.expensetracker.android.util.getStringRes
+import com.ajay.seenu.expensetracker.domain.model.Category
+import com.ajay.seenu.expensetracker.domain.model.TransactionType
 
 val ColorSaver = run {
     val redKey = "Red"
@@ -107,19 +109,20 @@ fun AddEditCategoryScreen(
         }
     }
 
-    val category = (categoryState as? UiState.Success<Transaction.Category>)?.data
+    val category = (categoryState as? UiState.Success<Category>)?.data
 
     var selectedIcon: Int? by rememberSaveable(category) {
-        mutableStateOf(category?.res ?: CategoryDefaults.categoryIconsList.random())
+        mutableStateOf(category?.iconRes ?: CategoryDefaults.categoryIconsList.random())
     }
     var title: String by rememberSaveable(category) {
         mutableStateOf(category?.label ?: "")
     }
     var iconBackgroundColor: Color by rememberSaveable(category, stateSaver = ColorSaver) {
-        mutableStateOf(category?.color ?: CategoryDefaults.categoryColors.random())
+        mutableStateOf(category?.color?.let { Color(it) }
+            ?: CategoryDefaults.categoryColors.random())
     }
-    var transactionType: Transaction.Type by rememberSaveable(category) {
-        mutableStateOf(category?.type ?: Transaction.Type.INCOME)
+    var transactionType: TransactionType by rememberSaveable(category) {
+        mutableStateOf(category?.type ?: TransactionType.INCOME)
     }
 
     var showError by rememberSaveable { mutableStateOf(false) }
@@ -146,8 +149,8 @@ fun AddEditCategoryScreen(
                         // TODO: Add onBackPressed logic as well
                         if (isInEditMode) {
                             if (title != category?.label ||
-                                selectedIcon != category.res ||
-                                iconBackgroundColor != category.color ||
+                                selectedIcon != category.iconRes ||
+                                iconBackgroundColor != Color(category.color) ||
                                 transactionType != category.type
                             ) {
                                 showExitDialog = true
@@ -188,7 +191,7 @@ fun AddEditCategoryScreen(
                         if (arg is AddEditScreenArg.Edit) {
                             val category = category!!
                             val hasChanges =
-                                category.label != title || category.color != iconBackgroundColor || category.res != selectedIcon
+                                category.label != title || Color(category.color) != iconBackgroundColor || category.iconRes != selectedIcon
 
                             if (!hasChanges) {
                                 Toast.makeText(
@@ -252,16 +255,16 @@ fun AddEditCategoryScreen(
                     .matchParentSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                val values = Transaction.Type.entries.map { stringResource(it.stringRes) }
+                val values = TransactionType.entries.map { stringResource(it.getStringRes()) }
                 if (arg is AddEditScreenArg.Create) {
                     val type = arg.type
                     SlidingSwitch(
-                        selectedValue = stringResource(type.stringRes),
+                        selectedValue = stringResource(type.getStringRes()),
                         values = values,
                         modifier = Modifier.widthIn(max = 600.dp),
                         shape = RoundedCornerShape(32.dp)
                     ) { index, _ ->
-                        transactionType = Transaction.Type.entries[index]
+                        transactionType = TransactionType.entries[index]
                     }
                 }
 
@@ -477,6 +480,6 @@ fun CategoryColorItem(
 }
 
 sealed interface AddEditScreenArg {
-    data class Create(val type: Transaction.Type) : AddEditScreenArg
+    data class Create(val type: TransactionType) : AddEditScreenArg
     data class Edit(val id: Long) : AddEditScreenArg
 }
