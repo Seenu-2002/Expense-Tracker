@@ -26,7 +26,7 @@ fun ExpenseTrackerTheme(
             secondary = Color(0xFF03DAC5),
             tertiary = Color(0xFF3700B3),
             surface = Color.DarkGray,
-            background = Color(0xFF171616)
+            background = Color(0xFF1C1919)
         )
     } else {
         lightColorScheme(

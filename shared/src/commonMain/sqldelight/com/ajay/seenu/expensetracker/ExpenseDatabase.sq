@@ -59,6 +59,9 @@ getAllTransactions:
 SELECT *
 FROM TransactionDetailEntity ORDER BY createdAt DESC LIMIT :limit OFFSET :offset;
 
+getTransactionsCount:
+SELECT COUNT(*) FROM TransactionDetail;
+
 getAllTransactionsBetween:
 SELECT *
 FROM TransactionDetailEntity WHERE createdAt >= :startUTCValue AND createdAt <= :endUTCValue

@@ -91,7 +91,6 @@ class OverviewScreenViewModel @Inject constructor(
 
     private fun getFilteredOverallData(dateRange: DateRange) {
         viewModelScope.launch {
-            _overallData.emit(UiState.Loading)
             getFilteredOverallDataUseCase.invoke(dateRange).collectLatest {
                 _overallData.emit(UiState.Success(it))
             }
@@ -112,7 +111,6 @@ class OverviewScreenViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             val currentState = _recentTransactions.value
-            _recentTransactions.emit(UiState.Loading)
             getFilteredTransactionsUseCase.invoke(dateRange = dateRange, pageNo = pageNo)
                 .collectLatest {
                     _recentTransactions.emit(
@@ -149,6 +147,8 @@ class OverviewScreenViewModel @Inject constructor(
         FilterPreference.setCurrentFilter(context, filter)
         viewModelScope.launch {
             _currentFilter.emit(filter)
+            _overallData.emit(UiState.Loading)
+            _recentTransactions.emit(UiState.Loading)
             getOverallData(filter)
             getRecentTransactions(filter)
         }

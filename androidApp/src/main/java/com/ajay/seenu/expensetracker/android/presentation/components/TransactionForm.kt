@@ -207,17 +207,7 @@ fun TransactionForm(
             }
         }
     )
-//    val takePictureLauncher = rememberLauncherForActivityResult(
-//        contract = ActivityResultContracts.TakePicturePreview()
-//    ) { bitmap ->
-//        bitmap?.let {
-//            if(attachments.size >= 5)
-//                Toast.makeText(context, "Cannot add more than 5 attachments", Toast.LENGTH_SHORT).show()
-//            else
-//                imageFile = saveBitmapToFile(context, bitmap)
-//            //viewModel.addAttachmentFromFile(transactionId, imageFile)
-//        }
-//    }
+
     var showAddAttachmentDialog by rememberSaveable {
         mutableStateOf(false)
     }
@@ -240,7 +230,7 @@ fun TransactionForm(
 
     val datePickerState by remember {
         // FIXME: Year is hardcoded
-        mutableStateOf(DatePickerState(Locale.ENGLISH, null, null, 2020..2024, DisplayMode.Picker))
+        mutableStateOf(DatePickerState(Locale.ENGLISH, null, null, 2020..2025, DisplayMode.Picker))
     }
     val focusRequester = remember {
         FocusRequester()
@@ -450,7 +440,7 @@ fun TransactionForm(
                         .fillMaxWidth()
                         .fillMaxHeight(0.70F)
                         .background(
-                            Color.White,
+                            MaterialTheme.colorScheme.background,
                             RoundedCornerShape(
                                 topStart = 25.dp,
                                 topEnd = 25.dp,

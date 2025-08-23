@@ -1,3 +1,4 @@
+import org.gradle.kotlin.dsl.implementation
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -33,6 +34,8 @@ kotlin {
             implementation(libs.sqldelight.extensions.paging)
             implementation(libs.sqldelight.extensions.coroutines)
             implementation(libs.androidx.datastore.preferences.core)
+            implementation(libs.kotlin.json.serialization)
+            implementation(libs.kotlinx.coroutines.core)
             // Multiplatform logging library
             implementation(libs.kermit)
         }
@@ -48,6 +51,7 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.sqldelight.android.driver)
             implementation(libs.security.crypto)
+            implementation(libs.core.ktx)
 
         }
         val androidUnitTest by getting {
@@ -64,7 +68,7 @@ kotlin {
 
 android {
     namespace = "com.ajay.seenu.expensetracker"
-    compileSdk = 34
+    compileSdk = 36
     defaultConfig {
         minSdk = 24
     }
