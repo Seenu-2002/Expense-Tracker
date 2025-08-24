@@ -1,9 +1,7 @@
 package com.ajay.seenu.expensetracker
 
-import app.cash.sqldelight.ColumnAdapter
 import app.cash.sqldelight.EnumColumnAdapter
 import app.cash.sqldelight.db.SqlDriver
-import kotlinx.datetime.LocalDate
 
 const val DATABASE_NAME = "expenseDatabase.db"
 
@@ -20,10 +18,10 @@ fun createDatabase(driverFactory: DriverFactory): ExpenseDatabase {
     )
     return ExpenseDatabase(
         driver,
-        CategoryAdapter = Category.Adapter(EnumColumnAdapter()),
-        TransactionDetailAdapter = TransactionDetail.Adapter(
-            typeAdapter = EnumColumnAdapter(),
-            paymentTypeAdapter = EnumColumnAdapter()
-        )
+        CategoryEntityAdapter = CategoryEntity.Adapter(EnumColumnAdapter()),
+        TransactionDetailEntityAdapter = TransactionDetailEntity.Adapter(
+            typeAdapter = EnumColumnAdapter()
+        ),
+        AccountGroupEntityAdapter = AccountGroupEntity.Adapter(EnumColumnAdapter())
     )
 }

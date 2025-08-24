@@ -2,8 +2,8 @@ package com.ajay.seenu.expensetracker.android.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ajay.seenu.expensetracker.Attachment
-import com.ajay.seenu.expensetracker.android.domain.usecases.attachment.AddAttachmentUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.attachment.AddAttachmentUseCase
+import com.ajay.seenu.expensetracker.domain.model.Attachment
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

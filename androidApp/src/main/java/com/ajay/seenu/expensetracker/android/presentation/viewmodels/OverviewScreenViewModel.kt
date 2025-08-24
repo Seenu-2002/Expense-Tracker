@@ -5,18 +5,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ajay.seenu.expensetracker.UserConfigurationsManager
 import com.ajay.seenu.expensetracker.android.data.FilterPreference
-import com.ajay.seenu.expensetracker.android.data.getStartDayOfTheWeek
-import com.ajay.seenu.expensetracker.android.data.getThisMonthInMillis
-import com.ajay.seenu.expensetracker.android.data.getThisWeekInMillis
-import com.ajay.seenu.expensetracker.android.data.getThisYearInMillis
-import com.ajay.seenu.expensetracker.android.domain.data.Filter
-import com.ajay.seenu.expensetracker.android.domain.data.TransactionsByDate
-import com.ajay.seenu.expensetracker.android.domain.data.UiState
-import com.ajay.seenu.expensetracker.android.domain.usecases.GetFilteredOverallDataUseCase
-import com.ajay.seenu.expensetracker.android.domain.usecases.GetFilteredTransactionsUseCase
-import com.ajay.seenu.expensetracker.android.domain.usecases.GetRecentTransactionsUseCase
-import com.ajay.seenu.expensetracker.android.domain.usecases.transaction.DeleteTransactionUseCase
-import com.ajay.seenu.expensetracker.android.presentation.widgets.OverallData
+import com.ajay.seenu.expensetracker.android.presentation.state.UiState
+import com.ajay.seenu.expensetracker.domain.model.DateFilter
+import com.ajay.seenu.expensetracker.domain.model.DateRange
+import com.ajay.seenu.expensetracker.domain.model.OverallData
+import com.ajay.seenu.expensetracker.domain.model.TransactionsByDate
+import com.ajay.seenu.expensetracker.domain.usecase.DateRangeCalculatorUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.data_filter.GetFilteredOverallDataUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.data_filter.GetFilteredTransactionsUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.data_filter.GetRecentTransactionsUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.transaction.DeleteTransactionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,7 +28,8 @@ class OverviewScreenViewModel @Inject constructor(
     private val userConfigurationsManager: UserConfigurationsManager
 ) : ViewModel() {
 
-    private val _overallData: MutableStateFlow<UiState<OverallData>> = MutableStateFlow(UiState.Loading)
+    private val _overallData: MutableStateFlow<UiState<OverallData>> =
+        MutableStateFlow(UiState.Loading)
     val overallData = _overallData.asStateFlow()
 
     private val _recentTransactions: MutableStateFlow<UiState<List<TransactionsByDate>>> =
@@ -43,8 +42,9 @@ class OverviewScreenViewModel @Inject constructor(
     private val _hasMoreData: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val hasMoreData = _hasMoreData.asStateFlow()
 
-    private val _currentFilter: MutableStateFlow<Filter> = MutableStateFlow(Filter.ThisMonth)
-    val currentFilter: StateFlow<Filter> = _currentFilter.asStateFlow()
+    private val _currentFilter: MutableStateFlow<DateFilter> =
+        MutableStateFlow(DateFilter.ThisMonth)
+    val currentFilter: StateFlow<DateFilter> = _currentFilter.asStateFlow()
 
     private val _updatedDateFormat: MutableStateFlow<String> = MutableStateFlow("")
     val updatedDateFormat = _updatedDateFormat.asStateFlow()
@@ -61,6 +61,9 @@ class OverviewScreenViewModel @Inject constructor(
     @Inject
     internal lateinit var deleteTransactionUseCase: DeleteTransactionUseCase
 
+    @Inject
+    internal lateinit var dateRangeCalculatorUseCase: DateRangeCalculatorUseCase
+
     init {
         init()
         viewModelScope.launch {
@@ -70,23 +73,10 @@ class OverviewScreenViewModel @Inject constructor(
 
     private var lastFetchedPage: Int = 1
 
-    private fun getOverallData(filter: Filter) {
+    private fun getOverallData(filter: DateFilter) {
         viewModelScope.launch {
-            val range = when(filter) {
-                Filter.ThisWeek -> {
-                    getThisWeekInMillis(getStartDayOfTheWeek())
-                }
-                Filter.ThisYear -> {
-                    getThisYearInMillis()
-                }
-                Filter.ThisMonth -> {
-                    getThisMonthInMillis()
-                }
-                is Filter.Custom -> {
-                    filter.startDate to filter.endDate
-                }
-            }
-            getFilteredOverallData(range.first, range.second)
+            val range = dateRangeCalculatorUseCase(filter)
+            getFilteredOverallData(range)
 
         }
     }
@@ -99,74 +89,48 @@ class OverviewScreenViewModel @Inject constructor(
         }
     }
 
-    private fun getFilteredOverallData(fromValue: Long, toValue: Long) {
+    private fun getFilteredOverallData(dateRange: DateRange) {
         viewModelScope.launch {
-            getFilteredOverallDataUseCase.invoke(fromValue, toValue).collectLatest {
+            getFilteredOverallDataUseCase.invoke(dateRange).collectLatest {
                 _overallData.emit(UiState.Success(it))
             }
         }
     }
 
-    private fun getRecentTransactions(filter: Filter = Filter.ThisMonth) {
+    private fun getRecentTransactions(filter: DateFilter = DateFilter.ThisMonth) {
         viewModelScope.launch {
             lastFetchedPage = 1
-            val range = when (filter) {
-                Filter.ThisWeek -> {
-                    getThisWeekInMillis(getStartDayOfTheWeek())
-                }
-                Filter.ThisYear -> {
-                    getThisYearInMillis()
-                }
-                Filter.ThisMonth -> {
-                    getThisMonthInMillis()
-                }
-                is Filter.Custom -> {
-                    filter.startDate to filter.endDate
-                }
-            }
-            getFilteredTransactions(fromValue = range.first, toValue = range.second)
+            val range = dateRangeCalculatorUseCase(filter)
+            getFilteredTransactions(dateRange = range)
         }
     }
 
     private fun getFilteredTransactions(
         pageNo: Int = lastFetchedPage,
-        fromValue: Long,
-        toValue: Long
+        dateRange: DateRange
     ) {
         viewModelScope.launch {
             val currentState = _recentTransactions.value
-            getFilteredTransactionsUseCase.invoke(pageNo, fromValue, toValue).collectLatest {
-                _recentTransactions.emit(
-                    UiState.Success(
-                        if(lastFetchedPage == 1)
-                            it.data
-                        else
-                            (currentState as UiState.Success).data + it.data
+            getFilteredTransactionsUseCase.invoke(dateRange = dateRange, pageNo = pageNo)
+                .collectLatest {
+                    _recentTransactions.emit(
+                        UiState.Success(
+                            if (lastFetchedPage == 1)
+                                it.data
+                            else
+                                (currentState as UiState.Success).data + it.data
+                        )
                     )
-                )
-                _hasMoreData.emit(it.hasMoreData)
-            }
+                    _hasMoreData.emit(it.hasMoreData)
+                }
         }
     }
 
     fun getNextPageTransactions() {
         viewModelScope.launch {
             lastFetchedPage++
-            val range = when (val filter = _currentFilter.value) {
-                Filter.ThisWeek -> {
-                    getThisWeekInMillis(getStartDayOfTheWeek())
-                }
-                Filter.ThisYear -> {
-                    getThisYearInMillis()
-                }
-                Filter.ThisMonth -> {
-                    getThisMonthInMillis()
-                }
-                is Filter.Custom -> {
-                    filter.startDate to filter.endDate
-                }
-            }
-            getFilteredTransactions(fromValue = range.first, toValue = range.second)
+            val range = dateRangeCalculatorUseCase(_currentFilter.value)
+            getFilteredTransactions(dateRange = range)
         }
     }
 
@@ -179,7 +143,7 @@ class OverviewScreenViewModel @Inject constructor(
         }
     }
 
-    fun setFilter(context: Context, filter: Filter) {
+    fun setFilter(context: Context, filter: DateFilter) {
         FilterPreference.setCurrentFilter(context, filter)
         viewModelScope.launch {
             _currentFilter.emit(filter)
@@ -188,9 +152,5 @@ class OverviewScreenViewModel @Inject constructor(
             getOverallData(filter)
             getRecentTransactions(filter)
         }
-    }
-
-    private suspend fun getStartDayOfTheWeek(): Int {
-        return userConfigurationsManager.getConfigs().getStartDayOfTheWeek()
     }
 }

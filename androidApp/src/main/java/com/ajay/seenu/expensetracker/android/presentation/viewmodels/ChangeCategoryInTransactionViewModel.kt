@@ -2,12 +2,13 @@ package com.ajay.seenu.expensetracker.android.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ajay.seenu.expensetracker.android.domain.data.Error
-import com.ajay.seenu.expensetracker.android.domain.data.Transaction
-import com.ajay.seenu.expensetracker.android.domain.data.UiState
-import com.ajay.seenu.expensetracker.android.domain.usecases.ChangeCategoriesUseCase
-import com.ajay.seenu.expensetracker.android.domain.usecases.category.DeleteCategoryUseCase
-import com.ajay.seenu.expensetracker.android.domain.usecases.category.GetAllCategoriesUseCase
+import com.ajay.seenu.expensetracker.android.presentation.state.Error
+import com.ajay.seenu.expensetracker.android.presentation.state.UiState
+import com.ajay.seenu.expensetracker.domain.model.Category
+import com.ajay.seenu.expensetracker.domain.model.TransactionType
+import com.ajay.seenu.expensetracker.domain.usecase.category.ChangeCategoriesUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.category.DeleteCategoryUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.category.GetAllCategoriesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,13 +30,13 @@ class ChangeCategoryInTransactionViewModel @Inject constructor() : ViewModel() {
     internal lateinit var deleteCategoryUseCase: DeleteCategoryUseCase
 
 
-    private var _categoryIdToBeDeleted: Transaction.Category? = null
-    val categoryToBeDeleted: Transaction.Category
+    private var _categoryIdToBeDeleted: Category? = null
+    val categoryToBeDeleted: Category
         get() = _categoryIdToBeDeleted!!
 
-    private val _categories: MutableStateFlow<UiState<List<Transaction.Category>>> =
+    private val _categories: MutableStateFlow<UiState<List<Category>>> =
         MutableStateFlow(UiState.Empty)
-    val categories: StateFlow<UiState<List<Transaction.Category>>> = _categories.asStateFlow()
+    val categories: StateFlow<UiState<List<Category>>> = _categories.asStateFlow()
 
     private val _updateStatus: MutableStateFlow<UiState<Boolean>> = MutableStateFlow(UiState.Empty)
     val updateStatus: StateFlow<UiState<Boolean>> = _updateStatus.asStateFlow()
@@ -43,7 +44,7 @@ class ChangeCategoryInTransactionViewModel @Inject constructor() : ViewModel() {
     private val _transactionCount: MutableStateFlow<UiState<Long>> = MutableStateFlow(UiState.Empty)
     val transactionCount: StateFlow<UiState<Long>> = _transactionCount.asStateFlow()
 
-    fun init(type: Transaction.Type, categoryToBeDeletedId: Long) {
+    fun init(type: TransactionType, categoryToBeDeletedId: Long) {
         viewModelScope.launch {
             try {
                 _categories.value = UiState.Loading
@@ -65,7 +66,7 @@ class ChangeCategoryInTransactionViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    fun updateCategory(category: Transaction.Category) {
+    fun updateCategory(category: Category) {
         if (category == categoryToBeDeleted) {
             throw IllegalArgumentException("Cannot update the category that is being deleted")
         }

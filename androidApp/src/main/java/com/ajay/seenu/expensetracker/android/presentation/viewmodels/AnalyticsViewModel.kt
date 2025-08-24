@@ -3,9 +3,8 @@ package com.ajay.seenu.expensetracker.android.presentation.viewmodels
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ajay.seenu.expensetracker.UserConfigurationsManager
 import com.ajay.seenu.expensetracker.android.data.FilterPreference
-import com.ajay.seenu.expensetracker.android.domain.data.Filter
+import com.ajay.seenu.expensetracker.domain.model.DateFilter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,18 +15,16 @@ import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
-class AnalyticsViewModel @Inject constructor(
-    private val userConfigurationsManager: UserConfigurationsManager
-) : ViewModel() {
+class AnalyticsViewModel @Inject constructor() : ViewModel() {
 
     val chartOrder: List<Charts> = Charts.entries
 
-    private val _currentFilter: MutableStateFlow<Filter> = MutableStateFlow(Filter.ThisMonth)
-    val currentFilter: StateFlow<Filter> = _currentFilter.asStateFlow()
+    private val _currentFilter: MutableStateFlow<DateFilter> = MutableStateFlow(DateFilter.ThisMonth)
+    val currentFilter: StateFlow<DateFilter> = _currentFilter.asStateFlow()
 
     private val _updatedDateFormat: MutableStateFlow<String> = MutableStateFlow("dd MMM, yyyy")
 
-    fun setFilter(context: Context, filter: Filter) {
+    fun setFilter(context: Context, filter: DateFilter) {
         FilterPreference.setCurrentFilter(context, filter)
         viewModelScope.launch {
             _currentFilter.emit(filter)
@@ -41,6 +38,5 @@ class AnalyticsViewModel @Inject constructor(
 
 enum class Charts(val label: String) {
     TOTAL_EXPENSE_PER_DAY_BY_CATEGORY("Total Expense per day By Category"),
-    EXPENSE_BY_CATEGORY("Expense by Category"),
-    EXPENSE_BY_PAYMENT_TYPE("Expense by Payment Type")
+    EXPENSE_BY_CATEGORY("Expense by Category")
 }

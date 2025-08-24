@@ -1,6 +1,6 @@
 package com.ajay.seenu.expensetracker
 
-import com.ajay.seenu.expensetracker.entity.UserConfigs
+import com.ajay.seenu.expensetracker.domain.model.UserConfigs
 
 
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")

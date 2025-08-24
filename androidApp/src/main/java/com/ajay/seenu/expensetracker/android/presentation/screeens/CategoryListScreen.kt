@@ -60,23 +60,25 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ajay.seenu.expensetracker.android.R
-import com.ajay.seenu.expensetracker.android.domain.data.Transaction
-import com.ajay.seenu.expensetracker.android.domain.data.UiState
+import com.ajay.seenu.expensetracker.android.presentation.state.UiState
 import com.ajay.seenu.expensetracker.android.presentation.theme.LocalColors
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.CategoriesListUiData
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.CategoryScreenViewModel
-import com.ajay.seenu.expensetracker.android.presentation.widgets.CategoryChangeConfirmationDialog
-import com.ajay.seenu.expensetracker.android.presentation.widgets.CategoryRow
-import com.ajay.seenu.expensetracker.android.presentation.widgets.ProgressDialog
-import com.ajay.seenu.expensetracker.android.presentation.widgets.SlidingSwitch
+import com.ajay.seenu.expensetracker.android.presentation.components.CategoryChangeConfirmationDialog
+import com.ajay.seenu.expensetracker.android.presentation.components.CategoryRow
+import com.ajay.seenu.expensetracker.android.presentation.components.ProgressDialog
+import com.ajay.seenu.expensetracker.android.presentation.components.SlidingSwitch
+import com.ajay.seenu.expensetracker.android.util.getStringRes
+import com.ajay.seenu.expensetracker.domain.model.Category
+import com.ajay.seenu.expensetracker.domain.model.TransactionType
 import timber.log.Timber
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryListScreen(
     onCategoryEdit: (Long) -> Unit,
-    onCreateCategory: (Transaction.Type) -> Unit,
-    onDeleteCategory: (id: Long, type: Transaction.Type, recordCount: Long) -> Unit,
+    onCreateCategory: (TransactionType) -> Unit,
+    onDeleteCategory: (id: Long, type: TransactionType, recordCount: Long) -> Unit,
     onNavigateBack: () -> Unit,
     viewModel: CategoryScreenViewModel = hiltViewModel()
 ) {
@@ -84,7 +86,7 @@ fun CategoryListScreen(
     val type by viewModel.transactionType.collectAsStateWithLifecycle()
     val transactionCountState by viewModel.transactionCount.collectAsStateWithLifecycle()
     var showConfirmationDialog by remember { mutableStateOf(false) }
-    var categoryToBeDeleted: Transaction.Category? by remember { mutableStateOf(null) }
+    var categoryToBeDeleted: Category? by remember { mutableStateOf(null) }
 
     val context = LocalContext.current
 
@@ -163,7 +165,7 @@ fun CategoryListScreen(
                         },
                         onDelete = { category ->
                             val categories =
-                                state.data.let { if (category.type == Transaction.Type.INCOME) it.incomeCategories else it.expenseCategories }
+                                state.data.let { if (category.type == TransactionType.INCOME) it.incomeCategories else it.expenseCategories }
 
                             // Not allowing deletion if it's the last category of that type
                             if (categories.size <= 1) {
@@ -261,7 +263,7 @@ fun CategoryListScreen(
 @Composable
 fun SwipeableCategoryRow(
     modifier: Modifier = Modifier,
-    category: Transaction.Category,
+    category: Category,
     onDelete: () -> Unit,
     onEdit: () -> Unit
 ) {
@@ -345,11 +347,11 @@ fun SwipeableCategoryRow(
 @Composable
 fun CategoryListScreenContent(
     modifier: Modifier = Modifier,
-    selectedType: Transaction.Type,
+    selectedType: TransactionType,
     categoriesUiData: CategoriesListUiData,
-    onTypeChanged: (Transaction.Type) -> Unit,
-    onDelete: (Transaction.Category) -> Unit,
-    onEdit: (Transaction.Category) -> Unit,
+    onTypeChanged: (TransactionType) -> Unit,
+    onDelete: (Category) -> Unit,
+    onEdit: (Category) -> Unit,
 ) {
 
     Column(
@@ -357,20 +359,20 @@ fun CategoryListScreenContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        val selectedCategories = if (selectedType == Transaction.Type.INCOME) {
+        val selectedCategories = if (selectedType == TransactionType.INCOME) {
             categoriesUiData.incomeCategories
         } else {
             categoriesUiData.expenseCategories
         }
 
-        val values = Transaction.Type.entries.map { stringResource(it.stringRes) }
+        val values = TransactionType.entries.map { stringResource(it.getStringRes()) }
         SlidingSwitch(
-            selectedValue = stringResource(selectedType.stringRes),
+            selectedValue = stringResource(selectedType.getStringRes()),
             values = values,
             modifier = Modifier.widthIn(max = 600.dp),
             shape = RoundedCornerShape(12.dp)
         ) { index, _ ->
-            val type = Transaction.Type.entries[index]
+            val type = TransactionType.entries[index]
             Timber.d("Switching to type: $type")
             onTypeChanged(type)
         }
@@ -403,7 +405,7 @@ fun CategoryListScreenContent(
         LaunchedEffect(pagerState) {
             snapshotFlow { pagerState.currentPage }.collect { page ->
                 Timber.d("Current page: $page")
-                val type = Transaction.Type.entries[page]
+                val type = TransactionType.entries[page]
                 onTypeChanged(type)
             }
         }
@@ -445,9 +447,9 @@ fun CategoryListScreenContent(
 @Composable
 fun CategoryList(
     modifier: Modifier = Modifier,
-    categories: List<Transaction.Category>,
-    onDelete: (Transaction.Category) -> Unit,
-    onEdit: (Transaction.Category) -> Unit
+    categories: List<Category>,
+    onDelete: (Category) -> Unit,
+    onEdit: (Category) -> Unit
 ) {
     val lazyListState = rememberLazyListState()
     LazyColumn(

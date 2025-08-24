@@ -43,6 +43,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -56,16 +57,18 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
-import com.ajay.seenu.expensetracker.Attachment
 import com.ajay.seenu.expensetracker.android.R
-import com.ajay.seenu.expensetracker.android.domain.data.Transaction
 import com.ajay.seenu.expensetracker.android.presentation.common.PreviewThemeWrapper
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.DetailTransactionViewModel
-import com.ajay.seenu.expensetracker.entity.PaymentType
+import com.ajay.seenu.expensetracker.domain.model.Account
+import com.ajay.seenu.expensetracker.domain.model.Attachment
+import com.ajay.seenu.expensetracker.domain.model.Category
+import com.ajay.seenu.expensetracker.domain.model.Transaction
+import com.ajay.seenu.expensetracker.domain.model.TransactionType
 import java.text.DateFormat
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
+import kotlin.time.ExperimentalTime
 
 @Composable
 fun DetailTransactionScreen(
@@ -91,7 +94,7 @@ fun DetailTransactionScreen(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalTime::class)
 @Composable
 fun DetailTransactionView(modifier: Modifier = Modifier,
                           transaction: Transaction,
@@ -99,8 +102,10 @@ fun DetailTransactionView(modifier: Modifier = Modifier,
                           onEditTransaction: () -> Unit,
                           onNavigateBack: () -> Unit) {
     val context = LocalContext.current
+
+    // TODO: Need to be in UiState
     val formatter: DateFormat = SimpleDateFormat("EEEE d MMMM yyyy", Locale.getDefault())
-    val date = formatter.format(transaction.date)
+    val date = formatter.format(transaction.createdAt.toEpochMilliseconds())
 
     Box(
         modifier = modifier
@@ -112,7 +117,7 @@ fun DetailTransactionView(modifier: Modifier = Modifier,
                 .fillMaxWidth()
                 .fillMaxHeight(0.3F)
                 .background(
-                    color = if (transaction.type == Transaction.Type.EXPENSE)
+                    color = if (transaction.type == TransactionType.EXPENSE)
                         Color(0xFFFD3C4A)
                     else Color(0xFF00A86B),
                     shape = RoundedCornerShape(
@@ -187,11 +192,11 @@ fun DetailTransactionView(modifier: Modifier = Modifier,
                 Column(modifier = Modifier.weight(1f)
                     .padding(vertical = 10.dp),
                     horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = "Payment Type",
+                    Text(text = "Account", // TODO: String resource
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis)
                     Spacer(modifier = Modifier.height(10.dp))
-                    Text(text = transaction.paymentType.label,
+                    Text(text = transaction.account.name,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         fontWeight = FontWeight.SemiBold)
@@ -231,7 +236,7 @@ fun DetailTransactionView(modifier: Modifier = Modifier,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.SemiBold)
                 transaction.note?.let {
-                    Text(text = transaction.note)
+                    Text(text = it)
                 }?: run {
                     Column (modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -315,6 +320,7 @@ fun DetailTransactionView(modifier: Modifier = Modifier,
     }
 }
 
+@OptIn(ExperimentalTime::class)
 @Preview()
 @Composable
 private fun DetailTransactionScreenPreview() {
@@ -323,16 +329,20 @@ private fun DetailTransactionScreenPreview() {
             transaction = Transaction(
                 id = 0L,
                 amount = (10).toDouble(),
-                category = Transaction.Category(
+                category = Category(
                     id = 0L,
                     label = "Test",
-                    type = Transaction.Type.INCOME,
-                    color = Color.Red,
-                    res = R.drawable.attach_money
+                    type = TransactionType.INCOME,
+                    color = Color.Red.toArgb().toLong(),
+                    iconRes = R.drawable.attach_money
                 ),
-                date = Date(),
-                paymentType = PaymentType.UPI,
-                type = Transaction.Type.INCOME
+                createdAt = kotlin.time.Clock.System.now(),
+                account = Account(
+                    id = 0L,
+                    name = "Test Account",
+                    groupId = 12L
+                ),
+                type = TransactionType.INCOME
             ),
             attachments = emptyList(),
             onEditTransaction = {},

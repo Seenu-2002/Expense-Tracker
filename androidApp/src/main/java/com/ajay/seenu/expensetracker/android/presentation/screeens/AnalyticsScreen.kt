@@ -42,14 +42,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.data.FilterPreference
-import com.ajay.seenu.expensetracker.android.domain.data.Filter
 import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.ExpenseByCategoryChart
-import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.ExpenseByPaymentTypeChart
 import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.TotalExpensePerDayChart
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.AnalyticsViewModel
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.Charts
-import com.ajay.seenu.expensetracker.android.presentation.widgets.DateRangePickerBottomSheet
-import com.ajay.seenu.expensetracker.android.presentation.widgets.FilterBottomSheet
+import com.ajay.seenu.expensetracker.android.presentation.components.DateRangePickerBottomSheet
+import com.ajay.seenu.expensetracker.android.presentation.components.FilterBottomSheet
+import com.ajay.seenu.expensetracker.domain.model.DateFilter
+import com.ajay.seenu.expensetracker.util.toLocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,8 +67,8 @@ fun AnalyticsScreen(navController: NavController, viewModel: AnalyticsViewModel 
         mutableStateOf(false)
     }
     val dateRangePickerState = rememberDateRangePickerState(
-        initialSelectedStartDateMillis = (currentFilter as? Filter.Custom)?.startDate,
-        initialSelectedEndDateMillis = (currentFilter as? Filter.Custom)?.endDate
+        initialSelectedStartDateMillis = (currentFilter as? DateFilter.Custom)?.startDateInMillis,
+        initialSelectedEndDateMillis = (currentFilter as? DateFilter.Custom)?.endDateInMillis
     )
     val dateRangeSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var openDateRangePicker by rememberSaveable {
@@ -77,8 +77,8 @@ fun AnalyticsScreen(navController: NavController, viewModel: AnalyticsViewModel 
 
     LaunchedEffect(currentFilter) {
         val filter = currentFilter
-        if (filter is Filter.Custom) {
-            dateRangePickerState.setSelection(filter.startDate, filter.endDate)
+        if (filter is DateFilter.Custom) {
+            dateRangePickerState.setSelection(filter.startDateInMillis, filter.endDateInMillis)
         }
     }
 
@@ -94,7 +94,7 @@ fun AnalyticsScreen(navController: NavController, viewModel: AnalyticsViewModel 
                     }
                     .padding(4.dp),
                 badge = {
-                    if (currentFilter != Filter.ThisMonth) {
+                    if (currentFilter != DateFilter.ThisMonth) {
                         Box(
                             modifier = Modifier
                                 .size(10.dp)
@@ -145,18 +145,6 @@ fun AnalyticsScreen(navController: NavController, viewModel: AnalyticsViewModel 
                             )
                         }
                     }
-
-                    Charts.EXPENSE_BY_PAYMENT_TYPE -> {
-                        ChartContainer(Modifier, chartType.label) {
-                            ExpenseByPaymentTypeChart(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 4.dp, vertical = 2.dp)
-                                    .height(300.dp),
-                                currentFilter
-                            )
-                        }
-                    }
                 }
             }
         }
@@ -168,7 +156,7 @@ fun AnalyticsScreen(navController: NavController, viewModel: AnalyticsViewModel 
                 formatter = viewModel.getDateFormatter(),
                 onFilterSelected = { filter ->
                     when (filter) {
-                        Filter.CUSTOM_MOCK -> {
+                        DateFilter.Custom.MOCK -> {
                             openDateRangePicker = true
                             openFilterBottomSheet = false
                         }
@@ -194,7 +182,9 @@ fun AnalyticsScreen(navController: NavController, viewModel: AnalyticsViewModel 
                 formatter = viewModel.getDateFormatter(),
                 onDateSelected = { startDate, endDate ->
                     openDateRangePicker = false
-                    viewModel.setFilter(context, Filter.Custom(startDate, endDate))
+                    val startDate = startDate.toLocalDate()
+                    val endDate = endDate.toLocalDate()
+                    viewModel.setFilter(context, DateFilter.Custom(startDate, endDate))
                 })
         }
     }

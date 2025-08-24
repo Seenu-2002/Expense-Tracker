@@ -1,6 +1,5 @@
 package com.ajay.seenu.expensetracker.android.presentation.screeens
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -35,24 +34,30 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
-import com.ajay.seenu.expensetracker.Attachment
-import com.ajay.seenu.expensetracker.android.ExpenseTrackerTheme
+import com.ajay.seenu.expensetracker.android.presentation.theme.ExpenseTrackerTheme
 import com.ajay.seenu.expensetracker.android.R
+import com.ajay.seenu.expensetracker.domain.model.Attachment
+import timber.log.Timber
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun AttachmentsView(modifier: Modifier = Modifier,
-                             attachments: List<Attachment>,
-                             onAttachmentCanceled: (Attachment) -> Unit,
-                             onClick: () -> Unit) {
+internal fun AttachmentsView(
+    modifier: Modifier = Modifier,
+    attachments: List<Attachment>,
+    onAttachmentCanceled: (Attachment) -> Unit,
+    onClick: () -> Unit
+) {
     val scrollState = rememberScrollState()
-    Column(modifier = modifier
-        .fillMaxWidth()
-        .border(1.dp, LocalContentColor.current.copy(alpha = 0.2F), RoundedCornerShape(10.dp))
-    ) {
-        Row(modifier = Modifier
+    Column(
+        modifier = modifier
             .fillMaxWidth()
-            .padding(top = 10.dp)) {
+            .border(1.dp, LocalContentColor.current.copy(alpha = 0.2F), RoundedCornerShape(10.dp))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp)
+        ) {
             Text(
                 text = "Attachments (${attachments.size})",
                 modifier = Modifier
@@ -61,7 +66,8 @@ internal fun AttachmentsView(modifier: Modifier = Modifier,
                 color = LocalContentColor.current.copy(alpha = 0.5F)
             )
             Icon(
-                modifier = Modifier.padding(end = 15.dp)
+                modifier = Modifier
+                    .padding(end = 15.dp)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null
@@ -73,12 +79,14 @@ internal fun AttachmentsView(modifier: Modifier = Modifier,
                 tint = LocalContentColor.current.copy(alpha = 0.5F)
             )
         }
-        Row(modifier = modifier
-            .fillMaxWidth()
-            .heightIn(MinContainerHeight, MaxFlowRowHeight)
-            .verticalScroll(scrollState),
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .heightIn(MinContainerHeight, MaxFlowRowHeight)
+                .verticalScroll(scrollState),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start) {
+            horizontalArrangement = Arrangement.Start
+        ) {
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(7.dp),
                 verticalArrangement = Arrangement.spacedBy(7.dp),
@@ -87,26 +95,35 @@ internal fun AttachmentsView(modifier: Modifier = Modifier,
                     .padding(10.dp)
             ) {
                 attachments.forEach { attachment ->
-                    Box(modifier = Modifier.padding(10.dp)
-                        .size(100.dp)
-                        .border(1.dp, LocalContentColor.current.copy(alpha = 0.2F))) {
-                        AsyncImage(model = attachment.imageUri.toUri(),
+                    Box(
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .size(100.dp)
+                            .border(1.dp, LocalContentColor.current.copy(alpha = 0.2F))
+                    ) {
+                        AsyncImage(
+                            model = attachment.imageUri.toUri(),
                             contentDescription = null,
                             modifier = Modifier.fillMaxSize(),
                             onState = {
-                                when(it) {
+                                when (it) {
                                     is AsyncImagePainter.State.Error -> {
-                                        Log.e("DetailTransactionView", "Error loading image: ${it.result.throwable.message}")
+                                        Timber
+                                            .e("Error loading image: ${it.result.throwable.message}")
                                     }
+
                                     is AsyncImagePainter.State.Success -> {
-                                        Log.d("DetailTransactionView", "Image loaded successfully")
+                                        Timber
+                                            .d("Image loaded successfully")
                                     }
+
                                     else -> {
-                                        Log.d("DetailTransactionView", "Loading image...")
+                                        Timber.d("Loading image...")
                                     }
                                 }
                             })
-                        Icon(painter = painterResource(R.drawable.baseline_close_24),
+                        Icon(
+                            painter = painterResource(R.drawable.baseline_close_24),
                             contentDescription = "cancel",
                             modifier = Modifier
                                 .align(Alignment.TopEnd)

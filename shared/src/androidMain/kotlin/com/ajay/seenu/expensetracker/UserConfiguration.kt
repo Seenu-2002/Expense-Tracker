@@ -6,13 +6,13 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.ajay.seenu.expensetracker.entity.StartDayOfTheWeek
-import com.ajay.seenu.expensetracker.entity.Theme
-import com.ajay.seenu.expensetracker.entity.UserConfigs
+import com.ajay.seenu.expensetracker.domain.model.Theme
+import com.ajay.seenu.expensetracker.domain.model.UserConfigs
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.datetime.DayOfWeek
 
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 actual class UserConfigurationsManager(private val appContext: Context) {
@@ -73,8 +73,8 @@ actual class UserConfigurationsManager(private val appContext: Context) {
                     Theme.valueOf(theme)
                 } ?: Theme.SYSTEM_THEME,
                 weekStartsFrom = it[startDayOfWeek]?.let { startDayOfWeek ->
-                    StartDayOfTheWeek.valueOf(startDayOfWeek)
-                } ?: StartDayOfTheWeek.SUNDAY,
+                    DayOfWeek.valueOf(startDayOfWeek)
+                } ?: DayOfWeek.SUNDAY,
                 dateFormat = it[dateFormat] ?: "dd MMM, yyyy",
                 isAppLockEnabled = it[isAppLockEnabled] ?: false
             )

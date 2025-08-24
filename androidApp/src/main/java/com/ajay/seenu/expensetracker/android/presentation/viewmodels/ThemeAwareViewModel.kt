@@ -4,7 +4,7 @@ import androidx.annotation.CallSuper
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ajay.seenu.expensetracker.UserConfigurationsManager
-import com.ajay.seenu.expensetracker.entity.Theme
+import com.ajay.seenu.expensetracker.domain.model.Theme
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
