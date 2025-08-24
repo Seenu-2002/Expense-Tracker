@@ -1,4 +1,4 @@
-package com.ajay.seenu.expensetracker.entity
+package com.ajay.seenu.expensetracker.domain
 
 interface FileManager {
     suspend fun saveFile(content: String, fileName: String, mimeType: String): Boolean

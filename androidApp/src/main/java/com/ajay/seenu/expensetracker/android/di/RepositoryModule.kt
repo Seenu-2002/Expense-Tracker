@@ -3,15 +3,16 @@ package com.ajay.seenu.expensetracker.android.di
 import android.content.Context
 import com.ajay.seenu.expensetracker.DriverFactory
 import com.ajay.seenu.expensetracker.ExpenseDatabase
-import com.ajay.seenu.expensetracker.UserConfigurationsManager
 import com.ajay.seenu.expensetracker.createDatabase
 import com.ajay.seenu.expensetracker.data.data_source.AccountDataSource
 import com.ajay.seenu.expensetracker.data.data_source.AttachmentDateSource
 import com.ajay.seenu.expensetracker.data.data_source.CategoryDataSource
+import com.ajay.seenu.expensetracker.data.data_source.ExportDataSource
 import com.ajay.seenu.expensetracker.data.data_source.TransactionDataSource
 import com.ajay.seenu.expensetracker.data.data_source.local.AccountLocalDataSource
 import com.ajay.seenu.expensetracker.data.data_source.local.AttachmentLocalDataSource
 import com.ajay.seenu.expensetracker.data.data_source.local.CategoryLocalDataSource
+import com.ajay.seenu.expensetracker.data.data_source.local.ExportLocalDataSource
 import com.ajay.seenu.expensetracker.data.data_source.local.TransactionLocalDataSource
 import com.ajay.seenu.expensetracker.data.repository.AccountRepository
 import com.ajay.seenu.expensetracker.data.repository.AttachmentRepository
@@ -78,6 +79,12 @@ object RepositoryModule {
 
     @Singleton
     @Provides
+    fun provideExportLocalDataSource(database: ExpenseDatabase, transactionRepository: TransactionRepository): ExportDataSource {
+        return ExportLocalDataSource(transactionRepository, database)
+    }
+
+    @Singleton
+    @Provides
     fun provideAccountRepository(dataSource: AccountDataSource): AccountRepository {
         return AccountRepository(dataSource)
     }
@@ -86,12 +93,6 @@ object RepositoryModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): ExpenseDatabase {
         return createDatabase(DriverFactory(context))
-    }
-
-    @Singleton
-    @Provides
-    fun provideUserConfigsManager(@ApplicationContext context: Context): UserConfigurationsManager {
-        return UserConfigurationsManager(context)
     }
 
 }

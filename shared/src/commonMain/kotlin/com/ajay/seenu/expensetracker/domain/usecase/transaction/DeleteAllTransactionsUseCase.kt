@@ -1,9 +1,8 @@
-package com.ajay.seenu.expensetracker.android.domain.usecases.transaction
+package com.ajay.seenu.expensetracker.domain.usecase.transaction
 
-import com.ajay.seenu.expensetracker.android.data.TransactionRepository
-import javax.inject.Inject
+import com.ajay.seenu.expensetracker.data.repository.TransactionRepository
 
-class DeleteAllTransactionsUseCase @Inject constructor(
+class DeleteAllTransactionsUseCase constructor(
     private val repository: TransactionRepository
 ) {
     suspend operator fun invoke() {

@@ -23,7 +23,6 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
@@ -62,22 +61,21 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Visibility
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
-import com.ajay.seenu.expensetracker.entity.ExportFormat
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.ExportViewModel
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.SettingsViewModel
-import com.ajay.seenu.expensetracker.entity.ExportState
-import com.ajay.seenu.expensetracker.entity.StartDayOfTheWeek
+import com.ajay.seenu.expensetracker.domain.model.ExportFormat
+import com.ajay.seenu.expensetracker.domain.model.ExportState
 import com.ajay.seenu.expensetracker.domain.model.Theme
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(navController: NavController,
-                   viewModel: SettingsViewModel = hiltViewModel(),
-                   exportViewModel: ExportViewModel = hiltViewModel()) {
+fun SettingsScreen(
+    viewModel: SettingsViewModel = hiltViewModel(),
+    exportViewModel: ExportViewModel = hiltViewModel()
+) {
     val configs by viewModel.userConfigs.collectAsStateWithLifecycle()
     val exportUiState by exportViewModel.uiState.collectAsStateWithLifecycle()
 
@@ -139,9 +137,13 @@ fun SettingsScreen(navController: NavController,
             stringResource(R.string.friday),
             stringResource(R.string.saturday),
         )
-        ListBottomSheet(state = weekStartsFromBottomSheet, items = options, selectedItem = stringResource(weekStartsFromStringRes), onDismiss = {
-            showWeekStartsFromBottomSheet = false
-        }) { index, _ ->
+        ListBottomSheet(
+            state = weekStartsFromBottomSheet,
+            items = options,
+            selectedItem = stringResource(weekStartsFromStringRes),
+            onDismiss = {
+                showWeekStartsFromBottomSheet = false
+            }) { index, _ ->
             scope.launch {
                 weekStartsFromBottomSheet.hide()
             }
@@ -156,9 +158,13 @@ fun SettingsScreen(navController: NavController,
                 context.getString(R.string.date_format_row, it.first, it.second)
             }
         }
-        ListBottomSheet(state = dateFormatBottomSheet, items = dateFormats, selectedItem = configs.dateFormat, onDismiss = {
-            showDateFormatBottomSheet = false
-        }) { index, option ->
+        ListBottomSheet(
+            state = dateFormatBottomSheet,
+            items = dateFormats,
+            selectedItem = configs.dateFormat,
+            onDismiss = {
+                showDateFormatBottomSheet = false
+            }) { index, option ->
             scope.launch {
                 dateFormatBottomSheet.hide()
             }
@@ -167,10 +173,18 @@ fun SettingsScreen(navController: NavController,
     }
 
     if (showThemeBottomSheet) {
-        val options = listOf(stringResource(R.string.theme_light), stringResource(R.string.theme_dark), stringResource(R.string.theme_system_theme))
-        ListBottomSheet(state = themeBottomSheet, items = options, selectedItem = stringResource(themeStringRes), onDismiss = {
-            showThemeBottomSheet = false
-        }) { index, _ ->
+        val options = listOf(
+            stringResource(R.string.theme_light),
+            stringResource(R.string.theme_dark),
+            stringResource(R.string.theme_system_theme)
+        )
+        ListBottomSheet(
+            state = themeBottomSheet,
+            items = options,
+            selectedItem = stringResource(themeStringRes),
+            onDismiss = {
+                showThemeBottomSheet = false
+            }) { index, _ ->
             scope.launch {
                 themeBottomSheet.hide()
             }
@@ -199,7 +213,8 @@ fun SettingsScreen(navController: NavController,
                     ) {
                         showThemeBottomSheet = true
                     }
-                    SettingsRowWithSwitch(Modifier,
+                    SettingsRowWithSwitch(
+                        Modifier,
                         Icons.Filled.Lock,
                         "App Lock",
                         configs.isAppLockEnabled,
@@ -207,7 +222,7 @@ fun SettingsScreen(navController: NavController,
                         onClick = { }
                     ) {
                         viewModel.shouldEnableAppLock(it)
-                        val enabled = if(it) "enabled" else "disabled"
+                        val enabled = if (it) "enabled" else "disabled"
                         Toast.makeText(context, "App lock is $enabled", Toast.LENGTH_SHORT).show()
                     }
                     SettingsRow(
@@ -227,13 +242,18 @@ fun SettingsScreen(navController: NavController,
             }
             SettingsRowContainer(modifier = Modifier.fillMaxWidth(), title = "Data") { modifier ->
                 Column(modifier.fillMaxWidth()) {
-                    Row(modifier = Modifier.fillMaxWidth()
-                        .height(52.dp)
-                        .clickable(enabled = exportUiState.exportState !is ExportState.Loading, onClick = {
-                            exportViewModel.selectFormat(ExportFormat.CSV)
-                            exportViewModel.exportAndSave()
-                        }),
-                        verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp)
+                            .clickable(
+                                enabled = exportUiState.exportState !is ExportState.Loading,
+                                onClick = {
+                                    exportViewModel.selectFormat(ExportFormat.CSV)
+                                    exportViewModel.exportAndSave()
+                                }),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Icon(
                             modifier = Modifier.padding(start = 12.dp),
                             painter = painterResource(R.drawable.baseline_import_export_24),
@@ -249,12 +269,15 @@ fun SettingsScreen(navController: NavController,
                             CircularProgressIndicator(modifier = Modifier.size(24.dp))
                         }
                     }
-                    Row(modifier = Modifier.fillMaxWidth()
-                        .height(52.dp)
-                        .clickable(onClick = {
-                            showDeleteAllTransactionDialog = true
-                        }),
-                        verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp)
+                            .clickable(onClick = {
+                                showDeleteAllTransactionDialog = true
+                            }),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Icon(
                             modifier = Modifier.padding(start = 12.dp),
                             imageVector = Icons.Filled.Delete,
@@ -284,7 +307,7 @@ fun SettingsScreen(navController: NavController,
             }
         )
     }
-    if(showDeleteAllTransactionDialog) {
+    if (showDeleteAllTransactionDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteAllTransactionDialog = false },
             title = { Text("Delete All Transactions") },
@@ -294,8 +317,10 @@ fun SettingsScreen(navController: NavController,
                     viewModel.deleteAllTransactions()
                     showDeleteAllTransactionDialog = false
                 }) {
-                    Text("Delete",
-                        color = MaterialTheme.colorScheme.error)
+                    Text(
+                        "Delete",
+                        color = MaterialTheme.colorScheme.error
+                    )
                 }
             },
             dismissButton = {
@@ -402,7 +427,8 @@ fun SettingsRow(
 @Composable
 fun SettingsRowWithSwitchPreview(modifier: Modifier = Modifier) {
     var isChecked by remember { mutableStateOf(false) }
-    SettingsRowWithSwitch(icon = Icons.Filled.Lock,
+    SettingsRowWithSwitch(
+        icon = Icons.Filled.Lock,
         label = "Encryption",
         isChecked = isChecked,
         onClick = { isChecked = !isChecked },

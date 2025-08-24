@@ -1,21 +1,28 @@
-package com.ajay.seenu.expensetracker
+package com.ajay.seenu.expensetracker.data.data_source.local
 
-import com.ajay.seenu.expensetracker.entity.ExportData
-import com.ajay.seenu.expensetracker.entity.ExportFormat
-import com.ajay.seenu.expensetracker.entity.ExportResult
-import com.ajay.seenu.expensetracker.entity.ExportState
-import com.ajay.seenu.expensetracker.entity.TransactionExport
-import com.ajay.seenu.expensetracker.entity.TransactionType
+import com.ajay.seenu.expensetracker.ExpenseDatabase
+import com.ajay.seenu.expensetracker.data.data_source.ExportDataSource
+import com.ajay.seenu.expensetracker.data.repository.TransactionRepository
+import com.ajay.seenu.expensetracker.domain.model.ExportData
+import com.ajay.seenu.expensetracker.domain.model.ExportFormat
+import com.ajay.seenu.expensetracker.domain.model.ExportResult
+import com.ajay.seenu.expensetracker.domain.model.ExportState
+import com.ajay.seenu.expensetracker.domain.model.TransactionExport
+import com.ajay.seenu.expensetracker.domain.model.TransactionType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
-class ExportDataSourceImpl(
+@OptIn(ExperimentalTime::class)
+class ExportLocalDataSource constructor(
+    private val transactionRepository: TransactionRepository,
     private val database: ExpenseDatabase,
     private val appVersion: String = "1.0.0"
 ) : ExportDataSource {
@@ -32,21 +39,23 @@ class ExportDataSourceImpl(
         return try {
             _exportState.value = ExportState.Loading
 
-            val transactions = database.expenseDatabaseQueries.getAllTransactions(Long.MAX_VALUE,
-                0).executeAsList()
+            val transactions =
+                transactionRepository.getAllTransactions(1, Int.MAX_VALUE).data
             val exportTransactions = transactions.map { transaction ->
                 TransactionExport(
                     id = transaction.id,
                     amount = transaction.amount,
                     description = transaction.note,
-                    category = transaction.category,
-                    date = formatDate(transaction.date),
+                    category = transaction.category.id,
+                    date = formatDate(transaction.createdAt.epochSeconds),
                     type = transaction.type
                 )
             }
 
-            val totalIncome = transactions.filter { it.type == TransactionType.INCOME }.sumOf { it.amount }
-            val totalExpense = transactions.filter { it.type == TransactionType.EXPENSE }.sumOf { it.amount }
+            val totalIncome =
+                transactions.filter { it.type == TransactionType.INCOME }.sumOf { it.amount }
+            val totalExpense =
+                transactions.filter { it.type == TransactionType.EXPENSE }.sumOf { it.amount }
 
             val exportData = ExportData(
                 exportDate = getCurrentDateTime(),
@@ -103,7 +112,7 @@ class ExportDataSourceImpl(
                     "\"${transaction.category}\"," +
                     "\"${transaction.date}\"," +
                     "\"${transaction.type}\""
-                                }
+        }
         return "$header\n$rows"
     }
 
@@ -113,14 +122,14 @@ class ExportDataSourceImpl(
     }
 
     private fun formatDate(timestamp: Long): String {
-        val instant = kotlinx.datetime.Instant.fromEpochMilliseconds(timestamp)
-        val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+        val instant = Instant.fromEpochMilliseconds(timestamp)
+        val localDateTime = instant.toLocalDateTime(TimeZone.Companion.currentSystemDefault())
         return "${localDateTime.date} ${localDateTime.time}"
     }
 
     private fun getCurrentDateTime(): String {
         val now = Clock.System.now()
-        val localDateTime = now.toLocalDateTime(TimeZone.currentSystemDefault())
+        val localDateTime = now.toLocalDateTime(TimeZone.Companion.currentSystemDefault())
         return "${localDateTime.date} ${localDateTime.time}"
     }
 }

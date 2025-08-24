@@ -1,9 +1,9 @@
 package com.ajay.seenu.expensetracker.android.data
 
-import com.ajay.seenu.expensetracker.ExportDataSource
-import com.ajay.seenu.expensetracker.entity.ExportFormat
-import com.ajay.seenu.expensetracker.entity.ExportState
-import com.ajay.seenu.expensetracker.entity.FileManager
+import com.ajay.seenu.expensetracker.data.data_source.ExportDataSource
+import com.ajay.seenu.expensetracker.domain.FileManager
+import com.ajay.seenu.expensetracker.domain.model.ExportFormat
+import com.ajay.seenu.expensetracker.domain.model.ExportState
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 

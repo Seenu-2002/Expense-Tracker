@@ -50,10 +50,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.ajay.seenu.expensetracker.android.R
-import com.ajay.seenu.expensetracker.android.util.asCurrency
 import com.ajay.seenu.expensetracker.android.presentation.common.ChartDefaults
+import com.ajay.seenu.expensetracker.android.presentation.components.SlidingSwitch
 import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.PieChart
 import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.PieChartData
 import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.PieChartEvent
@@ -61,7 +60,7 @@ import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.PieCha
 import com.ajay.seenu.expensetracker.android.presentation.state.Error
 import com.ajay.seenu.expensetracker.android.presentation.state.UiState
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.SimpleAnalyticsViewModel
-import com.ajay.seenu.expensetracker.android.presentation.components.SlidingSwitch
+import com.ajay.seenu.expensetracker.android.util.asCurrency
 import com.ajay.seenu.expensetracker.android.util.getColor
 import com.ajay.seenu.expensetracker.android.util.getPlaceHolderRes
 import com.ajay.seenu.expensetracker.android.util.getStringRes
@@ -76,7 +75,6 @@ import kotlin.random.Random
 )
 @Composable
 fun SimpleAnalyticsScreen(
-    navController: NavController,
     viewmodel: SimpleAnalyticsViewModel = hiltViewModel()
 ) {
 

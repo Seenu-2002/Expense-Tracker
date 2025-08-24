@@ -1,9 +1,8 @@
-package com.ajay.seenu.expensetracker
+package com.ajay.seenu.expensetracker.data.data_source
 
-// ExportRepository.kt
-import com.ajay.seenu.expensetracker.entity.ExportFormat
-import com.ajay.seenu.expensetracker.entity.ExportResult
-import com.ajay.seenu.expensetracker.entity.ExportState
+import com.ajay.seenu.expensetracker.domain.model.ExportFormat
+import com.ajay.seenu.expensetracker.domain.model.ExportResult
+import com.ajay.seenu.expensetracker.domain.model.ExportState
 import kotlinx.coroutines.flow.StateFlow
 
 interface ExportDataSource {

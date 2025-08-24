@@ -1,16 +1,17 @@
-package com.ajay.seenu.expensetracker.entity
+package com.ajay.seenu.expensetracker.domain
 
 import android.content.Context
 import android.content.Intent
 import android.os.Environment
 import androidx.core.content.FileProvider
-import com.ajay.seenu.expensetracker.ExportDataSourceImpl
+import com.ajay.seenu.expensetracker.data.data_source.local.ExportLocalDataSource
+import com.ajay.seenu.expensetracker.domain.model.ExportFormat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 
-class AndroidFileManager(
+class AndroidFileManager constructor(
     private val context: Context
 ) : FileManager {
 
@@ -73,6 +74,6 @@ class AndroidFileManager(
 }
 
 // Android-specific extension functions
-fun ExportDataSourceImpl.saveAndShare(context: Context, format: ExportFormat) {
+fun ExportLocalDataSource.saveAndShare(context: Context, format: ExportFormat) {
     // This can be called from Android UI
 }

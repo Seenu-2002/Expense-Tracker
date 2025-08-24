@@ -60,7 +60,7 @@ SELECT *
 FROM TransactionDetailEntity ORDER BY createdAt DESC LIMIT :limit OFFSET :offset;
 
 getTransactionsCount:
-SELECT COUNT(*) FROM TransactionDetail;
+SELECT COUNT(*) FROM TransactionDetailEntity;
 
 getAllTransactionsBetween:
 SELECT *

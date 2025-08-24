@@ -20,6 +20,7 @@ import com.ajay.seenu.expensetracker.domain.usecase.data_filter.GetFilteredTrans
 import com.ajay.seenu.expensetracker.domain.usecase.data_filter.GetRecentTransactionsUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.data_filter.GetTotalTransactionPerDayByCategoryUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.AddTransactionUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.transaction.DeleteAllTransactionsUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.DeleteTransactionUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.GetTransactionCountByCategoryUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.GetTransactionUseCase
@@ -98,6 +99,12 @@ object UseCaseModule {
     @Provides
     fun provideDeleteTransactionUseCase(repository: TransactionRepository): DeleteTransactionUseCase {
         return DeleteTransactionUseCase(repository)
+    }
+
+    @Singleton
+    @Provides
+    fun provideDeleteAllTransactionsUseCase(repository: TransactionRepository): DeleteAllTransactionsUseCase {
+        return DeleteAllTransactionsUseCase(repository)
     }
 
     @Singleton
