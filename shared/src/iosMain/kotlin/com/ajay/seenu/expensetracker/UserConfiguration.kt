@@ -2,7 +2,7 @@ package com.ajay.seenu.expensetracker
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import com.ajay.seenu.expensetracker.entity.UserConfigs
+import com.ajay.seenu.expensetracker.domain.model.UserConfigs
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager

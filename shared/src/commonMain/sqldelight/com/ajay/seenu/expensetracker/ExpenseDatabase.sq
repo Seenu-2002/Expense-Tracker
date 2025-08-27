@@ -1,31 +1,34 @@
-import com.ajay.seenu.expensetracker.entity.PaymentType;
-import com.ajay.seenu.expensetracker.entity.TransactionType;
+import com.ajay.seenu.expensetracker.data.model.TransactionTypeEntity;
+import com.ajay.seenu.expensetracker.data.model.AccountGroupTypeEntity;
 
-CREATE TABLE TransactionDetail (
+CREATE TABLE TransactionDetailEntity (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    type TEXT AS TransactionType NOT NULL,
+    type TEXT AS TransactionTypeEntity NOT NULL,
     amount REAL NOT NULL,
-    category INTEGER NOT NULL,
-    paymentType TEXT AS PaymentType NOT NULL,
-    date INTEGER NOT NULL,
+    categoryId INTEGER NOT NULL,
+    accountId INTEGER NOT NULL,
+    createdAt INTEGER NOT NULL,
     note TEXT,
-    payer TEXT,
     place TEXT,
-    FOREIGN KEY(category) REFERENCES Category(id)
+    FOREIGN KEY(categoryId) REFERENCES CategoryEntity(id)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+    FOREIGN KEY(accountId) REFERENCES AccountEntity(id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT
 );
+CREATE INDEX transaction_time ON TransactionDetailEntity(createdAt);
 
-CREATE TABLE Category (
+CREATE TABLE CategoryEntity (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     label TEXT NOT NULL,
-    type TEXT AS TransactionType NOT NULL,
+    type TEXT AS TransactionTypeEntity NOT NULL,
     iconRes INTEGER NOT NULL,
     color INTEGER NOT NULL ,
     UNIQUE (label, type) ON CONFLICT REPLACE
 );
 
-CREATE TABLE Attachment (
+CREATE TABLE AttachmentEntity (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     transactionId INTEGER NOT NULL, -- Foreign key to link to the ITEM table
     name TEXT NOT NULL,
@@ -33,112 +36,156 @@ CREATE TABLE Attachment (
     fileType TEXT NOT NULL,
     size INTEGER NOT NULL,
     imageUri TEXT NOT NULL,
-    FOREIGN KEY (transactionId) REFERENCES TransactionDetail(id) ON DELETE CASCADE
+    FOREIGN KEY (transactionId) REFERENCES TransactionDetailEntity(id) ON DELETE CASCADE
+);
+CREATE INDEX transactionId ON AttachmentEntity(transactionId);
+
+CREATE TABLE AccountGroupEntity (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    type TEXT AS AccountGroupTypeEntity NOT NULL
 );
 
-CREATE INDEX transaction_time ON TransactionDetail(date);
+CREATE TABLE AccountEntity (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    groupId INTEGER NOT NULL,
+    FOREIGN KEY(groupId) REFERENCES AccountGroupEntity(id)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+);
 
 getAllTransactions:
 SELECT *
-FROM TransactionDetail ORDER BY date DESC LIMIT :limit OFFSET :offset;
+FROM TransactionDetailEntity ORDER BY createdAt DESC LIMIT :limit OFFSET :offset;
 
 getTransactionsCount:
-SELECT COUNT(*) FROM TransactionDetail;
+SELECT COUNT(*) FROM TransactionDetailEntity;
 
 getAllTransactionsBetween:
 SELECT *
-FROM TransactionDetail WHERE date >= :startUTCValue AND date <= :endUTCValue
-ORDER BY date DESC LIMIT :limit OFFSET :offset;
+FROM TransactionDetailEntity WHERE createdAt >= :startUTCValue AND createdAt <= :endUTCValue
+ORDER BY createdAt DESC LIMIT :limit OFFSET :offset;
 
 getAllTransactionsByType:
 SELECT *
-FROM TransactionDetail WHERE type = :type ORDER BY date DESC LIMIT :limit OFFSET :offset;
+FROM TransactionDetailEntity WHERE type = :type ORDER BY createdAt DESC LIMIT :limit OFFSET :offset;
 
 getTransaction:
 SELECT *
-FROM TransactionDetail WHERE id = :id;
+FROM TransactionDetailEntity WHERE id = :id;
 
 addTransaction:
-INSERT INTO TransactionDetail(type, amount, category, paymentType, note, date, payer, place)
-VALUES (?,?, ?, ?, ?, ?, ?, ?);
+INSERT INTO TransactionDetailEntity(type, amount, categoryId, accountId, note, createdAt, place)
+VALUES (?,?, ?, ?, ?, ?, ?);
 
 updateTransaction:
-INSERT OR REPLACE INTO TransactionDetail(id, type, amount, category, paymentType, note, date, payer, place)
-VALUES ( ?,?, ?, ?, ?, ?, ?, ?, ?);
+INSERT OR REPLACE INTO TransactionDetailEntity(id, type, amount, categoryId, accountId, note, createdAt, place)
+VALUES ( ?,?, ?, ?, ?, ?, ?, ?);
 
 getLastInsertTransactionRowId:
 SELECT last_insert_rowid();
 
 deleteAllTransactions:
-DELETE FROM TransactionDetail;
+DELETE FROM TransactionDetailEntity;
 
 deleteAllTransactionsByType:
-DELETE FROM TransactionDetail WHERE type = :type;
+DELETE FROM TransactionDetailEntity WHERE type = :type;
 
 deleteTransaction:
-DELETE FROM TransactionDetail WHERE id = :id;
+DELETE FROM TransactionDetailEntity WHERE id = :id;
 
 changeCategory:
-UPDATE TransactionDetail SET category = :newCategory WHERE category = :oldCategory;
+UPDATE TransactionDetailEntity SET categoryId = :newCategory WHERE categoryId = :oldCategory;
 
 numberOfTransactionsByCategory:
-SELECT COUNT(*) AS count FROM TransactionDetail WHERE category = :category;
+SELECT COUNT(*) AS count FROM TransactionDetailEntity WHERE categoryId = :category;
 
 getSumOfAmountByType:
-SELECT SUM(amount) AS sum FROM TransactionDetail WHERE type = :type;
+SELECT SUM(amount) AS sum FROM TransactionDetailEntity WHERE type = :type;
 
 getSumOfAmountBetweenByType:
-SELECT SUM(amount) AS sum FROM TransactionDetail WHERE type = :type
-AND date >= :startUTCValue AND date <= :endUTCValue;
+SELECT SUM(amount) AS sum FROM TransactionDetailEntity WHERE type = :type
+AND createdAt >= :startUTCValue AND createdAt <= :endUTCValue;
 
 getAllCategories:
-SELECT * FROM Category;
+SELECT * FROM CategoryEntity;
 
 getCategories:
-SELECT * FROM Category WHERE type = :type;
+SELECT * FROM CategoryEntity WHERE type = :type;
 
 deleteCategory:
-DELETE FROM Category WHERE id = ?;
+DELETE FROM CategoryEntity WHERE id = ?;
 
 addCategory:
-INSERT INTO Category(label, type, iconRes, color)
+INSERT INTO CategoryEntity(label, type, iconRes, color)
 VALUES (?,?, ?, ?);
 
 getCategory:
-SELECT * FROM Category WHERE id = ?;
+SELECT * FROM CategoryEntity WHERE id = ?;
 
 updateCategory:
-UPDATE Category
+UPDATE CategoryEntity
 SET label = ?, iconRes = ?, color = ?
 WHERE id = ?;
 
 searchCategory:
-SELECT * FROM Category WHERE label = :label AND type = :type;
+SELECT * FROM CategoryEntity WHERE label = :label AND type = :type;
 
 getTotalTransactionPerDayByTypeBetween:
-SELECT date, category, SUM(amount) AS totalAmount FROM TransactionDetail WHERE type = :type AND date >= :startUTCValue AND date <= :endUTCValue GROUP BY date, category ORDER BY date DESC;
-
-getTotalExpenseByPaymentTypeBetween:
-SELECT paymentType, SUM(amount) AS totalAmount FROM TransactionDetail WHERE type = "EXPENSE" AND date >= :startUTCValue AND date <= :endUTCValue GROUP BY paymentType ORDER BY totalAmount DESC;
+SELECT createdAt, categoryId, SUM(amount) AS totalAmount FROM TransactionDetailEntity WHERE type = :type AND createdAt >= :startUTCValue AND createdAt <= :endUTCValue GROUP BY createdAt, categoryId ORDER BY createdAt DESC;
 
 getTotalExpenseByCategoryBetween:
-SELECT category, SUM(amount) AS totalAmount FROM TransactionDetail WHERE type = "EXPENSE" AND date >= :startUTCValue AND date <= :endUTCValue GROUP BY category ORDER BY totalAmount DESC;
+SELECT categoryId, SUM(amount) AS totalAmount FROM TransactionDetailEntity WHERE type = "EXPENSE" AND createdAt >= :startUTCValue AND createdAt <= :endUTCValue GROUP BY categoryId ORDER BY totalAmount DESC;
 
 getTotalAmountByCategoryAndTypeBetween:
-SELECT category, SUM(amount) AS total FROM TransactionDetail WHERE type = :type AND date >= :startUTCValue AND date <= :endUTCValue GROUP BY category ORDER BY category ASC;
+SELECT categoryId, SUM(amount) AS total FROM TransactionDetailEntity WHERE type = :type AND createdAt >= :startUTCValue AND createdAt <= :endUTCValue GROUP BY categoryId ORDER BY categoryId ASC;
 
 getAllAttachmentsForTransaction:
-SELECT * FROM Attachment WHERE transactionId = ?;
+SELECT * FROM AttachmentEntity WHERE transactionId = ?;
 
 insertAttachment:
-INSERT INTO Attachment (transactionId, name, filePath, fileType, size, imageUri)
+INSERT INTO AttachmentEntity (transactionId, name, filePath, fileType, size, imageUri)
 VALUES (?, ?, ?, ?, ?, ?);
 
 deleteAttachmentById:
-DELETE FROM Attachment WHERE id = ?;
+DELETE FROM AttachmentEntity WHERE id = ?;
 
 deleteAttachmentsByTransactionId:
-DELETE FROM Attachment WHERE transactionId = ?;
+DELETE FROM AttachmentEntity WHERE transactionId = ?;
+
+getAccountGroups:
+SELECT * FROM AccountGroupEntity;
+
+getAccountGroupById:
+SELECT * FROM AccountGroupEntity WHERE id = ?;
+
+createAccountGroup:
+INSERT INTO AccountGroupEntity (name, type) VALUES (?, ?);
+
+updateAccountGroup:
+UPDATE AccountGroupEntity SET name = ?, type = ? WHERE id = :id;
+
+deleteAccountGroup:
+DELETE FROM AccountGroupEntity WHERE id = ?;
+
+getAccountsByGroupId:
+SELECT * FROM AccountEntity WHERE groupId = ?;
+
+getAllAccounts:
+SELECT * FROM AccountEntity;
+
+getAccountById:
+SELECT * FROM AccountEntity WHERE id = ?;
+
+createAccount:
+INSERT INTO AccountEntity (name, groupId) VALUES (?, ?);
+
+updateAccount:
+UPDATE AccountEntity SET name = ?, groupId = ? WHERE id = :id;
+
+deleteAccount:
+DELETE FROM AccountEntity WHERE id = ?;
 
 CREATE TABLE Budget (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -210,10 +257,10 @@ SELECT
     b.categoryId,
     COALESCE(SUM(CASE WHEN t.type = 'EXPENSE' THEN t.amount ELSE 0 END), 0)
 FROM Budget b
-LEFT JOIN TransactionDetail t ON (
+LEFT JOIN TransactionDetailEntity t ON (
     (b.categoryId IS NULL OR b.categoryId = t.category)
-    AND t.date >= ?
-    AND t.date <= ?
+    AND t.createdAt >= ?
+    AND t.createdAt <= ?
     AND t.type = 'EXPENSE'
 )
 WHERE b.isActive = 1

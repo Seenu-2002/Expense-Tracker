@@ -1,5 +1,6 @@
 package com.ajay.seenu.expensetracker
 
+import com.ajay.seenu.expensetracker.data.datasource.local.TransactionLocalDataSource
 import com.ajay.seenu.expensetracker.entity.TransactionType
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
@@ -9,11 +10,11 @@ import kotlin.test.assertNotNull
 
 class SqlDelightTest {
 
-    private lateinit var dbSource: TransactionDataSourceImpl
+    private lateinit var dbSource: TransactionLocalDataSource
 
     @BeforeTest
     fun setup() = runTest {
-        dbSource = TransactionDataSourceImpl(
+        dbSource = TransactionLocalDataSource(
             testDriver()
         )
     }

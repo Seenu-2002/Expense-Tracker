@@ -127,10 +127,10 @@ fun MainScreen(
             }
             composable(Screen.Analytics.route) {
 //                AnalyticsScreen(navController = navController)
-                SimpleAnalyticsScreen(navController = navController)
+                SimpleAnalyticsScreen()
             }
             composable(Screen.Settings.route) {
-                SettingsScreen(navController = navController)
+                SettingsScreen()
             }
             composable(Screen.Budget.route) {
                 BudgetScreen(
