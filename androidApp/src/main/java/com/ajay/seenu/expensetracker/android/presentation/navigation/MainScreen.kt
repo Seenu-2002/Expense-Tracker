@@ -28,8 +28,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.ajay.seenu.expensetracker.android.presentation.screeens.OverviewScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.SettingsScreen
@@ -47,14 +49,12 @@ fun MainScreen(
     onCreateBudget: () -> Unit,
     onBudgetClick: (Long) -> Unit,
 ) {
-    var navigationSelectedItem by remember {
-        mutableIntStateOf(0)
-    }
+    val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    var currentRoute = navBackStackEntry?.destination?.route
     var isFABVisible by remember {
         mutableStateOf(true)
     }
-
-    val navController = rememberNavController()
 
     Scaffold(
         modifier = Modifier
@@ -62,7 +62,7 @@ fun MainScreen(
         bottomBar = {
             NavigationBar() {
                 getBottomNavigationItems().forEachIndexed { index, navigationItem ->
-                    val isSelected = index == navigationSelectedItem
+                    val isSelected = currentRoute == navigationItem.route
                     NavigationBarItem(
                         selected = isSelected,
                         label = {
@@ -76,7 +76,7 @@ fun MainScreen(
                             )
                         },
                         onClick = {
-                            navigationSelectedItem = index
+                            currentRoute = navigationItem.route
                             navController.navigate(navigationItem.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
