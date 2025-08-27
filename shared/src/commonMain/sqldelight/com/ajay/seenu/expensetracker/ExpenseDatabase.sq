@@ -187,7 +187,7 @@ UPDATE AccountEntity SET name = ?, groupId = ? WHERE id = :id;
 deleteAccount:
 DELETE FROM AccountEntity WHERE id = ?;
 
-CREATE TABLE Budget (
+CREATE TABLE BudgetEntity (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     name TEXT NOT NULL,
     categoryId INTEGER,  -- NULL for overall budget, specific category_id for category budget
@@ -202,30 +202,30 @@ CREATE TABLE Budget (
 );
 
 -- Index for better query performance
-CREATE INDEX idx_budget_category ON Budget(categoryId);
-CREATE INDEX idx_budget_active ON Budget(isActive);
-CREATE INDEX idx_budget_period ON Budget(startDate, endDate);
+CREATE INDEX idx_budget_category ON BudgetEntity(categoryId);
+CREATE INDEX idx_budget_active ON BudgetEntity(isActive);
+CREATE INDEX idx_budget_period ON BudgetEntity(startDate, endDate);
 
 -- Queries for Budget operations
 selectAllActiveBudgets:
-SELECT * FROM Budget
+SELECT * FROM BudgetEntity
 WHERE isActive = 1
 ORDER BY createdAt DESC;
 
 selectBudgetsByCategory:
-SELECT * FROM Budget
+SELECT * FROM BudgetEntity
 WHERE categoryId = ? AND isActive = 1;
 
 selectOverallBudgets:
-SELECT * FROM Budget
+SELECT * FROM BudgetEntity
 WHERE categoryId IS NULL AND isActive = 1;
 
 selectBudgetById:
-SELECT * FROM Budget
+SELECT * FROM BudgetEntity
 WHERE id = ?;
 
 selectActiveBudgetsForPeriod:
-SELECT * FROM Budget
+SELECT * FROM BudgetEntity
 WHERE isActive = 1
 AND (
     (isRecurring = 1) OR
@@ -233,18 +233,18 @@ AND (
 );
 
 insertBudget:
-INSERT INTO Budget (name, categoryId, amount, periodType, startDate, endDate, isRecurring)
+INSERT INTO BudgetEntity (name, categoryId, amount, periodType, startDate, endDate, isRecurring)
 VALUES (?, ?, ?, ?, ?, ?, ?);
 
 updateBudget:
-UPDATE Budget
+UPDATE BudgetEntity
 SET name = ?, categoryId = ?, amount = ?, periodType = ?,
     startDate = ?, endDate = ?, isRecurring = ?,
     updatedAt = strftime('%s', 'now')
 WHERE id = ?;
 
 deleteBudget:
-UPDATE Budget
+UPDATE BudgetEntity
 SET isActive = 0, updatedAt = strftime('%s', 'now')
 WHERE id = ?;
 
@@ -256,9 +256,9 @@ SELECT
     b.amount,
     b.categoryId,
     COALESCE(SUM(CASE WHEN t.type = 'EXPENSE' THEN t.amount ELSE 0 END), 0)
-FROM Budget b
+FROM BudgetEntity b
 LEFT JOIN TransactionDetailEntity t ON (
-    (b.categoryId IS NULL OR b.categoryId = t.category)
+    (b.categoryId IS NULL OR b.categoryId = t.categoryId)
     AND t.createdAt >= ?
     AND t.createdAt <= ?
     AND t.type = 'EXPENSE'

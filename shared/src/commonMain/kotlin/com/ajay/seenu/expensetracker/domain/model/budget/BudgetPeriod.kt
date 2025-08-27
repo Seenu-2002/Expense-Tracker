@@ -1,4 +1,4 @@
-package com.ajay.seenu.expensetracker.entity.budget
+package com.ajay.seenu.expensetracker.domain.model.budget
 
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.atTime
@@ -6,15 +6,18 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 data class BudgetPeriod(
     val startDate: Long,
     val endDate: Long
 ) {
     companion object {
+        @OptIn(ExperimentalTime::class)
         fun getCurrentPeriod(
             periodType: BudgetPeriodType,
-            currentTimeMillis: Long = kotlinx.datetime.Clock.System.now().toEpochMilliseconds()
+            currentTimeMillis: Long = Clock.System.now().toEpochMilliseconds()
         ): BudgetPeriod {
             val currentInstant = kotlinx.datetime.Instant.fromEpochMilliseconds(currentTimeMillis)
             val currentDateTime = currentInstant.toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())

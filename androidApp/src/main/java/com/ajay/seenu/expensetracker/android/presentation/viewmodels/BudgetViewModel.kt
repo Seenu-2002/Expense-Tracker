@@ -2,12 +2,12 @@ package com.ajay.seenu.expensetracker.android.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ajay.seenu.expensetracker.BudgetRepository
-import com.ajay.seenu.expensetracker.Category
-import com.ajay.seenu.expensetracker.android.data.CategoryRepository
-import com.ajay.seenu.expensetracker.entity.TransactionType
-import com.ajay.seenu.expensetracker.entity.budget.BudgetRequest
-import com.ajay.seenu.expensetracker.entity.budget.BudgetWithSpending
+import com.ajay.seenu.expensetracker.data.repository.BudgetRepository
+import com.ajay.seenu.expensetracker.data.repository.CategoryRepository
+import com.ajay.seenu.expensetracker.domain.model.Category
+import com.ajay.seenu.expensetracker.domain.model.TransactionType
+import com.ajay.seenu.expensetracker.domain.model.budget.BudgetRequest
+import com.ajay.seenu.expensetracker.domain.model.budget.BudgetWithSpending
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

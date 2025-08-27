@@ -1,6 +1,5 @@
-package com.ajay.seenu.expensetracker.entity.budget
+package com.ajay.seenu.expensetracker.domain.model.budget
 
-import com.ajay.seenu.expensetracker.Budget
 
 data class BudgetWithSpending(
     val budget: Budget,

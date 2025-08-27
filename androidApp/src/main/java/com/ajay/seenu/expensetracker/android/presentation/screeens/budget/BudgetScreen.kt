@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.BudgetViewModel
-import com.ajay.seenu.expensetracker.entity.budget.BudgetWithSpending
+import com.ajay.seenu.expensetracker.domain.model.budget.BudgetWithSpending
 
 @Composable
 fun BudgetScreen(
