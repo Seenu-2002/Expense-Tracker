@@ -2,12 +2,13 @@ package com.ajay.seenu.expensetracker.android.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ajay.seenu.expensetracker.android.domain.data.Error
-import com.ajay.seenu.expensetracker.android.domain.data.Transaction
-import com.ajay.seenu.expensetracker.android.domain.data.UiState
-import com.ajay.seenu.expensetracker.android.domain.usecases.GetTransactionCountByCategoryUseCase
-import com.ajay.seenu.expensetracker.android.domain.usecases.category.DeleteCategoryUseCase
-import com.ajay.seenu.expensetracker.android.domain.usecases.category.GetAllCategoriesAsFlowUseCase
+import com.ajay.seenu.expensetracker.android.presentation.state.Error
+import com.ajay.seenu.expensetracker.android.presentation.state.UiState
+import com.ajay.seenu.expensetracker.domain.model.Category
+import com.ajay.seenu.expensetracker.domain.model.TransactionType
+import com.ajay.seenu.expensetracker.domain.usecase.category.DeleteCategoryUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.category.GetAllCategoriesAsFlowUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.transaction.GetTransactionCountByCategoryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,14 +26,14 @@ class CategoryScreenViewModel @Inject constructor(
     private val _categoriesUiData: MutableStateFlow<UiState<CategoriesListUiData>> = MutableStateFlow(UiState.Empty)
     val categoriesUiData: StateFlow<UiState<CategoriesListUiData>> = _categoriesUiData.asStateFlow()
 
-    private val _category: MutableStateFlow<Transaction.Category?> = MutableStateFlow(null)
+    private val _category: MutableStateFlow<Category?> = MutableStateFlow(null)
     val category = _category.asStateFlow()
 
-    private val _transactionType: MutableStateFlow<Transaction.Type> =
-        MutableStateFlow(Transaction.Type.INCOME)
-    val transactionType: StateFlow<Transaction.Type> = _transactionType.asStateFlow()
+    private val _transactionType: MutableStateFlow<TransactionType> =
+        MutableStateFlow(TransactionType.INCOME)
+    val transactionType: StateFlow<TransactionType> = _transactionType.asStateFlow()
 
-    private val _transactionCount: MutableStateFlow<UiState<Pair<Long, Transaction.Category>>> = MutableStateFlow(UiState.Empty)
+    private val _transactionCount: MutableStateFlow<UiState<Pair<Long, Category>>> = MutableStateFlow(UiState.Empty)
     val transactionCount = _transactionCount.asStateFlow()
 
     @Inject
@@ -48,8 +49,8 @@ class CategoryScreenViewModel @Inject constructor(
         viewModelScope.launch { 
             _categoriesUiData.emit(UiState.Loading)
             try {
-                val incomeCategoriesFlow = getCategoriesUseCase(Transaction.Type.INCOME)
-                val expenseCategoriesFlow = getCategoriesUseCase(Transaction.Type.EXPENSE)
+                val incomeCategoriesFlow = getCategoriesUseCase(TransactionType.INCOME)
+                val expenseCategoriesFlow = getCategoriesUseCase(TransactionType.EXPENSE)
                 incomeCategoriesFlow.combine(expenseCategoriesFlow) { incomeCategories, expenseCategories ->
                     CategoriesListUiData(
                         incomeCategories = incomeCategories,
@@ -65,11 +66,11 @@ class CategoryScreenViewModel @Inject constructor(
         }
     }
 
-    fun getTransactionCountByCategory(category: Transaction.Category) {
+    fun getTransactionCountByCategory(category: Category) {
         viewModelScope.launch {
             _transactionCount.emit(UiState.Loading)
             try {
-                _transactionType.emit(_category.value?.type ?: Transaction.Type.INCOME)
+                _transactionType.emit(_category.value?.type ?: TransactionType.INCOME)
                 _transactionCount.emit(UiState.Loading)
                 val count = getTransactionCountByCategoryUseCase(category)
                 _transactionCount.emit(UiState.Success(count to category))
@@ -86,7 +87,7 @@ class CategoryScreenViewModel @Inject constructor(
         }
     }
 
-    fun changeType(type: Transaction.Type) {
+    fun changeType(type: TransactionType) {
         viewModelScope.launch {
             _transactionType.emit(type)
         }
@@ -94,6 +95,6 @@ class CategoryScreenViewModel @Inject constructor(
 }
 
 data class CategoriesListUiData constructor(
-    val incomeCategories: List<Transaction.Category>,
-    val expenseCategories: List<Transaction.Category>
+    val incomeCategories: List<Category>,
+    val expenseCategories: List<Category>
 )

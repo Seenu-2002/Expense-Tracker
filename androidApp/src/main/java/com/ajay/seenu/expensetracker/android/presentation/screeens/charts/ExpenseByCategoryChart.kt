@@ -10,12 +10,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ajay.seenu.expensetracker.android.R
-import com.ajay.seenu.expensetracker.android.domain.data.Filter
 import com.ajay.seenu.expensetracker.android.presentation.common.ChartDefaults
 import com.ajay.seenu.expensetracker.android.presentation.common.rememberMarker
 import com.ajay.seenu.expensetracker.android.presentation.screeens.InsufficientDataCard
 import com.ajay.seenu.expensetracker.android.presentation.screeens.Loader
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.chart_viewmodels.ExpenseByCategoryChartViewModel
+import com.ajay.seenu.expensetracker.domain.model.DateFilter
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottomAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStartAxis
@@ -31,7 +31,7 @@ import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
 @Composable
 fun ExpenseByCategoryChart(
     modifier: Modifier = Modifier,
-    filter: Filter = Filter.ThisMonth,
+    filter: DateFilter = DateFilter.ThisMonth,
     viewModel: ExpenseByCategoryChartViewModel = hiltViewModel(),
 ) {
     val chartState = viewModel.chartState.collectAsState()

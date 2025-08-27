@@ -37,20 +37,21 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ajay.seenu.expensetracker.android.R
-import com.ajay.seenu.expensetracker.android.domain.data.Error
-import com.ajay.seenu.expensetracker.android.domain.data.Transaction
-import com.ajay.seenu.expensetracker.android.domain.data.UiState
+import com.ajay.seenu.expensetracker.android.presentation.state.Error
+import com.ajay.seenu.expensetracker.android.presentation.state.UiState
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.ChangeCategoryInTransactionViewModel
-import com.ajay.seenu.expensetracker.android.presentation.widgets.CategoryChangeConfirmationDialog
-import com.ajay.seenu.expensetracker.android.presentation.widgets.CategoryRow
-import com.ajay.seenu.expensetracker.android.presentation.widgets.ProgressDialog
+import com.ajay.seenu.expensetracker.android.presentation.components.CategoryChangeConfirmationDialog
+import com.ajay.seenu.expensetracker.android.presentation.components.CategoryRow
+import com.ajay.seenu.expensetracker.android.presentation.components.ProgressDialog
+import com.ajay.seenu.expensetracker.domain.model.Category
+import com.ajay.seenu.expensetracker.domain.model.TransactionType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChangeCategoryInTransactionScreen(
     onNavigateBack: () -> Unit,
     categoryIdToBeDeleted: Long,
-    type: Transaction.Type,
+    type: TransactionType,
     transactionCount: Long
 ) {
     val viewmodel: ChangeCategoryInTransactionViewModel = hiltViewModel()
@@ -58,7 +59,7 @@ fun ChangeCategoryInTransactionScreen(
     val updateStatus by viewmodel.updateStatus.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    lateinit var categoryIdToBeReplacedWith: Transaction.Category
+    lateinit var categoryIdToBeReplacedWith: Category
     var showConfirmationDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -189,9 +190,9 @@ fun ChangeCategoryInTransactionScreen(
 fun ChangeCategoryInTransactionContent(
     modifier: Modifier = Modifier,
     recordCount: Long,
-    categoryToBeDeleted: Transaction.Category,
-    categories: List<Transaction.Category>,
-    onCategorySelected: (Transaction.Category) -> Unit
+    categoryToBeDeleted: Category,
+    categories: List<Category>,
+    onCategorySelected: (Category) -> Unit
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Row(

@@ -1,19 +1,17 @@
 package com.ajay.seenu.expensetracker.android.presentation.viewmodels
 
-import android.content.Context
-import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ajay.seenu.expensetracker.Attachment
-import com.ajay.seenu.expensetracker.android.data.TransactionRepository
-import com.ajay.seenu.expensetracker.android.domain.data.Transaction
-import com.ajay.seenu.expensetracker.android.domain.mapper.CategoryMapper
-import com.ajay.seenu.expensetracker.android.domain.usecases.attachment.AddAttachmentUseCase
-import com.ajay.seenu.expensetracker.android.domain.usecases.attachment.GetAttachmentsUseCase
-import com.ajay.seenu.expensetracker.android.domain.usecases.transaction.AddTransactionUseCase
-import com.ajay.seenu.expensetracker.android.domain.usecases.transaction.GetTransactionUseCase
-import com.ajay.seenu.expensetracker.android.domain.usecases.transaction.UpdateTransactionUseCase
-import com.ajay.seenu.expensetracker.android.domain.util.getFileInfoFromUri
+import com.ajay.seenu.expensetracker.data.repository.CategoryRepository
+import com.ajay.seenu.expensetracker.domain.model.Attachment
+import com.ajay.seenu.expensetracker.domain.model.Category
+import com.ajay.seenu.expensetracker.domain.model.Transaction
+import com.ajay.seenu.expensetracker.domain.model.TransactionType
+import com.ajay.seenu.expensetracker.domain.usecase.attachment.AddAttachmentUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.attachment.GetAttachmentsUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.transaction.AddTransactionUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.transaction.GetTransactionUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.transaction.UpdateTransactionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,7 +22,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AddTransactionViewModel @Inject constructor(
-    private val repository: TransactionRepository,
+    private val categoryRepository: CategoryRepository,
     private val addTransactionUseCase: AddTransactionUseCase,
     private val updateTransactionUseCase: UpdateTransactionUseCase
 ) : ViewModel() {
@@ -44,11 +42,14 @@ class AddTransactionViewModel @Inject constructor(
     private var _attachments: MutableStateFlow<List<Attachment>> = MutableStateFlow(emptyList())
     val attachments: StateFlow<List<Attachment>> = _attachments.asStateFlow()
 
-    private val _categories: MutableStateFlow<List<Transaction.Category>> = MutableStateFlow(emptyList())
+    private val _categories: MutableStateFlow<List<Category>> =
+        MutableStateFlow(emptyList())
     val categories = _categories.asStateFlow()
 
-    fun addTransaction(transaction: Transaction,
-                       attachments: List<Attachment>) {
+    fun addTransaction(
+        transaction: Transaction,
+        attachments: List<Attachment>
+    ) {
         viewModelScope.launch {
             try {
                 val transactionId = addTransactionUseCase.addTransaction(transaction)
@@ -69,8 +70,10 @@ class AddTransactionViewModel @Inject constructor(
         }
     }
 
-    fun updateTransaction(transaction: Transaction,
-                          attachments: List<Attachment>) {
+    fun updateTransaction(
+        transaction: Transaction,
+        attachments: List<Attachment>
+    ) {
         viewModelScope.launch {
             try {
                 val transactionId = updateTransactionUseCase.invoke(transaction)
@@ -102,10 +105,10 @@ class AddTransactionViewModel @Inject constructor(
         }
     }
 
-    fun getCategories(type: Transaction.Type) {
+    fun getCategories(type: TransactionType) {
         viewModelScope.launch {
-            val categories = repository.getCategories(type)
-            _categories.emit(CategoryMapper.mapCategories(categories)) // FIXME: Introduce use case and move the mapping logic there
+            val categories = categoryRepository.getCategories(type)
+            _categories.emit(categories)
         }
     }
 

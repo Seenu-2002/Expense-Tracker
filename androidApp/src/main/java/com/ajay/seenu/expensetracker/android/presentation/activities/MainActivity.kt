@@ -4,8 +4,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -24,43 +22,34 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ajay.seenu.expensetracker.UserConfigurationsManager
-import com.ajay.seenu.expensetracker.android.ExpenseTrackerTheme
-import com.ajay.seenu.expensetracker.android.data.TransactionMode
-import com.ajay.seenu.expensetracker.android.domain.security.BiometricPromptManager
-import com.ajay.seenu.expensetracker.android.domain.data.Transaction
 import com.ajay.seenu.expensetracker.android.presentation.navigation.MainScreen
 import com.ajay.seenu.expensetracker.android.presentation.navigation.Screen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.AddEditCategoryScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.AddEditScreenArg
 import com.ajay.seenu.expensetracker.android.presentation.screeens.CategoryListScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.ChangeCategoryInTransactionScreen
-import com.ajay.seenu.expensetracker.android.presentation.screeens.ChangeCategoryInTransactionScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.DetailTransactionScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.TransactionScreen
+import com.ajay.seenu.expensetracker.android.presentation.state.TransactionMode
 import com.ajay.seenu.expensetracker.android.presentation.theme.AppDefaults
+import com.ajay.seenu.expensetracker.android.presentation.theme.ExpenseTrackerTheme
 import com.ajay.seenu.expensetracker.android.presentation.theme.LocalColors
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.MainViewModel
-import com.ajay.seenu.expensetracker.entity.Theme
+import com.ajay.seenu.expensetracker.android.security.BiometricPromptManager
+import com.ajay.seenu.expensetracker.domain.model.Theme
+import com.ajay.seenu.expensetracker.domain.model.TransactionType
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -125,7 +114,7 @@ class MainActivity : AppCompatActivity() {
                                     }
                                 }
                             }
-                            val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+                            val lifecycleOwner = LocalLifecycleOwner.current
 
                             DisposableEffect(lifecycleOwner) {
                                 val observer = LifecycleEventObserver { _, event ->
@@ -267,7 +256,7 @@ class MainActivity : AppCompatActivity() {
                         navController.navigate("${Screen.Category.route}/-1/${type.name.uppercase()}")
                     },
                     onCategoryEdit = { id ->
-                        navController.navigate("${Screen.Category.route}/$id/${Transaction.Type.EXPENSE.name.uppercase()}")
+                        navController.navigate("${Screen.Category.route}/$id/${TransactionType.EXPENSE.name.uppercase()}")
                     },
                     onDeleteCategory = { id, type, count ->
                         navController.navigate("${Screen.ChangeCategoryInTransaction.route}/$id/${type.name}/${count}")
@@ -293,12 +282,12 @@ class MainActivity : AppCompatActivity() {
                     id = null
                 }
                 val type = it.arguments?.getString("type")
-                    ?.let { Transaction.Type.valueOf(it.uppercase()) }
+                    ?.let { TransactionType.valueOf(it.uppercase()) }
 
                 val arg = if (id != null) {
                     AddEditScreenArg.Edit(id)
                 } else {
-                    AddEditScreenArg.Create(type ?: Transaction.Type.EXPENSE)
+                    AddEditScreenArg.Create(type ?: TransactionType.EXPENSE)
                 }
                 AddEditCategoryScreen(
                     arg = arg,
@@ -323,8 +312,8 @@ class MainActivity : AppCompatActivity() {
             ) {
                 val id = it.arguments?.getLong("id")!!
                 val type = it.arguments?.getString("type")
-                    ?.let { Transaction.Type.valueOf(it.uppercase()) }
-                    ?: Transaction.Type.EXPENSE
+                    ?.let { TransactionType.valueOf(it.uppercase()) }
+                    ?: TransactionType.EXPENSE
                 val count = it.arguments?.getLong("count") ?: 0L
                 ChangeCategoryInTransactionScreen(
                     onNavigateBack = {

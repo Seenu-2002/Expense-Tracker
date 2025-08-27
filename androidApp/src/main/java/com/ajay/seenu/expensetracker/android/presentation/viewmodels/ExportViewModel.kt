@@ -2,9 +2,9 @@ package com.ajay.seenu.expensetracker.android.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ajay.seenu.expensetracker.entity.ExportFormat
-import com.ajay.seenu.expensetracker.entity.ExportState
 import com.ajay.seenu.expensetracker.android.data.ExportRepository
+import com.ajay.seenu.expensetracker.domain.model.ExportFormat
+import com.ajay.seenu.expensetracker.domain.model.ExportState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

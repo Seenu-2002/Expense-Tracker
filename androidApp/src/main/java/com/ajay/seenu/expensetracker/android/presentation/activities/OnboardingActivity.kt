@@ -21,10 +21,10 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import com.ajay.seenu.expensetracker.android.ExpenseTrackerTheme
+import com.ajay.seenu.expensetracker.android.presentation.theme.ExpenseTrackerTheme
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.OnBoardingViewModel
-import com.ajay.seenu.expensetracker.entity.Theme
+import com.ajay.seenu.expensetracker.domain.model.Theme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch

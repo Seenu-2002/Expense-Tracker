@@ -3,8 +3,8 @@ package com.ajay.seenu.expensetracker.android.presentation.common
 import android.content.Context
 import androidx.compose.ui.graphics.Color
 import com.ajay.seenu.expensetracker.android.R
-import com.ajay.seenu.expensetracker.android.domain.data.Transaction
-
+import com.ajay.seenu.expensetracker.domain.model.Category
+import com.ajay.seenu.expensetracker.domain.model.TransactionType
 
 object CategoryDefaults {
     val categoryIconsList by lazy {
@@ -102,124 +102,124 @@ object CategoryDefaults {
         Color(0xFF607D8B)  // Muted Teal-Gray
     )
 
-    fun getDefaultCategories(context: Context): List<Transaction.Category> {
+    fun getDefaultCategories(context: Context): List<Category> {
         // Default Income Categories
         val incomeCategories = listOf(
-            Transaction.Category(
+            Category(
                 id = -1L,
-                type = Transaction.Type.INCOME,
+                type = TransactionType.INCOME,
                 label = context.getString(R.string.default_category_salary),
-                color = Color(0xFF4CAF50), // Green
-                res = R.drawable.monetization_on
+                color = 0xFF4CAF50, // Green
+                iconRes = R.drawable.monetization_on
             ),
-            Transaction.Category(
+            Category(
                 id = -1L,
-                type = Transaction.Type.INCOME,
+                type = TransactionType.INCOME,
                 label = context.getString(R.string.default_category_business),
-                color = Color(0xFF03A9F4), // Blue
-                res = R.drawable.business
+                color = 0xFF03A9F4, // Blue
+                iconRes = R.drawable.business
             ),
-            Transaction.Category(
+            Category(
                 id = -1L,
-                type = Transaction.Type.INCOME,
+                type = TransactionType.INCOME,
                 label = context.getString(R.string.default_category_investments),
-                color = Color(0xFFE91E63), // Pink
-                res = R.drawable.trending_up
+                color = 0xFFE91E63, // Pink
+                iconRes = R.drawable.trending_up
             ),
-            Transaction.Category(
+            Category(
                 id = -1L,
-                type = Transaction.Type.INCOME,
+                type = TransactionType.INCOME,
                 label = context.getString(R.string.default_category_freelance),
-                color = Color(0xFFFF9800), // Orange
-                res = R.drawable.work
+                color = 0xFFFF9800, // Orange
+                iconRes = R.drawable.work
             ),
-            Transaction.Category(
+            Category(
                 id = -1L,
-                type = Transaction.Type.INCOME,
+                type = TransactionType.INCOME,
                 label = context.getString(R.string.default_category_gifts),
-                color = Color(0xFFFFC107), // Yellow
-                res = R.drawable.redeem
+                color = 0xFFFFC107, // Yellow
+                iconRes = R.drawable.redeem
             ),
-            Transaction.Category(
+            Category(
                 id = -1L,
-                type = Transaction.Type.INCOME,
+                type = TransactionType.INCOME,
                 label = context.getString(R.string.default_category_others),
-                color = Color(0xFF607D8B), // Teal-Gray
-                res = R.drawable.star
+                color = 0xFF607D8B, // Teal-Gray
+                iconRes = R.drawable.star
             )
         )
 
         // Default Expense Categories
         val expenseCategories = listOf(
-            Transaction.Category(
+            Category(
                 id = -1L,
-                type = Transaction.Type.EXPENSE,
+                type = TransactionType.EXPENSE,
                 label = context.getString(R.string.default_category_housing),
-                color = Color(0xFF795548), // Brown
-                res = R.drawable.home
+                color = 0xFF795548, // Brown
+                iconRes = R.drawable.home
             ),
-            Transaction.Category(
+            Category(
                 id = -1L,
-                type = Transaction.Type.EXPENSE,
+                type = TransactionType.EXPENSE,
                 label = context.getString(R.string.default_category_food),
-                color = Color(0xFFFF5722), // Orange-Red
-                res = R.drawable.fastfood
+                color = 0xFFFF5722, // Orange-Red
+                iconRes = R.drawable.fastfood
             ),
-            Transaction.Category(
+            Category(
                 id = -1L,
-                type = Transaction.Type.EXPENSE,
+                type = TransactionType.EXPENSE,
                 label = context.getString(R.string.default_category_transportation),
-                color = Color(0xFF03A9F4), // Blue
-                res = R.drawable.directions_bus
+                color = 0xFF03A9F4, // Blue
+                iconRes = R.drawable.directions_bus
             ),
-            Transaction.Category(
+            Category(
                 id = -1L,
-                type = Transaction.Type.EXPENSE,
+                type = TransactionType.EXPENSE,
                 label = context.getString(R.string.default_category_health),
-                color = Color(0xFFF44336), // Red
-                res = R.drawable.medical_services
+                color = 0xFFF44336, // Red
+                iconRes = R.drawable.medical_services
             ),
-            Transaction.Category(
+            Category(
                 id = -1L,
-                type = Transaction.Type.EXPENSE,
+                type = TransactionType.EXPENSE,
                 label = context.getString(R.string.default_category_education),
-                color = Color(0xFF3F51B5), // Indigo
-                res = R.drawable.school
+                color = 0xFF3F51B5, // Indigo
+                iconRes = R.drawable.school
             ),
-            Transaction.Category(
+            Category(
                 id = -1L,
-                type = Transaction.Type.EXPENSE,
+                type = TransactionType.EXPENSE,
                 label = context.getString(R.string.default_category_entertainment),
-                color = Color(0xFF673AB7), // Indigo
-                res = R.drawable.theaters
+                color = 0xFF673AB7, // Indigo
+                iconRes = R.drawable.theaters
             ),
-            Transaction.Category(
+            Category(
                 id = -1L,
-                type = Transaction.Type.EXPENSE,
+                type = TransactionType.EXPENSE,
                 label = context.getString(R.string.default_category_personal_care),
-                color = Color(0xFFFF9800), // Orange
-                res = R.drawable.local_cafe
+                color = 0xFFFF9800, // Orange
+                iconRes = R.drawable.local_cafe
             ),
-            Transaction.Category(
+            Category(
                 id = -1L,
-                type = Transaction.Type.EXPENSE,
+                type = TransactionType.EXPENSE,
                 label = context.getString(R.string.default_category_savings_investments),
-                color = Color(0xFF4CAF50), // Green
-                res = R.drawable.savings
+                color = 0xFF4CAF50, // Green
+                iconRes = R.drawable.savings
             ),
-            Transaction.Category(
+            Category(
                 id = -1L,
-                type = Transaction.Type.EXPENSE,
+                type = TransactionType.EXPENSE,
                 label = context.getString(R.string.default_category_debt_repayment),
-                color = Color(0xFF455A64), // Gray-Blue
-                res = R.drawable.receipt_long
+                color = 0xFF455A64, // Gray-Blue
+                iconRes = R.drawable.receipt_long
             ),
-            Transaction.Category(
+            Category(
                 id = -1L,
-                type = Transaction.Type.EXPENSE,
+                type = TransactionType.EXPENSE,
                 label = context.getString(R.string.default_category_others),
-                color = Color(0xFF607D8B), // Teal-Gray
-                res = R.drawable.star
+                color = 0xFF607D8B, // Teal-Gray
+                iconRes = R.drawable.star
             )
         )
 

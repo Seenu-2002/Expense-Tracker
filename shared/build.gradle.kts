@@ -35,8 +35,9 @@ kotlin {
             implementation(libs.sqldelight.extensions.coroutines)
             implementation(libs.androidx.datastore.preferences.core)
             implementation(libs.kotlin.json.serialization)
-            implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.coroutines.core)
+            // Multiplatform logging library
+            implementation(libs.kermit)
         }
         commonTest{
             dependencies {
