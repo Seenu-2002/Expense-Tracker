@@ -5,14 +5,22 @@ package com.ajay.seenu.expensetracker.android.presentation.screeens
 import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.TweenSpec
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,8 +42,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.presentation.components.CategoryRow
 import com.ajay.seenu.expensetracker.android.presentation.components.TransactionForm
+import com.ajay.seenu.expensetracker.android.presentation.state.AccountsListUiModel
 import com.ajay.seenu.expensetracker.android.presentation.state.TransactionMode
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.AddTransactionViewModel
+import com.ajay.seenu.expensetracker.domain.model.Account
+import com.ajay.seenu.expensetracker.domain.model.AccountType
 import com.ajay.seenu.expensetracker.domain.model.Category
 import com.ajay.seenu.expensetracker.domain.model.TransactionType
 
@@ -47,7 +58,7 @@ fun TransactionScreen(
     onNavigateBack: () -> Unit
 ) {
     LaunchedEffect(Unit) {
-        viewModel.getCategories(TransactionType.INCOME)
+        viewModel.init(TransactionType.INCOME)
         when (transactionMode) {
             TransactionMode.New -> {}
             is TransactionMode.Clone -> {
@@ -64,8 +75,12 @@ fun TransactionScreen(
     val transaction by viewModel.transaction.collectAsStateWithLifecycle()
     val attachments by viewModel.attachments.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
+    val accounts by viewModel.accounts.collectAsStateWithLifecycle()
     var showForm by rememberSaveable { mutableStateOf(false) }
     var selectedCategory: Category? by remember {
+        mutableStateOf(null)
+    }
+    var selectedAccount: Account? by remember {
         mutableStateOf(null)
     }
 
@@ -86,6 +101,7 @@ fun TransactionScreen(
             is TransactionMode.Clone -> {
                 transaction?.let {
                     selectedCategory = it.category
+                    selectedAccount = it.account
                     showForm = true
                 }
             }
@@ -93,6 +109,7 @@ fun TransactionScreen(
             is TransactionMode.Edit -> {
                 transaction?.let {
                     selectedCategory = it.category
+                    selectedAccount = it.account
                     showForm = true
                 }
             }
@@ -114,6 +131,7 @@ fun TransactionScreen(
                 selectedCategory = null
                 viewModel.getCategories(type)
             },
+            selectedAccount = selectedAccount,
             onAccountClicked = {
                 showAccountBottomSheet = true
             },
@@ -123,14 +141,15 @@ fun TransactionScreen(
                     viewModel.updateTransaction(newTransaction, newAttachments)
                 else
                     viewModel.addTransaction(newTransaction, newAttachments)
-                Toast.makeText(context, "Transaction added Successfully!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Transaction added Successfully!", Toast.LENGTH_SHORT)
+                    .show()
                 onNavigateBack.invoke()
             }
         )
     }
 
     val categoriesBottomSheetState = rememberModalBottomSheetState(true)
-    val paymentTypeBottomSheetState = rememberModalBottomSheetState(true) // TODO: Change it to category
+    val accountBottomSheetState = rememberModalBottomSheetState(true)
     val focusManager = LocalFocusManager.current
 
     if (showCategoriesBottomSheet) {
@@ -144,23 +163,61 @@ fun TransactionScreen(
     }
 
     if (showAccountBottomSheet) {
-        TODO()
-//        PaymentTypeBottomSheet(
-//            selectedPaymentType = selectedPaymentType,
-//            state = paymentTypeBottomSheetState,
-//            onDismiss = {
-//                focusManager.clearFocus(true)
-//                showPaymentTypeBottomSheet = false
-//            },
-//            paymentTypes = PaymentType.entries
-//        ) { type ->
-//            selectedPaymentType = type
-//            showPaymentTypeBottomSheet = false
-//        }
+        AccountsBottomSheet(
+            state = accountBottomSheetState,
+            onDismiss = {
+                showCategoriesBottomSheet = false
+            },
+            selectedAccount = selectedAccount,
+            accountsUiModel = AccountsListUiModel(accounts = accounts)
+        ) { account ->
+            selectedAccount = account
+            showAccountBottomSheet = false
+        }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AccountsBottomSheet(
+    state: SheetState,
+    onDismiss: () -> Unit,
+    selectedAccount: Account?,
+    accountsUiModel: AccountsListUiModel,
+    onAccountSelected: (Account) -> Unit
+) {
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = state,
+        dragHandle = { BottomSheetDefaults.DragHandle() },
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            for (type in AccountType.entries) {
+                val accounts = accountsUiModel.typeVsAccountMap[type] ?: emptyList()
+                for (account in accounts) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onAccountSelected(account) }
+                            .padding(vertical = 8.dp, horizontal = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = account.name
+                        )
+
+                        if (account == selectedAccount) {
+                            Icon(imageVector = Icons.Rounded.Check, contentDescription = null)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+}
+
 @Composable
 fun CategoryBottomSheet(
     state: SheetState,
@@ -169,7 +226,7 @@ fun CategoryBottomSheet(
     onCategorySelected: (Category) -> Unit,
 ) {
     ModalBottomSheet(
-        onDismissRequest = { onDismiss() },
+        onDismissRequest = onDismiss,
         sheetState = state,
         dragHandle = { BottomSheetDefaults.DragHandle() },
     ) {

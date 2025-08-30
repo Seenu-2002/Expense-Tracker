@@ -40,7 +40,8 @@ fun MainScreen(
     onAddTransaction: () -> Unit,
     onTransactionClicked: (Long) -> Unit,
     onCloneTransaction: (Long) -> Unit,
-    onCategoryListScreen: () -> Unit
+    onCategoryListScreen: () -> Unit,
+    onAccountListScreen: () -> Unit
 ) {
     var navigationSelectedItem by remember {
         mutableIntStateOf(0)
@@ -125,7 +126,10 @@ fun MainScreen(
                 SimpleAnalyticsScreen()
             }
             composable(Screen.Settings.route) {
-                SettingsScreen()
+                SettingsScreen(
+                    onManageAccountsClicked = onAccountListScreen,
+                    onManageCategoriesClicked = onCategoryListScreen
+                )
             }
         }
     }

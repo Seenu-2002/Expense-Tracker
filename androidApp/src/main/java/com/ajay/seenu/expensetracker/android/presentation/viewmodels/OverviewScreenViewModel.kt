@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -76,6 +77,7 @@ class OverviewScreenViewModel @Inject constructor(
     private fun getOverallData(filter: DateFilter) {
         viewModelScope.launch {
             val range = dateRangeCalculatorUseCase(filter)
+            Timber.d("Calculated Date Range: $range")
             getFilteredOverallData(range)
 
         }

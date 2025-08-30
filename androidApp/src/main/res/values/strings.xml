@@ -29,6 +29,8 @@
     <string name="expense">Expense</string>
     <string name="categories">Categories</string>
     <string name="add_transaction">Add Transaction</string>
+    <string name="add_category">Add Category</string>
+    <string name="add_account">Add Account</string>
 
     <string name="chart_axis_date">Date</string>
     <string name="chart_axis_category">Category</string>
@@ -98,5 +100,21 @@
     <string name="change_category">Change Category</string>
     <string name="delete_category_success">Category %1$s has been deleted successfully!</string>
 
+    <string name="cash">Cash</string>
+    <string name="bank_accounts">Bank Accounts</string>
+    <string name="credit_cards">Credit Cards</string>
+    <string name="loan">Loan</string>
+    <string name="investment">Investment</string>
+    <string name="others">Others</string>
+    <string name="something_went_wrong">Something went wrong!</string>
+    <string name="accounts">Accounts</string>
+    <string name="create_account">Create Account</string>
+    <string name="edit_account">Edit Account</string>
+    <string name="account_name">Account Name</string>
+    <string name="accounts_category_settings">Accounts &amp; Category</string>
+    <string name="manage_categories">Manage Categories</string>
+    <string name="manage_accounts">Manage Accounts</string>
 
+    <string name="account_created">Account %1$s has been created!</string>
+    <string name="account_updated">Account %1$s has been updated!</string>
 </resources>

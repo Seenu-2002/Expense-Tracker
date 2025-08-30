@@ -10,6 +10,8 @@ sealed class UiState<out T> {
 sealed interface Error {
     data object Empty : Error
     data object CategoryAlreadyPresent : Error
+    data object AccountAlreadyPresent : Error
     data class Unhandled(val exception: Throwable) : Error
     data object CategoryNotFound : Error
+    data object AccountNotFound : Error
 }

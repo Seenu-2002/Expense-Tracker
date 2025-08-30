@@ -47,13 +47,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.data.FilterPreference
-import com.ajay.seenu.expensetracker.android.util.formatDateHeader
-import com.ajay.seenu.expensetracker.android.presentation.state.UiState
-import com.ajay.seenu.expensetracker.android.presentation.viewmodels.OverviewScreenViewModel
 import com.ajay.seenu.expensetracker.android.presentation.components.DateRangePickerBottomSheet
 import com.ajay.seenu.expensetracker.android.presentation.components.FilterBottomSheet
 import com.ajay.seenu.expensetracker.android.presentation.components.OverviewCard
 import com.ajay.seenu.expensetracker.android.presentation.components.TransactionPreviewRow
+import com.ajay.seenu.expensetracker.android.presentation.state.UiState
+import com.ajay.seenu.expensetracker.android.presentation.viewmodels.OverviewScreenViewModel
 import com.ajay.seenu.expensetracker.domain.model.DateFilter
 import com.ajay.seenu.expensetracker.util.getDateLabel
 import com.ajay.seenu.expensetracker.util.toLocalDate
@@ -221,7 +220,7 @@ fun OverviewScreen(
                                         .background(MaterialTheme.colorScheme.background)
                                         .padding(horizontal = 15.dp, vertical = 8.dp),
                                     // TODO: User config format
-                                    text = formatDateHeader(transactionsByDate.rawDate.getDateLabel()),
+                                    text = transactionsByDate.rawDate.getDateLabel(),
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight.W500
                                 )

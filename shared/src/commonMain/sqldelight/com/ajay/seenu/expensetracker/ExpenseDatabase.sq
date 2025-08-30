@@ -1,5 +1,5 @@
 import com.ajay.seenu.expensetracker.data.model.TransactionTypeEntity;
-import com.ajay.seenu.expensetracker.data.model.AccountGroupTypeEntity;
+import com.ajay.seenu.expensetracker.data.model.AccountTypeEntity;
 
 CREATE TABLE TransactionDetailEntity (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -24,7 +24,7 @@ CREATE TABLE CategoryEntity (
     label TEXT NOT NULL,
     type TEXT AS TransactionTypeEntity NOT NULL,
     iconRes INTEGER NOT NULL,
-    color INTEGER NOT NULL ,
+    color INTEGER NOT NULL,
     UNIQUE (label, type) ON CONFLICT REPLACE
 );
 
@@ -40,19 +40,12 @@ CREATE TABLE AttachmentEntity (
 );
 CREATE INDEX transactionId ON AttachmentEntity(transactionId);
 
-CREATE TABLE AccountGroupEntity (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    type TEXT AS AccountGroupTypeEntity NOT NULL
-);
-
 CREATE TABLE AccountEntity (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    groupId INTEGER NOT NULL,
-    FOREIGN KEY(groupId) REFERENCES AccountGroupEntity(id)
-        ON UPDATE CASCADE
-        ON DELETE RESTRICT
+    type TEXT AS AccountTypeEntity NOT NULL,
+    isDefault INTEGER DEFAULT 0 NOT NULL,
+    UNIQUE (name, type) ON CONFLICT REPLACE
 );
 
 getAllTransactions:
@@ -154,23 +147,8 @@ DELETE FROM AttachmentEntity WHERE id = ?;
 deleteAttachmentsByTransactionId:
 DELETE FROM AttachmentEntity WHERE transactionId = ?;
 
-getAccountGroups:
-SELECT * FROM AccountGroupEntity;
-
-getAccountGroupById:
-SELECT * FROM AccountGroupEntity WHERE id = ?;
-
-createAccountGroup:
-INSERT INTO AccountGroupEntity (name, type) VALUES (?, ?);
-
-updateAccountGroup:
-UPDATE AccountGroupEntity SET name = ?, type = ? WHERE id = :id;
-
-deleteAccountGroup:
-DELETE FROM AccountGroupEntity WHERE id = ?;
-
-getAccountsByGroupId:
-SELECT * FROM AccountEntity WHERE groupId = ?;
+getAccountsByType:
+SELECT * FROM AccountEntity WHERE type = ?;
 
 getAllAccounts:
 SELECT * FROM AccountEntity;
@@ -179,10 +157,10 @@ getAccountById:
 SELECT * FROM AccountEntity WHERE id = ?;
 
 createAccount:
-INSERT INTO AccountEntity (name, groupId) VALUES (?, ?);
+INSERT INTO AccountEntity (name, type, isDefault) VALUES (?, ?, ?);
 
 updateAccount:
-UPDATE AccountEntity SET name = ?, groupId = ? WHERE id = :id;
+UPDATE AccountEntity SET name = ?, type = ? WHERE id = :id;
 
 deleteAccount:
 DELETE FROM AccountEntity WHERE id = ?;

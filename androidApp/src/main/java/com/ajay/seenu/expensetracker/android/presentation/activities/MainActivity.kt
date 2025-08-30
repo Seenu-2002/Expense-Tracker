@@ -35,8 +35,11 @@ import androidx.navigation.navArgument
 import com.ajay.seenu.expensetracker.UserConfigurationsManager
 import com.ajay.seenu.expensetracker.android.presentation.navigation.MainScreen
 import com.ajay.seenu.expensetracker.android.presentation.navigation.Screen
+import com.ajay.seenu.expensetracker.android.presentation.screeens.AccountsListScreen
+import com.ajay.seenu.expensetracker.android.presentation.screeens.AddEditAccountScreen
+import com.ajay.seenu.expensetracker.android.presentation.screeens.AddEditAccountScreenArg
 import com.ajay.seenu.expensetracker.android.presentation.screeens.AddEditCategoryScreen
-import com.ajay.seenu.expensetracker.android.presentation.screeens.AddEditScreenArg
+import com.ajay.seenu.expensetracker.android.presentation.screeens.AddEditCategoryScreenArg
 import com.ajay.seenu.expensetracker.android.presentation.screeens.CategoryListScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.ChangeCategoryInTransactionScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.DetailTransactionScreen
@@ -196,10 +199,14 @@ class MainActivity : AppCompatActivity() {
                     },
                     onCategoryListScreen = {
                         navController.navigate(Screen.CategoryList.route)
+                    },
+                    onAccountListScreen = {
+                        navController.navigate(Screen.AccountList.route)
                     }
                 )
             }
-            composable("${Screen.AddTransaction.route}/{transaction_id}/{mode}",
+            composable(
+                "${Screen.AddTransaction.route}/{transaction_id}/{mode}",
                 arguments = listOf(
                     navArgument("transaction_id") {
                         type = NavType.LongType
@@ -211,11 +218,11 @@ class MainActivity : AppCompatActivity() {
             ) {
                 val transactionId = it.arguments?.getLong("transaction_id")
                 val mode = it.arguments?.getString("mode")
-                val transactionMode = if(transactionId == -1L || transactionId == null) {
+                val transactionMode = if (transactionId == -1L || transactionId == null) {
                     TransactionMode.New
                 } else {
                     mode?.let {
-                        when(mode) {
+                        when (mode) {
                             "clone" -> TransactionMode.Clone(transactionId)
                             "edit" -> TransactionMode.Edit(transactionId)
                             "new" -> TransactionMode.New
@@ -285,9 +292,9 @@ class MainActivity : AppCompatActivity() {
                     ?.let { TransactionType.valueOf(it.uppercase()) }
 
                 val arg = if (id != null) {
-                    AddEditScreenArg.Edit(id)
+                    AddEditCategoryScreenArg.Edit(id)
                 } else {
-                    AddEditScreenArg.Create(type ?: TransactionType.EXPENSE)
+                    AddEditCategoryScreenArg.Create(type ?: TransactionType.EXPENSE)
                 }
                 AddEditCategoryScreen(
                     arg = arg,
@@ -322,6 +329,43 @@ class MainActivity : AppCompatActivity() {
                     categoryIdToBeDeleted = id,
                     type = type,
                     transactionCount = count
+                )
+            }
+            composable(Screen.AccountList.route) {
+                AccountsListScreen(
+                    onCreateAccount = {
+                        val route = "${Screen.Account.route}/-1"
+                        navController.navigate(route)
+                    },
+                    onEditAccount = {
+                        val route = "${Screen.Account.route}/${it}"
+                        navController.navigate(route)
+                    },
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+            composable(
+                "${Screen.Account.route}/{id}",
+                arguments = listOf(
+                    navArgument("id") {
+                        type = NavType.LongType
+                    }
+                )
+            ) { entry ->
+                val id = entry.arguments?.getLong("id", -1)
+                val arg = if (id == null || id == -1L) {
+                    AddEditAccountScreenArg.Create
+                } else {
+                    AddEditAccountScreenArg.Edit(id)
+                }
+
+                AddEditAccountScreen(
+                    arg = arg,
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    }
                 )
             }
         }

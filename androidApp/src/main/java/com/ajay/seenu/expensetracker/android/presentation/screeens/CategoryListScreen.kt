@@ -60,14 +60,14 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ajay.seenu.expensetracker.android.R
-import com.ajay.seenu.expensetracker.android.presentation.state.UiState
-import com.ajay.seenu.expensetracker.android.presentation.theme.LocalColors
-import com.ajay.seenu.expensetracker.android.presentation.viewmodels.CategoriesListUiData
-import com.ajay.seenu.expensetracker.android.presentation.viewmodels.CategoryScreenViewModel
 import com.ajay.seenu.expensetracker.android.presentation.components.CategoryChangeConfirmationDialog
 import com.ajay.seenu.expensetracker.android.presentation.components.CategoryRow
 import com.ajay.seenu.expensetracker.android.presentation.components.ProgressDialog
 import com.ajay.seenu.expensetracker.android.presentation.components.SlidingSwitch
+import com.ajay.seenu.expensetracker.android.presentation.state.UiState
+import com.ajay.seenu.expensetracker.android.presentation.theme.LocalColors
+import com.ajay.seenu.expensetracker.android.presentation.viewmodels.CategoriesListUiData
+import com.ajay.seenu.expensetracker.android.presentation.viewmodels.CategoryScreenViewModel
 import com.ajay.seenu.expensetracker.android.util.getStringRes
 import com.ajay.seenu.expensetracker.domain.model.Category
 import com.ajay.seenu.expensetracker.domain.model.TransactionType
@@ -137,7 +137,7 @@ fun CategoryListScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Add,
-                        contentDescription = stringResource(R.string.add_transaction)
+                        contentDescription = stringResource(R.string.add_category)
                     )
                 }
             }
@@ -260,6 +260,7 @@ fun CategoryListScreen(
     }
 }
 
+// TODO: Use `com.ajay.seenu.expensetracker.android.presentation.common.SwipeableBox`
 @Composable
 fun SwipeableCategoryRow(
     modifier: Modifier = Modifier,

@@ -10,4 +10,6 @@ sealed class Screen(val route: String) {
     data object ChangeCategoryInTransaction : Screen("change_category_in_transaction")
     data object Category: Screen("category_route")
     data object Default : Screen("default")
+    data object AccountList : Screen("accounts_route")
+    data object Account : Screen("account_route")
 }

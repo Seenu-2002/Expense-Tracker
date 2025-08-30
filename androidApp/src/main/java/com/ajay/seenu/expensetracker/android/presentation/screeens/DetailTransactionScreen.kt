@@ -61,6 +61,7 @@ import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.presentation.common.PreviewThemeWrapper
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.DetailTransactionViewModel
 import com.ajay.seenu.expensetracker.domain.model.Account
+import com.ajay.seenu.expensetracker.domain.model.AccountType
 import com.ajay.seenu.expensetracker.domain.model.Attachment
 import com.ajay.seenu.expensetracker.domain.model.Category
 import com.ajay.seenu.expensetracker.domain.model.Transaction
@@ -340,7 +341,7 @@ private fun DetailTransactionScreenPreview() {
                 account = Account(
                     id = 0L,
                     name = "Test Account",
-                    groupId = 12L
+                    type = AccountType.BANK_ACCOUNT
                 ),
                 type = TransactionType.INCOME
             ),

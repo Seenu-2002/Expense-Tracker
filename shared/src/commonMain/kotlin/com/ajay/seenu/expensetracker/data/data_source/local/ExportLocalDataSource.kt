@@ -47,7 +47,7 @@ class ExportLocalDataSource constructor(
                     amount = transaction.amount,
                     description = transaction.note,
                     category = transaction.category.id,
-                    date = formatDate(transaction.createdAt.epochSeconds),
+                    date = formatDate(transaction.createdAt.toEpochMilliseconds()),
                     type = transaction.type
                 )
             }

@@ -1,10 +1,18 @@
 package com.ajay.seenu.expensetracker.android.di
 
 import com.ajay.seenu.expensetracker.UserConfigurationsManager
+import com.ajay.seenu.expensetracker.data.repository.AccountRepository
 import com.ajay.seenu.expensetracker.data.repository.AttachmentRepository
 import com.ajay.seenu.expensetracker.data.repository.CategoryRepository
 import com.ajay.seenu.expensetracker.data.repository.TransactionRepository
 import com.ajay.seenu.expensetracker.domain.usecase.DateRangeCalculatorUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.account.CreateAccountUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.account.DeleteAccountUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.account.GetAccountUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.account.GetAccountsAsFlowUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.account.GetAccountsUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.account.InsertDefaultAccountsUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.account.UpdateAccountUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.attachment.AddAttachmentUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.attachment.GetAttachmentsUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.category.AddCategoryUseCase
@@ -162,6 +170,48 @@ object UseCaseModule {
     @Provides
     fun provideDateRangeCalculatorUseCase(userConfigurationsManager: UserConfigurationsManager): DateRangeCalculatorUseCase {
         return DateRangeCalculatorUseCase(userConfigurationsManager)
+    }
+
+    @Singleton
+    @Provides
+    fun provideInsertDefaultAccountsUseCase(repository: AccountRepository): InsertDefaultAccountsUseCase {
+        return InsertDefaultAccountsUseCase(repository)
+    }
+
+    @Singleton
+    @Provides
+    fun provideGetAccountsUseCase(repository: AccountRepository): GetAccountsUseCase {
+        return GetAccountsUseCase(repository)
+    }
+
+    @Singleton
+    @Provides
+    fun provideGetAccountsAsFlowUseCase(repository: AccountRepository): GetAccountsAsFlowUseCase {
+        return GetAccountsAsFlowUseCase(repository)
+    }
+
+    @Singleton
+    @Provides
+    fun provideGetAccountUseCase(repository: AccountRepository): GetAccountUseCase {
+        return GetAccountUseCase(repository)
+    }
+
+    @Singleton
+    @Provides
+    fun provideCreateAccountUseCase(repository: AccountRepository): CreateAccountUseCase {
+        return CreateAccountUseCase(repository)
+    }
+
+    @Singleton
+    @Provides
+    fun provideUpdateAccountUseCase(repository: AccountRepository): UpdateAccountUseCase {
+        return UpdateAccountUseCase(repository)
+    }
+
+    @Singleton
+    @Provides
+    fun provideDeleteAccountUseCase(repository: AccountRepository): DeleteAccountUseCase {
+        return DeleteAccountUseCase(repository)
     }
 
 }

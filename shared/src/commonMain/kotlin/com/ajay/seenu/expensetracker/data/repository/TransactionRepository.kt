@@ -190,7 +190,7 @@ class TransactionRepository constructor(
             ).mapNotNull {
                 it.totalAmount?.let { sum ->
                     ExpensePerDay(
-                        Instant.fromEpochSeconds(it.createdAt),
+                        Instant.fromEpochMilliseconds(it.createdAt),
                         categories.find { category -> category.id == it.categoryId }!!,
                         sum
                     )
