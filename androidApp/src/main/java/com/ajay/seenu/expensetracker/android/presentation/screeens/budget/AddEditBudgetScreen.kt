@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.sp
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.presentation.common.TransactionFieldView
 import com.ajay.seenu.expensetracker.domain.model.Category
+import com.ajay.seenu.expensetracker.domain.model.TransactionType
 import com.ajay.seenu.expensetracker.domain.model.budget.Budget
 import com.ajay.seenu.expensetracker.domain.model.budget.BudgetPeriodType
 import com.ajay.seenu.expensetracker.domain.model.budget.BudgetRequest
@@ -66,15 +67,15 @@ import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddBudgetScreen(
-    isEdit: Boolean = false,
-    initialBudget: Budget? = null,
+fun AddEditBudgetScreen(
+    arg: AddEditBudgetArg,
     categories: List<Category> = emptyList(),
     onSave: (BudgetRequest) -> Unit,
     onNavigateBack: () -> Unit
 ) {
-    var amount by remember { mutableStateOf(initialBudget?.amount?.toInt()?.toString() ?: "") }
-    var selectedCategory by remember { mutableStateOf(initialBudget?.categoryId ?: categories.firstOrNull()?.id) }
+    val budget = if(arg is AddEditBudgetArg.Edit) arg.budget else null
+    var amount by remember { mutableStateOf(budget?.amount?.toInt()?.toString() ?: "") }
+    var selectedCategory by remember { mutableStateOf(budget?.categoryId ?: categories.firstOrNull()?.id) }
     var receiveAlert by rememberSaveable { mutableStateOf(false) }
     var showAmountError by rememberSaveable {
         mutableStateOf(false)
@@ -95,7 +96,9 @@ fun AddBudgetScreen(
         CenterAlignedTopAppBar(
             title = {
                 Text(
-                    if (isEdit) "Edit Budget" else "Create Budget",
+                    if (arg is AddEditBudgetArg.Edit)
+                        stringResource(R.string.edit_budget) else
+                        stringResource(R.string.create_budget),
                     color = Color.White,
                 )
             },
@@ -328,4 +331,9 @@ fun AddBudgetScreen(
             }
         }
     }
+}
+
+sealed interface AddEditBudgetArg {
+    data object Create : AddEditBudgetArg
+    data class Edit(val budget: Budget) : AddEditBudgetArg
 }

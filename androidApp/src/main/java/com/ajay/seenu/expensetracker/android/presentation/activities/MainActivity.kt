@@ -46,10 +46,11 @@ import com.ajay.seenu.expensetracker.android.presentation.screeens.CategoryListS
 import com.ajay.seenu.expensetracker.android.presentation.screeens.ChangeCategoryInTransactionScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.DetailTransactionScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.TransactionScreen
+import com.ajay.seenu.expensetracker.android.presentation.screeens.budget.AddEditBudgetArg
 import com.ajay.seenu.expensetracker.android.presentation.state.TransactionMode
 import com.ajay.seenu.expensetracker.android.presentation.screeens.budget.BudgetDetailScreen
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.BudgetViewModel
-import com.ajay.seenu.expensetracker.android.presentation.screeens.budget.AddBudgetScreen
+import com.ajay.seenu.expensetracker.android.presentation.screeens.budget.AddEditBudgetScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.budget.DeleteBudgetDialog
 import com.ajay.seenu.expensetracker.android.presentation.theme.AppDefaults
 import com.ajay.seenu.expensetracker.android.presentation.theme.ExpenseTrackerTheme
@@ -356,9 +357,8 @@ class MainActivity : AppCompatActivity() {
                 val categories by budgetViewModel.categories.collectAsStateWithLifecycle()
 
                 selectedBudget?.let { budgetWithSpending ->
-                    AddBudgetScreen(
-                        isEdit = true,
-                        initialBudget = budgetWithSpending.budget,
+                    AddEditBudgetScreen(
+                        arg = AddEditBudgetArg.Edit(budgetWithSpending.budget),
                         categories = categories,
                         onSave = { budgetRequest ->
                             budgetViewModel.updateBudget(budgetId, budgetRequest)
@@ -369,8 +369,8 @@ class MainActivity : AppCompatActivity() {
                         }
                     )
                 } ?: run {
-                    AddBudgetScreen(
-                        isEdit = false,
+                    AddEditBudgetScreen(
+                        arg = AddEditBudgetArg.Create,
                         categories = categories,
                         onSave = { budgetRequest ->
                             budgetViewModel.createBudget(budgetRequest)
@@ -384,7 +384,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             composable(
-                "budget_detail/{budgetId}",
+                "${Screen.BudgetDetail.route}/{budgetId}",
                 arguments = listOf(navArgument("budgetId") { type = NavType.LongType })
             )
             { backStackEntry ->
