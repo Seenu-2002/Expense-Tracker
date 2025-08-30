@@ -186,3 +186,83 @@ UPDATE AccountEntity SET name = ?, groupId = ? WHERE id = :id;
 
 deleteAccount:
 DELETE FROM AccountEntity WHERE id = ?;
+
+CREATE TABLE BudgetEntity (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    name TEXT NOT NULL,
+    categoryId INTEGER,  -- NULL for overall budget, specific category_id for category budget
+    amount REAL NOT NULL,
+    periodType TEXT NOT NULL, -- 'MONTHLY', 'WEEKLY', 'YEARLY', 'CUSTOM'
+    startDate INTEGER NOT NULL,
+    endDate INTEGER,  -- NULL for recurring budgets, specific date for custom period
+    isRecurring INTEGER NOT NULL DEFAULT 1, -- 0 for false, 1 for true
+    createdAt INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+    updatedAt INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+    isActive INTEGER NOT NULL DEFAULT 1
+);
+
+-- Index for better query performance
+CREATE INDEX idx_budget_category ON BudgetEntity(categoryId);
+CREATE INDEX idx_budget_active ON BudgetEntity(isActive);
+CREATE INDEX idx_budget_period ON BudgetEntity(startDate, endDate);
+
+-- Queries for Budget operations
+selectAllActiveBudgets:
+SELECT * FROM BudgetEntity
+WHERE isActive = 1
+ORDER BY createdAt DESC;
+
+selectBudgetsByCategory:
+SELECT * FROM BudgetEntity
+WHERE categoryId = ? AND isActive = 1;
+
+selectOverallBudgets:
+SELECT * FROM BudgetEntity
+WHERE categoryId IS NULL AND isActive = 1;
+
+selectBudgetById:
+SELECT * FROM BudgetEntity
+WHERE id = ?;
+
+selectActiveBudgetsForPeriod:
+SELECT * FROM BudgetEntity
+WHERE isActive = 1
+AND (
+    (isRecurring = 1) OR
+    (startDate <= ? AND (endDate IS NULL OR endDate >= ?))
+);
+
+insertBudget:
+INSERT INTO BudgetEntity (name, categoryId, amount, periodType, startDate, endDate, isRecurring)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+updateBudget:
+UPDATE BudgetEntity
+SET name = ?, categoryId = ?, amount = ?, periodType = ?,
+    startDate = ?, endDate = ?, isRecurring = ?,
+    updatedAt = strftime('%s', 'now')
+WHERE id = ?;
+
+deleteBudget:
+UPDATE BudgetEntity
+SET isActive = 0, updatedAt = strftime('%s', 'now')
+WHERE id = ?;
+
+-- Query to get budget spending for a specific period
+getBudgetSpendingForPeriod:
+SELECT
+    b.id,
+    b.name,
+    b.amount,
+    b.categoryId,
+    COALESCE(SUM(CASE WHEN t.type = 'EXPENSE' THEN t.amount ELSE 0 END), 0)
+FROM BudgetEntity b
+LEFT JOIN TransactionDetailEntity t ON (
+    (b.categoryId IS NULL OR b.categoryId = t.categoryId)
+    AND t.createdAt >= ?
+    AND t.createdAt <= ?
+    AND t.type = 'EXPENSE'
+)
+WHERE b.isActive = 1
+AND b.id = ?
+GROUP BY b.id;

@@ -1,6 +1,7 @@
 package com.ajay.seenu.expensetracker.android.di
 
 import android.content.Context
+import com.ajay.seenu.expensetracker.data.repository.BudgetRepository
 import com.ajay.seenu.expensetracker.DriverFactory
 import com.ajay.seenu.expensetracker.ExpenseDatabase
 import com.ajay.seenu.expensetracker.createDatabase
@@ -87,6 +88,12 @@ object RepositoryModule {
     @Provides
     fun provideAccountRepository(dataSource: AccountDataSource): AccountRepository {
         return AccountRepository(dataSource)
+    }
+
+    @Provides
+    @Singleton
+    fun provideBudgetRepository(database: ExpenseDatabase): BudgetRepository {
+        return BudgetRepository(database)
     }
 
     @Provides
