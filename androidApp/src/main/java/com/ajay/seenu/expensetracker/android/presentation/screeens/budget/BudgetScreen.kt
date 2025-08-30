@@ -26,6 +26,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,11 +44,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.ajay.seenu.expensetracker.android.data.FilterPreference
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.BudgetViewModel
 import com.ajay.seenu.expensetracker.domain.model.budget.BudgetWithSpending
 
@@ -57,6 +60,12 @@ fun BudgetScreen(
     onCreateBudget: () -> Unit,
     onBudgetClick: (Long) -> Unit,
 ) {
+    val context = LocalContext.current
+    val filter = FilterPreference.getCurrentFilter(context)
+
+    LaunchedEffect(Unit) {
+        budgetViewModel.loadBudgets(filter)
+    }
     val budgets by budgetViewModel.budgets.collectAsState()
     val uiState by budgetViewModel.uiState.collectAsState()
 
@@ -75,11 +84,27 @@ fun BudgetScreen(
         }
     }
 
-    BudgetListScreen(
-        budgets = budgets,
-        onCreateBudget = onCreateBudget,
-        onBudgetClick = onBudgetClick,
-    )
+    if(!uiState.isLoading) {
+        budgets?.let {
+            BudgetListScreen(
+                budgets = it,
+                onCreateBudget = onCreateBudget,
+                onBudgetClick = onBudgetClick,
+            )
+        }
+    } else {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

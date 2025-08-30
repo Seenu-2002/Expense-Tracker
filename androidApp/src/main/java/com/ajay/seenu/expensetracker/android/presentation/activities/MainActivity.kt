@@ -27,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -38,6 +39,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ajay.seenu.expensetracker.UserConfigurationsManager
+import com.ajay.seenu.expensetracker.android.data.FilterPreference
 import com.ajay.seenu.expensetracker.android.presentation.navigation.MainScreen
 import com.ajay.seenu.expensetracker.android.presentation.navigation.Screen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.AddEditCategoryScreen
@@ -189,6 +191,8 @@ class MainActivity : AppCompatActivity() {
     fun App() {
         val navController = rememberNavController()
         val budgetViewModel: BudgetViewModel = hiltViewModel()
+        val context = LocalContext.current
+        val filter = FilterPreference.getCurrentFilter(context)
 
         NavHost(
             navController = navController,
@@ -215,7 +219,7 @@ class MainActivity : AppCompatActivity() {
                         navController.navigate("${Screen.AddBudget.route}/-1L")
                     },
                     onBudgetClick = { budgetId ->
-                        budgetViewModel.loadBudget(budgetId)
+                        budgetViewModel.loadBudget(budgetId, filter)
                         navController.navigate("${Screen.BudgetDetail.route}/$budgetId")
                     }
                 )
@@ -361,7 +365,7 @@ class MainActivity : AppCompatActivity() {
                         arg = AddEditBudgetArg.Edit(budgetWithSpending.budget),
                         categories = categories,
                         onSave = { budgetRequest ->
-                            budgetViewModel.updateBudget(budgetId, budgetRequest)
+                            budgetViewModel.updateBudget(budgetId, budgetRequest, filter)
                             navController.popBackStack()
                         },
                         onNavigateBack = {

@@ -4,12 +4,12 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import com.ajay.seenu.expensetracker.ExpenseDatabase
 import com.ajay.seenu.expensetracker.data.mapper.toDomain
+import com.ajay.seenu.expensetracker.domain.model.DateRange
 import com.ajay.seenu.expensetracker.domain.model.budget.Budget
-import com.ajay.seenu.expensetracker.domain.model.budget.BudgetPeriod
-import com.ajay.seenu.expensetracker.domain.model.budget.BudgetPeriodType
 import com.ajay.seenu.expensetracker.domain.model.budget.BudgetRequest
 import com.ajay.seenu.expensetracker.domain.model.budget.BudgetSummary
 import com.ajay.seenu.expensetracker.domain.model.budget.BudgetWithSpending
+import com.ajay.seenu.expensetracker.util.toEpochMillis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
@@ -63,7 +63,7 @@ class BudgetRepository(
             name = budgetRequest.name,
             categoryId = budgetRequest.categoryId,
             amount = budgetRequest.amount,
-            periodType = budgetRequest.periodType.name,
+            periodType = budgetRequest.periodType.toString(),
             startDate = budgetRequest.startDate,
             endDate = budgetRequest.endDate,
             isRecurring = if (budgetRequest.isRecurring) 1L else 0L
@@ -78,7 +78,7 @@ class BudgetRepository(
             name = budgetRequest.name,
             categoryId = budgetRequest.categoryId,
             amount = budgetRequest.amount,
-            periodType = budgetRequest.periodType.name,
+            periodType = budgetRequest.periodType.toString(),
             startDate = budgetRequest.startDate,
             endDate = budgetRequest.endDate,
             isRecurring = if (budgetRequest.isRecurring) 1L else 0L,
@@ -92,13 +92,12 @@ class BudgetRepository(
     }
 
     // Get budget with spending information for current period
-    suspend fun getBudgetWithSpending(budgetId: Long): BudgetWithSpending? {
+    suspend fun getBudgetWithSpending(budgetId: Long, range: DateRange): BudgetWithSpending? {
         val budget = getBudgetById(budgetId) ?: return null
-        val period = BudgetPeriod.getCurrentPeriod(BudgetPeriodType.valueOf(budget.periodType))
 
         val spentAmount = database.expenseDatabaseQueries.getBudgetSpendingForPeriod(
-            period.startDate,
-            period.endDate,
+            range.start.toEpochMillis(),
+            range.end.toEpochMillis(),
             budgetId
         ).executeAsOneOrNull()?.COALESCE ?: 0.0
 
@@ -129,13 +128,12 @@ class BudgetRepository(
     }
 
     // Get all budgets with spending for current period
-    fun getAllBudgetsWithSpending(): Flow<List<BudgetWithSpending>> {
+    fun getAllBudgetsWithSpending(range: DateRange): Flow<List<BudgetWithSpending>> {
         return getAllActiveBudgets().map { budgets ->
             budgets.map { budget ->
-                val period = BudgetPeriod.getCurrentPeriod(BudgetPeriodType.valueOf(budget.periodType))
                 val spentAmount = database.expenseDatabaseQueries.getBudgetSpendingForPeriod(
-                    period.startDate,
-                    period.endDate,
+                    range.start.toEpochMillis(),
+                    range.end.toEpochMillis(),
                     budget.id
                 ).executeAsOneOrNull()?.COALESCE ?: 0.0
 
@@ -148,8 +146,8 @@ class BudgetRepository(
     }
 
     // Get budget summary
-    fun getBudgetSummary(): Flow<BudgetSummary> {
-        return getAllBudgetsWithSpending().map { budgetsWithSpending ->
+    fun getBudgetSummary(range: DateRange): Flow<BudgetSummary> {
+        return getAllBudgetsWithSpending(range).map { budgetsWithSpending ->
             BudgetSummary(
                 totalBudgets = budgetsWithSpending.size,
                 totalBudgetAmount = budgetsWithSpending.sumOf { it.budget.amount },
@@ -164,6 +162,7 @@ class BudgetRepository(
     suspend fun checkBudgetExceeded(
         amount: Double,
         categoryId: Long,
+        range: DateRange,
         transactionDate: Long = Clock.System.now().toEpochMilliseconds()
     ): List<BudgetWithSpending> {
         val exceededBudgets = mutableListOf<BudgetWithSpending>()
@@ -179,17 +178,12 @@ class BudgetRepository(
         val allRelevantBudgets = categoryBudgets + overallBudgets
 
         for (budgetEntity in allRelevantBudgets) {
-            val period = if (budgetEntity.periodType == BudgetPeriodType.CUSTOM.name && budgetEntity.endDate != null) {
-                BudgetPeriod(budgetEntity.startDate, budgetEntity.endDate!!)
-            } else {
-                BudgetPeriod.getCurrentPeriod(BudgetPeriodType.valueOf(budgetEntity.periodType))
-            }
 
             // Check if transaction date falls within budgetEntity period
-            if (transactionDate >= period.startDate && transactionDate <= period.endDate) {
+            if (transactionDate >= range.start.toEpochMillis() && transactionDate <= range.end.toEpochMillis()) {
                 val currentSpent = database.expenseDatabaseQueries.getBudgetSpendingForPeriod(
-                    period.startDate,
-                    period.endDate,
+                    range.start.toEpochMillis(),
+                    range.end.toEpochMillis(),
                     budgetEntity.id
                 ).executeAsOneOrNull()?.COALESCE ?: 0.0
 

@@ -59,9 +59,8 @@ import androidx.compose.ui.unit.sp
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.presentation.common.TransactionFieldView
 import com.ajay.seenu.expensetracker.domain.model.Category
-import com.ajay.seenu.expensetracker.domain.model.TransactionType
+import com.ajay.seenu.expensetracker.domain.model.DateFilter
 import com.ajay.seenu.expensetracker.domain.model.budget.Budget
-import com.ajay.seenu.expensetracker.domain.model.budget.BudgetPeriodType
 import com.ajay.seenu.expensetracker.domain.model.budget.BudgetRequest
 import kotlin.math.roundToInt
 
@@ -310,7 +309,7 @@ fun AddEditBudgetScreen(
                                 name = selectedCategoryName,
                                 categoryId = selectedCategory,
                                 amount = amount.toDoubleOrNull() ?: 0.0,
-                                periodType = BudgetPeriodType.MONTHLY
+                                periodType = DateFilter.ThisMonth
                             )
                         )
                     } else {
