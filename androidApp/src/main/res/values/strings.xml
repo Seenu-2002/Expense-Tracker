@@ -103,6 +103,8 @@
     <string name="action_delete">Delete</string>
     <string name="change_category">Change Category</string>
     <string name="delete_category_success">Category %1$s has been deleted successfully!</string>
+    <string name="edit_budget">Edit Budget</string>
+    <string name="create_budget">Create Budget</string>
 
     <string name="delete_account_title">Delete Account</string>
     <string name="replace_account_title">Replace Account</string>
