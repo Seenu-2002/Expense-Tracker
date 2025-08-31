@@ -1,5 +1,6 @@
 package com.ajay.seenu.expensetracker.android.presentation.activities
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -22,7 +23,12 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -33,6 +39,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ajay.seenu.expensetracker.UserConfigurationsManager
+import com.ajay.seenu.expensetracker.android.data.FilterPreference
 import com.ajay.seenu.expensetracker.android.presentation.navigation.MainScreen
 import com.ajay.seenu.expensetracker.android.presentation.navigation.Screen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.AddEditCategoryScreen
@@ -41,7 +48,12 @@ import com.ajay.seenu.expensetracker.android.presentation.screeens.CategoryListS
 import com.ajay.seenu.expensetracker.android.presentation.screeens.ChangeCategoryInTransactionScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.DetailTransactionScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.TransactionScreen
+import com.ajay.seenu.expensetracker.android.presentation.screeens.budget.AddEditBudgetArg
 import com.ajay.seenu.expensetracker.android.presentation.state.TransactionMode
+import com.ajay.seenu.expensetracker.android.presentation.screeens.budget.BudgetDetailScreen
+import com.ajay.seenu.expensetracker.android.presentation.viewmodels.BudgetViewModel
+import com.ajay.seenu.expensetracker.android.presentation.screeens.budget.AddEditBudgetScreen
+import com.ajay.seenu.expensetracker.android.presentation.screeens.budget.DeleteBudgetDialog
 import com.ajay.seenu.expensetracker.android.presentation.theme.AppDefaults
 import com.ajay.seenu.expensetracker.android.presentation.theme.ExpenseTrackerTheme
 import com.ajay.seenu.expensetracker.android.presentation.theme.LocalColors
@@ -174,9 +186,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("UnrememberedGetBackStackEntry")
     @Composable
     fun App() {
         val navController = rememberNavController()
+        val budgetViewModel: BudgetViewModel = hiltViewModel()
+        val context = LocalContext.current
+        val filter = FilterPreference.getCurrentFilter(context)
+
         NavHost(
             navController = navController,
             startDestination = Screen.Default.route,
@@ -185,6 +202,7 @@ class MainActivity : AppCompatActivity() {
         ) {
             composable(Screen.Default.route) {
                 MainScreen(
+                    budgetViewModel = budgetViewModel,
                     onAddTransaction = {
                         navController.navigate("${Screen.AddTransaction.route}/-1L/new")
                     },
@@ -196,6 +214,13 @@ class MainActivity : AppCompatActivity() {
                     },
                     onCategoryListScreen = {
                         navController.navigate(Screen.CategoryList.route)
+                    },
+                    onCreateBudget = {
+                        navController.navigate("${Screen.AddBudget.route}/-1L")
+                    },
+                    onBudgetClick = { budgetId ->
+                        budgetViewModel.loadBudget(budgetId, filter)
+                        navController.navigate("${Screen.BudgetDetail.route}/$budgetId")
                     }
                 )
             }
@@ -208,7 +233,8 @@ class MainActivity : AppCompatActivity() {
                         type = NavType.StringType
                     }
                 )
-            ) {
+            )
+            {
                 val transactionId = it.arguments?.getLong("transaction_id")
                 val mode = it.arguments?.getString("mode")
                 val transactionMode = if(transactionId == -1L || transactionId == null) {
@@ -230,14 +256,14 @@ class MainActivity : AppCompatActivity() {
                     }
                 )
             }
-            composable(
-                "${Screen.DetailTransaction.route}/{transaction_id}",
+            composable("${Screen.DetailTransaction.route}/{transaction_id}",
                 arguments = listOf(
                     navArgument("transaction_id") {
                         type = NavType.LongType
                     }
                 )
-            ) {
+            )
+            {
                 var cloneId = it.arguments?.getLong("transaction_id")
                 if (cloneId == -1L) cloneId = null
                 DetailTransactionScreen(
@@ -276,7 +302,8 @@ class MainActivity : AppCompatActivity() {
                         type = NavType.StringType
                     }
                 )
-            ) {
+            )
+            {
                 var id = it.arguments?.getLong("id", -1L)
                 if (id == -1L) {
                     id = null
@@ -309,7 +336,8 @@ class MainActivity : AppCompatActivity() {
                         type = NavType.LongType
                     }
                 )
-            ) {
+            )
+            {
                 val id = it.arguments?.getLong("id")!!
                 val type = it.arguments?.getString("type")
                     ?.let { TransactionType.valueOf(it.uppercase()) }
@@ -323,6 +351,79 @@ class MainActivity : AppCompatActivity() {
                     type = type,
                     transactionCount = count
                 )
+            }
+            composable("${Screen.AddBudget.route}/{budgetId}",
+                arguments = listOf(navArgument("budgetId") { type = NavType.LongType })
+            )
+            { backStackEntry ->
+                val budgetId = backStackEntry.arguments?.getLong("budgetId") ?: 0L
+                val selectedBudget by budgetViewModel.selectedBudget.collectAsStateWithLifecycle()
+                val categories by budgetViewModel.categories.collectAsStateWithLifecycle()
+
+                selectedBudget?.let { budgetWithSpending ->
+                    AddEditBudgetScreen(
+                        arg = AddEditBudgetArg.Edit(budgetWithSpending.budget),
+                        categories = categories,
+                        onSave = { budgetRequest ->
+                            budgetViewModel.updateBudget(budgetId, budgetRequest, filter)
+                            navController.popBackStack()
+                        },
+                        onNavigateBack = {
+                            navController.popBackStack()
+                        }
+                    )
+                } ?: run {
+                    AddEditBudgetScreen(
+                        arg = AddEditBudgetArg.Create,
+                        categories = categories,
+                        onSave = { budgetRequest ->
+                            budgetViewModel.createBudget(budgetRequest)
+                            navController.popBackStack()
+                        },
+                        onNavigateBack = {
+                            navController.popBackStack()
+                        }
+                    )
+                }
+            }
+
+            composable(
+                "${Screen.BudgetDetail.route}/{budgetId}",
+                arguments = listOf(navArgument("budgetId") { type = NavType.LongType })
+            )
+            { backStackEntry ->
+                val budgetId = backStackEntry.arguments?.getLong("budgetId") ?: 0L
+                var showDeleteDialog by remember { mutableStateOf(false) }
+                val selectedBudget by budgetViewModel.selectedBudget.collectAsStateWithLifecycle()
+
+                selectedBudget?.let { budget ->
+                    BudgetDetailScreen(
+                        budgetWithSpending = budget,
+                        onEdit = {
+                            navController.navigate("${Screen.AddBudget.route}/$budgetId")
+                        },
+                        onDelete = {
+                            showDeleteDialog = true
+                        },
+                        onNavigateBack = {
+                            navController.popBackStack()
+                        }
+                    )
+
+                    if (showDeleteDialog) {
+                        DeleteBudgetDialog(
+                            budgetName = budget.budget.name,
+                            onConfirm = {
+                                budgetViewModel.deleteBudget(budgetId)
+                                showDeleteDialog = false
+                                navController.popBackStack()
+                            },
+                            onDismiss = {
+                                showDeleteDialog = false
+                            }
+                        )
+                    }
+                }
             }
         }
     }
