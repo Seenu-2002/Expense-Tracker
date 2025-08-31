@@ -69,6 +69,7 @@ fun AccountsListContent(
     modifier: Modifier = Modifier,
     accounts: AccountsListUiModel,
     isClickable: Boolean = true,
+    gesturesEnabled: Boolean = true,
     onAccountEdit: (Account) -> Unit = {},
     onAccountDelete: (Account) -> Unit = {},
     onAccountClicked: (Account) -> Unit = {}
@@ -79,6 +80,7 @@ fun AccountsListContent(
                 modifier = Modifier,
                 type = type,
                 isClickable = isClickable,
+                gesturesEnabled = gesturesEnabled,
                 accounts = accountsForType,
                 onAccountClicked = onAccountClicked,
                 onAccountEdit = onAccountEdit,
@@ -120,6 +122,7 @@ fun AccountsGroupRow(
     type: AccountType,
     accounts: List<Account>,
     isClickable: Boolean = true,
+    gesturesEnabled: Boolean = true,
     selectedAccount: Account? = null,
     onAccountEdit: (Account) -> Unit = {},
     onAccountDelete: (Account) -> Unit = {},
@@ -142,6 +145,7 @@ fun AccountsGroupRow(
         for (account in accounts) {
             SwipeableBox(
                 modifier = Modifier.fillMaxWidth(),
+                gesturesEnabled = gesturesEnabled,
                 onDelete = {
                     onAccountDelete(account)
                 },

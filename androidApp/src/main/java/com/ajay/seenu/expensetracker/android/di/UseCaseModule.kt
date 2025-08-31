@@ -16,7 +16,6 @@ import com.ajay.seenu.expensetracker.domain.usecase.account.UpdateAccountUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.attachment.AddAttachmentUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.attachment.GetAttachmentsUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.category.AddCategoryUseCase
-import com.ajay.seenu.expensetracker.domain.usecase.category.ChangeCategoriesUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.category.DeleteCategoryUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.category.GetAllCategoriesAsFlowUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.category.GetAllCategoriesUseCase
@@ -28,9 +27,12 @@ import com.ajay.seenu.expensetracker.domain.usecase.data_filter.GetFilteredTrans
 import com.ajay.seenu.expensetracker.domain.usecase.data_filter.GetRecentTransactionsUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.data_filter.GetTotalTransactionPerDayByCategoryUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.AddTransactionUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.transaction.ChangeAccountUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.transaction.ChangeCategoriesUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.DeleteAllTransactionsUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.DeleteTransactionUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.GetTransactionCountByCategoryUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.transaction.GetTransactionCountByAccountUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.GetTransactionUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.UpdateTransactionUseCase
 import dagger.Module
@@ -212,6 +214,18 @@ object UseCaseModule {
     @Provides
     fun provideDeleteAccountUseCase(repository: AccountRepository): DeleteAccountUseCase {
         return DeleteAccountUseCase(repository)
+    }
+
+    @Singleton
+    @Provides
+    fun provideGetTransactionCountByUseCase(repository: TransactionRepository): GetTransactionCountByAccountUseCase {
+        return GetTransactionCountByAccountUseCase(repository)
+    }
+
+    @Singleton
+    @Provides
+    fun provideChangeAccountUseCase(repository: TransactionRepository): ChangeAccountUseCase {
+        return ChangeAccountUseCase(repository)
     }
 
 }

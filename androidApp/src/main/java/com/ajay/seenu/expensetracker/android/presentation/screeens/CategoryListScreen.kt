@@ -60,8 +60,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ajay.seenu.expensetracker.android.R
-import com.ajay.seenu.expensetracker.android.presentation.components.CategoryChangeConfirmationDialog
 import com.ajay.seenu.expensetracker.android.presentation.components.CategoryRow
+import com.ajay.seenu.expensetracker.android.presentation.components.ChangeConfirmationDialog
 import com.ajay.seenu.expensetracker.android.presentation.components.ProgressDialog
 import com.ajay.seenu.expensetracker.android.presentation.components.SlidingSwitch
 import com.ajay.seenu.expensetracker.android.presentation.state.UiState
@@ -202,7 +202,6 @@ fun CategoryListScreen(
 
                 is UiState.Success -> {
                     LaunchedEffect(Unit) {
-                        Timber.e("Calling on delete")
                         val (count, category) = transactionCountState.data
                         if (count > 0) {
                             onDeleteCategory(
@@ -234,7 +233,8 @@ fun CategoryListScreen(
 
         if (showConfirmationDialog) {
             val categoryToBeDeleted = categoryToBeDeleted ?: return@Scaffold
-            CategoryChangeConfirmationDialog(
+            ChangeConfirmationDialog(
+                title = stringResource(R.string.delete_category_message),
                 message = stringResource(
                     R.string.delete_category_message,
                     categoryToBeDeleted.label,

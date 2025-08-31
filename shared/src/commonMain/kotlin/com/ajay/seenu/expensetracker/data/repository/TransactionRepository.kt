@@ -233,4 +233,16 @@ class TransactionRepository constructor(
         }
     }
 
+    suspend fun getTransactionCountByAccountId(accountId: Long): Long {
+        return withContext(Dispatchers.IO) {
+            transactionLocalDataSource.getTransactionCountByAccount(accountId)
+        }
+    }
+
+    suspend fun replaceAccountInTransactions(oldAccountId: Long, newAccountId: Long) {
+        withContext(Dispatchers.IO) {
+            transactionLocalDataSource.replaceAccount(oldAccountId, newAccountId)
+        }
+    }
+
 }

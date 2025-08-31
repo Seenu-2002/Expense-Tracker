@@ -24,6 +24,7 @@ import com.ajay.seenu.expensetracker.android.presentation.theme.LocalColors
 @Composable
 fun SwipeableBox(
     modifier: Modifier = Modifier,
+    gesturesEnabled: Boolean = true,
     onDelete: () -> Unit = {},
     onEdit: () -> Unit = {},
     content: @Composable () -> Unit,
@@ -82,6 +83,7 @@ fun SwipeableBox(
     SwipeToDismissBox(
         modifier = modifier.animateContentSize(),
         state = swipeState,
+        gesturesEnabled = gesturesEnabled,
         enableDismissFromEndToStart = true,
         enableDismissFromStartToEnd = true,
         backgroundContent = {

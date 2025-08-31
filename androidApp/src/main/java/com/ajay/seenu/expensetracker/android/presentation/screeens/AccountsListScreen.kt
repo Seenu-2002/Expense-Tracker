@@ -43,20 +43,25 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.presentation.components.AccountsListContent
+import com.ajay.seenu.expensetracker.android.presentation.components.ChangeConfirmationDialog
+import com.ajay.seenu.expensetracker.android.presentation.components.ProgressDialog
 import com.ajay.seenu.expensetracker.android.presentation.state.UiState
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.AccountsListViewModel
 import com.ajay.seenu.expensetracker.domain.model.Account
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountsListScreen(
     onCreateAccount: () -> Unit,
     onEditAccount: (id: Long) -> Unit,
+    onDeleteAccount: (id: Long, transactionCount: Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val viewModel: AccountsListViewModel = hiltViewModel()
 
     val accounts by viewModel.accounts.collectAsStateWithLifecycle()
+    val transactionCountInAccount by viewModel.transactionCountInAccount.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
         if (accounts == UiState.Empty) {
             viewModel.getAccounts()
@@ -132,15 +137,25 @@ fun AccountsListScreen(
                         modifier = Modifier.matchParentSize(),
                         accounts = accountsState.data,
                         isClickable = false,
-                        onAccountEdit = { account ->
-                            onEditAccount(account.id)
+                        onAccountEdit = { it ->
+                            onEditAccount(it.id)
                         },
                         onAccountDelete = {
-                            Toast.makeText(
-                                context,
-                                "Yet to be supported",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            accountToBeDeleted = it
+                            val accounts = accountsState.data.accounts
+
+                            if (accounts.size == 1) {
+                                Toast
+                                    .makeText(
+                                        context,
+                                        context.getString(R.string.error_last_account_to_delete),
+                                        Toast.LENGTH_SHORT
+                                    )
+                                    .show()
+                                return@AccountsListContent
+                            }
+
+                            viewModel.getTransactionCountInAccount(accountToBeDeleted!!)
                         }
                     )
                 }
@@ -151,6 +166,59 @@ fun AccountsListScreen(
                         color = MaterialTheme.colorScheme.error
                     )
                 }
+            }
+
+            when (val transactionCountState = transactionCountInAccount) {
+                UiState.Empty -> {}
+                UiState.Loading -> {
+                    ProgressDialog()
+                }
+
+                is UiState.Success -> {
+                    LaunchedEffect(Unit) {
+                        if (transactionCountState.data == 0L) {
+                            showConfirmationDialog = true
+                        } else {
+                            onDeleteAccount(accountToBeDeleted!!.id, transactionCountState.data)
+                            viewModel.resetCount()
+                        }
+                    }
+                }
+
+                is UiState.Failure -> {
+                    Timber.e("Unable to fetch transaction count by account :: ${transactionCountState.error}")
+                    Text(
+                        text = stringResource(R.string.something_went_wrong),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                    viewModel.resetCount()
+                }
+            }
+
+            if (showConfirmationDialog) {
+                val categoryToBeDeleted = accountToBeDeleted ?: return@Scaffold
+                ChangeConfirmationDialog(
+                    title = stringResource(R.string.delete_account_title),
+                    message = stringResource(
+                        R.string.delete_account_message,
+                        categoryToBeDeleted.name,
+                    ),
+                    onDismiss = {
+                        showConfirmationDialog = false
+                    },
+                    onConfirm = {
+                        viewModel.deleteAccount(categoryToBeDeleted)
+                        Toast.makeText(
+                            context,
+                            context.getString(
+                                R.string.delete_account_success,
+                                categoryToBeDeleted.name
+                            ),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        showConfirmationDialog = false
+                    }
+                )
             }
 
         }

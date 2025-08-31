@@ -41,6 +41,7 @@ import com.ajay.seenu.expensetracker.android.presentation.screeens.AddEditAccoun
 import com.ajay.seenu.expensetracker.android.presentation.screeens.AddEditCategoryScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.AddEditCategoryScreenArg
 import com.ajay.seenu.expensetracker.android.presentation.screeens.CategoryListScreen
+import com.ajay.seenu.expensetracker.android.presentation.screeens.ChangeAccountInTransactionScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.ChangeCategoryInTransactionScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.DetailTransactionScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.TransactionScreen
@@ -341,6 +342,10 @@ class MainActivity : AppCompatActivity() {
                         val route = "${Screen.Account.route}/${it}"
                         navController.navigate(route)
                     },
+                    onDeleteAccount = { id, transactionCount ->
+                        val route = "${Screen.ChangeAccountInTransaction.route}/$id/$transactionCount"
+                        navController.navigate(route)
+                    },
                     onNavigateBack = {
                         navController.popBackStack()
                     }
@@ -366,6 +371,25 @@ class MainActivity : AppCompatActivity() {
                     onNavigateBack = {
                         navController.popBackStack()
                     }
+                )
+            }
+            composable("${Screen.ChangeAccountInTransaction.route}/{id}/{count}", arguments = listOf(
+                navArgument("id") {
+                    type = NavType.LongType
+                },
+                navArgument("count") {
+                    type = NavType.LongType
+                }
+            )) { entry ->
+                val accountId = entry.arguments?.getLong("id")!!
+                val count = entry.arguments?.getLong("count")!!
+
+                ChangeAccountInTransactionScreen(
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    },
+                    accountToBeDeletedId = accountId,
+                    transactionCount = count
                 )
             }
         }
