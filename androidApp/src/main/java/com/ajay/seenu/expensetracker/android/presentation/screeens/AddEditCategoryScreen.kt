@@ -88,15 +88,15 @@ val ColorSaver = run {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditCategoryScreen(
-    arg: AddEditScreenArg,
+    arg: AddEditCategoryScreenArg,
     onNavigateBack: () -> Unit,
     viewModel: AddEditCategoryViewModel = hiltViewModel()
 ) {
 
     val status: UiState<String>? by viewModel.status.collectAsStateWithLifecycle()
-    val isInEditMode = arg is AddEditScreenArg.Edit
+    val isInEditMode = arg is AddEditCategoryScreenArg.Edit
     val categoryId = if (isInEditMode) {
-        (arg as AddEditScreenArg.Edit).id
+        arg.id
     } else {
         null
     }
@@ -188,7 +188,7 @@ fun AddEditCategoryScreen(
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 onClick = {
                     if (title.isNotBlank()) {
-                        if (arg is AddEditScreenArg.Edit) {
+                        if (arg is AddEditCategoryScreenArg.Edit) {
                             val category = category!!
                             val hasChanges =
                                 category.label != title || Color(category.color) != iconBackgroundColor || category.iconRes != selectedIcon
@@ -256,7 +256,7 @@ fun AddEditCategoryScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 val values = TransactionType.entries.map { stringResource(it.getStringRes()) }
-                if (arg is AddEditScreenArg.Create) {
+                if (arg is AddEditCategoryScreenArg.Create) {
                     val type = arg.type
                     SlidingSwitch(
                         selectedValue = stringResource(type.getStringRes()),
@@ -370,7 +370,7 @@ fun AddEditCategoryScreen(
             })
         }
 
-        if (arg is AddEditScreenArg.Edit && categoryState is UiState.Loading) {
+        if (arg is AddEditCategoryScreenArg.Edit && categoryState is UiState.Loading) {
             ProgressDialog()
         }
 
@@ -479,7 +479,7 @@ fun CategoryColorItem(
     }
 }
 
-sealed interface AddEditScreenArg {
-    data class Create(val type: TransactionType) : AddEditScreenArg
-    data class Edit(val id: Long) : AddEditScreenArg
+sealed interface AddEditCategoryScreenArg {
+    data class Create(val type: TransactionType) : AddEditCategoryScreenArg
+    data class Edit(val id: Long) : AddEditCategoryScreenArg
 }

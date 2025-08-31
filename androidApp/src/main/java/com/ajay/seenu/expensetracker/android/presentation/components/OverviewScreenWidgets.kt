@@ -51,13 +51,12 @@ import com.ajay.seenu.expensetracker.android.presentation.common.PreviewThemeWra
 import com.ajay.seenu.expensetracker.android.presentation.screeens.CategoryIconItem
 import com.ajay.seenu.expensetracker.android.presentation.theme.LocalColors
 import com.ajay.seenu.expensetracker.domain.model.Account
+import com.ajay.seenu.expensetracker.domain.model.AccountType
 import com.ajay.seenu.expensetracker.domain.model.Category
 import com.ajay.seenu.expensetracker.domain.model.OverallData
 import com.ajay.seenu.expensetracker.domain.model.Transaction
 import com.ajay.seenu.expensetracker.domain.model.TransactionType
-import com.ajay.seenu.expensetracker.util.toLocalDate
 import kotlinx.coroutines.delay
-import java.util.Date
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -268,6 +267,7 @@ fun TransactionPreviewRowPreview(@PreviewParameter(TransactionPreviewDataProvide
     }
 }
 
+// TODO: Use `com.ajay.seenu.expensetracker.android.presentation.common.SwipeableBox`
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionPreviewRow(
@@ -413,7 +413,7 @@ fun TransactionPreviewRow(
                         endMargin = 10.dp,
                         bias = 0F
                     )
-                }, text = "Replace with Account",
+                }, text = transaction.account.name,
                 color = LocalContentColor.current.copy(alpha = 0.5F),
                 fontSize = 13.sp
             )
@@ -448,7 +448,7 @@ class TransactionPreviewDataProvider : PreviewParameterProvider<Transaction> {
                 account = Account(
                     1L,
                     "Cash",
-                    0L
+                    AccountType.BANK_ACCOUNT
                 ),
                 Clock.System.now()
             ),
@@ -467,7 +467,7 @@ class TransactionPreviewDataProvider : PreviewParameterProvider<Transaction> {
                 account = Account(
                     1L,
                     "Cash",
-                    0L
+                    AccountType.BANK_ACCOUNT
                 ),
                 Clock.System.now()
             ),

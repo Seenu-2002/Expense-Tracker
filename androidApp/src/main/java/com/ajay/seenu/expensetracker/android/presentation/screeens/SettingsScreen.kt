@@ -49,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -74,7 +75,9 @@ import kotlinx.datetime.DayOfWeek
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
-    exportViewModel: ExportViewModel = hiltViewModel()
+    exportViewModel: ExportViewModel = hiltViewModel(),
+    onManageCategoriesClicked: () -> Unit = {},
+    onManageAccountsClicked: () -> Unit = {}
 ) {
     val configs by viewModel.userConfigs.collectAsStateWithLifecycle()
     val exportUiState by exportViewModel.uiState.collectAsStateWithLifecycle()
@@ -240,6 +243,11 @@ fun SettingsScreen(
                     }
                 }
             }
+            AccountAndCategorySettingsGroup(
+                modifier = Modifier.fillMaxWidth(),
+                onManageCategoriesClicked = onManageCategoriesClicked,
+                onManageAccountsClicked = onManageAccountsClicked
+            )
             SettingsRowContainer(modifier = Modifier.fillMaxWidth(), title = "Data") { modifier ->
                 Column(modifier.fillMaxWidth()) {
                     Row(
@@ -365,10 +373,84 @@ fun UserInfoPreview(modifier: Modifier = Modifier) {
     UserInfo(name = "Seenivasan T")
 }
 
+@Preview
+@Composable
+fun AccountAndCategorySettingsGroup(
+    modifier: Modifier = Modifier,
+    onManageCategoriesClicked: () -> Unit = {},
+    onManageAccountsClicked: () -> Unit = {}
+) {
+    SettingsRowContainer(
+        modifier = modifier,
+        title = stringResource(R.string.accounts_category_settings)
+    ) { modifier ->
+        Column(modifier = modifier.fillMaxWidth()) {
+            SettingsRow(
+                icon = painterResource(R.drawable.ic_category),
+                label = stringResource(R.string.manage_categories),
+                isClickable = true,
+                onClick = onManageCategoriesClicked
+            )
+            SettingsRow(
+                icon = painterResource(R.drawable.ic_accounts),
+                label = stringResource(R.string.manage_accounts),
+                isClickable = true,
+                onClick = onManageAccountsClicked
+            )
+        }
+    }
+}
+
+@Composable
+fun SettingsRow(
+    modifier: Modifier = Modifier,
+    icon: Painter,
+    label: String,
+    value: String? = null,
+    showArrow: Boolean = true,
+    isClickable: Boolean = true,
+    onClick: () -> Unit,
+) {
+    SettingsRow(
+        modifier = modifier,
+        icon = {
+            Icon(painter = icon, contentDescription = "")
+        },
+        label = label,
+        value = value,
+        showArrow = showArrow,
+        isClickable = isClickable,
+        onClick = onClick
+    )
+}
+
 @Composable
 fun SettingsRow(
     modifier: Modifier = Modifier,
     icon: ImageVector,
+    label: String,
+    value: String? = null,
+    showArrow: Boolean = true,
+    isClickable: Boolean = true,
+    onClick: () -> Unit,
+) {
+    SettingsRow(
+        modifier = modifier,
+        icon = {
+            Icon(imageVector = icon, contentDescription = "")
+        },
+        label = label,
+        value = value,
+        showArrow = showArrow,
+        isClickable = isClickable,
+        onClick = onClick
+    )
+}
+
+@Composable
+fun SettingsRow(
+    modifier: Modifier = Modifier,
+    icon: @Composable () -> Unit,
     label: String,
     value: String? = null,
     showArrow: Boolean = true,
@@ -384,11 +466,13 @@ fun SettingsRow(
         )
     ) {
         val (iconRef, labelRef, valueRef, arrowRef) = createRefs()
-        Icon(modifier = Modifier.constrainAs(iconRef) {
+        Box(modifier = Modifier.constrainAs(iconRef) {
             top.linkTo(parent.top, 8.dp)
             bottom.linkTo(parent.bottom, 8.dp)
             start.linkTo(parent.start, 12.dp)
-        }, imageVector = icon, contentDescription = "")
+        }) {
+            icon()
+        }
         Text(modifier = Modifier.constrainAs(labelRef) {
             start.linkTo(iconRef.end, 12.dp)
             top.linkTo(parent.top, 8.dp)

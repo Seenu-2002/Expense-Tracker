@@ -262,7 +262,7 @@ fun TransactionForm(
                             focusManager.clearFocus()
                             showDialog = false
                             val millis = datePickerState.selectedDateMillis!!
-                            date = Instant.fromEpochSeconds(millis)
+                            date = Instant.fromEpochMilliseconds(millis)
                         }
                         .padding(vertical = 6.dp, horizontal = 8.dp),
                     text = "Ok",

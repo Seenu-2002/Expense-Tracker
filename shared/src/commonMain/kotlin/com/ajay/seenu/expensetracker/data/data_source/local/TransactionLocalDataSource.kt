@@ -239,4 +239,12 @@ class TransactionLocalDataSource constructor(
         return queries.numberOfTransactionsByCategory(categoryId).executeAsOne()
     }
 
+    override fun getTransactionCountByAccount(id: Long): Long {
+        return queries.getTransactionCountByAccount(id).executeAsOne()
+    }
+
+    override fun replaceAccount(oldAccount: Long, newAccount: Long) {
+        return queries.changeAccount(oldAccount = oldAccount, newAccount = newAccount)
+    }
+
 }

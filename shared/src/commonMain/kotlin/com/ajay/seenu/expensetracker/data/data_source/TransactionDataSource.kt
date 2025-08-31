@@ -84,4 +84,7 @@ interface TransactionDataSource {
 
     fun replaceCategory(oldCategory: Long, newCategory: Long)
     fun getTransactionCountByCategory(categoryId: Long): Long
+    fun getTransactionCountByAccount(id: Long): Long
+
+    fun replaceAccount(oldAccount: Long, newAccount: Long)
 }

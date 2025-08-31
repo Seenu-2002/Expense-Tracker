@@ -2,7 +2,9 @@ package com.ajay.seenu.expensetracker.android.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ajay.seenu.expensetracker.data.repository.AccountRepository
 import com.ajay.seenu.expensetracker.data.repository.CategoryRepository
+import com.ajay.seenu.expensetracker.domain.model.Account
 import com.ajay.seenu.expensetracker.domain.model.Attachment
 import com.ajay.seenu.expensetracker.domain.model.Category
 import com.ajay.seenu.expensetracker.domain.model.Transaction
@@ -18,12 +20,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class AddTransactionViewModel @Inject constructor(
     private val categoryRepository: CategoryRepository,
     private val addTransactionUseCase: AddTransactionUseCase,
+    private val accountsRepository: AccountRepository,
     private val updateTransactionUseCase: UpdateTransactionUseCase
 ) : ViewModel() {
 
@@ -46,6 +50,14 @@ class AddTransactionViewModel @Inject constructor(
         MutableStateFlow(emptyList())
     val categories = _categories.asStateFlow()
 
+    private val _accounts: MutableStateFlow<List<Account>> = MutableStateFlow(emptyList())
+    val accounts: StateFlow<List<Account>> = _accounts.asStateFlow()
+
+    fun init(type: TransactionType) {
+        getCategories(type)
+        getAccounts()
+    }
+
     fun addTransaction(
         transaction: Transaction,
         attachments: List<Attachment>
@@ -65,6 +77,7 @@ class AddTransactionViewModel @Inject constructor(
                 }
             } catch (exp: Exception) {
                 // FIXME: Show exception
+                Timber.e(exp, "Error adding transaction")
             }
 
         }
@@ -109,6 +122,13 @@ class AddTransactionViewModel @Inject constructor(
         viewModelScope.launch {
             val categories = categoryRepository.getCategories(type)
             _categories.emit(categories)
+        }
+    }
+
+    fun getAccounts() {
+        viewModelScope.launch {
+            val accounts = accountsRepository.getAllAccounts()
+            _accounts.emit(accounts)
         }
     }
 

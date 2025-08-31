@@ -1,4 +1,4 @@
-package com.ajay.seenu.expensetracker.domain.usecase.category
+package com.ajay.seenu.expensetracker.domain.usecase.transaction
 
 import com.ajay.seenu.expensetracker.data.repository.TransactionRepository
 import com.ajay.seenu.expensetracker.domain.model.Category

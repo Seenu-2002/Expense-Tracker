@@ -20,7 +20,6 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -28,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -48,6 +46,7 @@ fun MainScreen(
     onCategoryListScreen: () -> Unit,
     onCreateBudget: () -> Unit,
     onBudgetClick: (Long) -> Unit,
+    onAccountListScreen: () -> Unit
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -121,8 +120,7 @@ fun MainScreen(
             composable(Screen.Overview.route) {
                 OverviewScreen(
                     onTransactionClicked = onTransactionClicked,
-                    onCloneTransaction = onCloneTransaction,
-                    onCategoryListScreen = onCategoryListScreen
+                    onCloneTransaction = onCloneTransaction
                 )
             }
             composable(Screen.Analytics.route) {
@@ -130,7 +128,10 @@ fun MainScreen(
                 SimpleAnalyticsScreen()
             }
             composable(Screen.Settings.route) {
-                SettingsScreen()
+                SettingsScreen(
+                    onManageAccountsClicked = onAccountListScreen,
+                    onManageCategoriesClicked = onCategoryListScreen
+                )
             }
             composable(Screen.Budget.route) {
                 BudgetScreen(

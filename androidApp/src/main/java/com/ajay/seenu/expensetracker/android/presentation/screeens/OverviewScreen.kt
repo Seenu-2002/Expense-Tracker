@@ -47,13 +47,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.data.FilterPreference
-import com.ajay.seenu.expensetracker.android.util.formatDateHeader
-import com.ajay.seenu.expensetracker.android.presentation.state.UiState
-import com.ajay.seenu.expensetracker.android.presentation.viewmodels.OverviewScreenViewModel
 import com.ajay.seenu.expensetracker.android.presentation.components.DateRangePickerBottomSheet
 import com.ajay.seenu.expensetracker.android.presentation.components.FilterBottomSheet
 import com.ajay.seenu.expensetracker.android.presentation.components.OverviewCard
 import com.ajay.seenu.expensetracker.android.presentation.components.TransactionPreviewRow
+import com.ajay.seenu.expensetracker.android.presentation.state.UiState
+import com.ajay.seenu.expensetracker.android.presentation.viewmodels.OverviewScreenViewModel
 import com.ajay.seenu.expensetracker.domain.model.DateFilter
 import com.ajay.seenu.expensetracker.util.getDateLabel
 import com.ajay.seenu.expensetracker.util.toLocalDate
@@ -65,8 +64,7 @@ import java.util.Locale
 fun OverviewScreen(
     viewModel: OverviewScreenViewModel = hiltViewModel(),
     onTransactionClicked: (Long) -> Unit,
-    onCloneTransaction: (Long) -> Unit,
-    onCategoryListScreen: () -> Unit
+    onCloneTransaction: (Long) -> Unit
 ) {
     val dateFormat by viewModel.updatedDateFormat.collectAsStateWithLifecycle()
     val recentTransactionsUiState by viewModel.recentTransactions.collectAsStateWithLifecycle()
@@ -142,14 +140,6 @@ fun OverviewScreen(
                     )
                 }
                 Spacer(modifier = Modifier.width(10.dp))
-                Icon(
-                    modifier = Modifier.clickable {
-                        onCategoryListScreen.invoke()
-                    },
-                    painter = painterResource(id = R.drawable.category_icon),
-                    contentDescription = "categories"
-                )
-                Spacer(modifier = Modifier.width(10.dp))
             }
         }
     ) { paddingValues ->
@@ -221,7 +211,7 @@ fun OverviewScreen(
                                         .background(MaterialTheme.colorScheme.background)
                                         .padding(horizontal = 15.dp, vertical = 8.dp),
                                     // TODO: User config format
-                                    text = formatDateHeader(transactionsByDate.rawDate.getDateLabel()),
+                                    text = transactionsByDate.rawDate.getDateLabel(),
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight.W500
                                 )

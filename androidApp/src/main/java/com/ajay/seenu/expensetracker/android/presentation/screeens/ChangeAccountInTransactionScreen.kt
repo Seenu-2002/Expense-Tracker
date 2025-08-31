@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
@@ -37,36 +35,34 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ajay.seenu.expensetracker.android.R
-import com.ajay.seenu.expensetracker.android.presentation.components.CategoryRow
+import com.ajay.seenu.expensetracker.android.presentation.components.AccountsListContent
 import com.ajay.seenu.expensetracker.android.presentation.components.ChangeConfirmationDialog
 import com.ajay.seenu.expensetracker.android.presentation.components.ProgressDialog
+import com.ajay.seenu.expensetracker.android.presentation.state.AccountsListUiModel
 import com.ajay.seenu.expensetracker.android.presentation.state.Error
 import com.ajay.seenu.expensetracker.android.presentation.state.UiState
-import com.ajay.seenu.expensetracker.android.presentation.viewmodels.ChangeCategoryInTransactionViewModel
-import com.ajay.seenu.expensetracker.domain.model.Category
-import com.ajay.seenu.expensetracker.domain.model.TransactionType
+import com.ajay.seenu.expensetracker.android.presentation.viewmodels.ChangeAccountInTransactionsViewModel
+import com.ajay.seenu.expensetracker.domain.model.Account
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChangeCategoryInTransactionScreen(
-    onNavigateBack: () -> Unit,
-    categoryIdToBeDeleted: Long,
-    type: TransactionType,
-    transactionCount: Long
+fun ChangeAccountInTransactionScreen(
+    accountToBeDeletedId: Long,
+    transactionCount: Long,
+    onNavigateBack: () -> Unit
 ) {
-    val viewmodel: ChangeCategoryInTransactionViewModel = hiltViewModel()
-    val categoriesState by viewmodel.categories.collectAsStateWithLifecycle()
+    val viewmodel: ChangeAccountInTransactionsViewModel = hiltViewModel()
+    val accountsState by viewmodel.accounts.collectAsStateWithLifecycle()
     val updateStatus by viewmodel.updateStatus.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    lateinit var categoryIdToBeReplacedWith: Category
+    lateinit var accountToBeReplacedWith: Account
     var showConfirmationDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        if (categoriesState == UiState.Empty) {
+        if (accountsState == UiState.Empty) {
             viewmodel.init(
-                type = type,
-                categoryToBeDeletedId = categoryIdToBeDeleted
+                accountToBeDeletedId = accountToBeDeletedId
             )
         }
     }
@@ -75,7 +71,7 @@ fun ChangeCategoryInTransactionScreen(
         TopAppBar(
             title = {
                 Text(
-                    text = stringResource(R.string.change_category),
+                    text = stringResource(R.string.change_account),
                     fontWeight = FontWeight.SemiBold
                 )
             },
@@ -94,44 +90,41 @@ fun ChangeCategoryInTransactionScreen(
                 .padding(innerPadding),
             contentAlignment = Alignment.Center
         ) {
-            when (val state = categoriesState) {
+            when (val state = accountsState) {
                 UiState.Loading, UiState.Empty -> {
                     CircularProgressIndicator()
                 }
 
                 is UiState.Success -> {
-                    val categoryToBeDeleted = viewmodel.categoryToBeDeleted
-                    ChangeCategoryInTransactionContent(
+                    val accountToBeDeleted = viewmodel.accountToBeDeleted
+                    ChangeAccountInTransactionContent(
                         modifier = Modifier.matchParentSize(),
                         recordCount = transactionCount,
-                        categoryToBeDeleted = categoryToBeDeleted,
-                        categories = state.data,
-                        onCategorySelected = { selectedCategory ->
-                            categoryIdToBeReplacedWith = selectedCategory
-                            showConfirmationDialog = true
-                        }
-                    )
+                        accountToBeDeleted = accountToBeDeleted,
+                        accounts = state.data,
+                    ) { account ->
+                        accountToBeReplacedWith = account
+                        showConfirmationDialog = true
+                    }
                 }
 
                 is UiState.Failure -> {
                     if (state.error is Error.CategoryNotFound) {
                         Toast.makeText(
                             context,
-                            R.string.error_category_not_found,
+                            R.string.error_account_not_found,
                             Toast.LENGTH_SHORT
                         ).show()
                     } else {
                         Toast.makeText(
                             context,
-                            "Unable to change categories :: ${state.error}",
+                            "Unable to change account :: ${state.error}",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
                     onNavigateBack()
                 }
-
             }
-
 
             when (val updateStatus = updateStatus) {
                 UiState.Loading -> {
@@ -141,8 +134,8 @@ fun ChangeCategoryInTransactionScreen(
                 is UiState.Success -> {
                     if (updateStatus.data) {
                         val msg = stringResource(
-                            R.string.delete_category_success,
-                            viewmodel.categoryToBeDeleted.label
+                            R.string.delete_account_success,
+                            viewmodel.accountToBeDeleted.name
                         )
                         LaunchedEffect(updateStatus) {
                             Toast.makeText(
@@ -158,44 +151,45 @@ fun ChangeCategoryInTransactionScreen(
                 is UiState.Failure -> {
                     Toast.makeText(
                         context,
-                        "Unable to update category :: ${updateStatus.error}",
+                        "Unable to update account :: ${updateStatus.error}",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
 
                 else -> {}
             }
-        }
 
-        if (showConfirmationDialog) {
-            ChangeConfirmationDialog(
-                title = stringResource(R.string.replace_category_title),
-                message = stringResource(
-                    R.string.replace_category_message,
-                    viewmodel.categoryToBeDeleted.label,
-                    categoryIdToBeReplacedWith.label
-                ),
-                confirmButtonText = stringResource(R.string.action_replace_delete),
-                onDismiss = {
-                    showConfirmationDialog = false
-                },
-                onConfirm = {
-                    viewmodel.updateCategory(categoryIdToBeReplacedWith)
-                    showConfirmationDialog = false
-                }
-            )
+            if (showConfirmationDialog) {
+                ChangeConfirmationDialog(
+                    title = stringResource(R.string.replace_account_title),
+                    message = stringResource(
+                        R.string.replace_account_message,
+                        viewmodel.accountToBeDeleted.name,
+                        accountToBeReplacedWith.name
+                    ),
+                    confirmButtonText = stringResource(R.string.action_replace_delete),
+                    onDismiss = {
+                        showConfirmationDialog = false
+                    },
+                    onConfirm = {
+                        viewmodel.updateAccount(accountToBeReplacedWith)
+                        showConfirmationDialog = false
+                    }
+                )
+            }
         }
     }
 }
 
 @Composable
-fun ChangeCategoryInTransactionContent(
+fun ChangeAccountInTransactionContent(
     modifier: Modifier = Modifier,
     recordCount: Long,
-    categoryToBeDeleted: Category,
-    categories: List<Category>,
-    onCategorySelected: (Category) -> Unit
+    accountToBeDeleted: Account,
+    accounts: List<Account>,
+    onAccountSelected: (Account) -> Unit,
 ) {
+    val accountsUiModel = AccountsListUiModel(accounts)
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
@@ -210,29 +204,20 @@ fun ChangeCategoryInTransactionContent(
                     .weight(1F),
 
                 text = stringResource(
-                    R.string.replace_category_info,
-                    categoryToBeDeleted.label,
+                    R.string.replace_account_info,
+                    accountToBeDeleted.name,
                     recordCount
                 ),
                 fontWeight = FontWeight.SemiBold
             )
         }
         Spacer(modifier = Modifier.height(12.dp))
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1F)
-        ) {
-            items(categories) { category ->
-                CategoryRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    category = category,
-                    clickable = true,
-                    onClicked = onCategorySelected
-                )
-            }
-        }
+        AccountsListContent(
+            modifier = Modifier.fillMaxWidth(),
+            isClickable = true,
+            gesturesEnabled = false,
+            accounts = accountsUiModel,
+            onAccountClicked = onAccountSelected
+        )
     }
 }

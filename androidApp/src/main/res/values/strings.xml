@@ -29,6 +29,8 @@
     <string name="expense">Expense</string>
     <string name="categories">Categories</string>
     <string name="add_transaction">Add Transaction</string>
+    <string name="add_category">Add Category</string>
+    <string name="add_account">Add Account</string>
 
     <string name="chart_axis_date">Date</string>
     <string name="chart_axis_category">Category</string>
@@ -80,13 +82,16 @@
     <string name="category_deleted">Category %1$s has been deleted!</string>
     <string name="error_category_not_created">Category could not be created!</string>
     <string name="error_category_not_found">Category not found!</string>
+    <string name="error_account_not_found">Account not found!</string>
     <string name="dialog_discard_changes_title">Discard changes?</string>
     <string name="dialog_discard_changes_message">You have unsaved changes. If you go back now, your edits will be lost.</string>
     <string name="dialog_discard_changes_positive">Discard</string>
     <string name="dialog_discard_changes_negative">Cancel</string>
     <string name="no_changes_made">No changes has been made!</string>
     <string name="error_last_category_to_delete">At least 1 category should be present to delete others.</string>
+    <string name="error_last_account_to_delete">At least 1 account should be present to delete others.</string>
 
+    <string name="delete_category_title">Delete Category</string>
     <string name="replace_category_title">Replace Category</string>
     <string name="replace_category_message">Are you sure to delete <b>%1$s</b> category and replace transactions with <b>%2$s</b> ?</string>
     <string name="delete_category_message">Are you sure to delete <b>%1$s</b> category ?</string>
@@ -95,10 +100,37 @@
     <string name="replace_category_warning">All expenses under "%1$s" will be reassigned to the selected category.</string>
     <string name="action_cancel">Cancel</string>
     <string name="action_replace_delete">Replace &amp; Delete</string>
+    <string name="action_delete">Delete</string>
     <string name="change_category">Change Category</string>
     <string name="delete_category_success">Category %1$s has been deleted successfully!</string>
     <string name="edit_budget">Edit Budget</string>
     <string name="create_budget">Create Budget</string>
 
+    <string name="delete_account_title">Delete Account</string>
+    <string name="replace_account_title">Replace Account</string>
+    <string name="replace_account_message">Are you sure to delete <b>%1$s</b> account and replace transactions with <b>%2$s</b> ?</string>
+    <string name="delete_account_message">Are you sure to delete <b>%1$s</b> account ?</string>
+    <string name="replace_account_info">You are deleting the account "%1$s" which has been linked in %2$s records. To keep your expenses organized, please choose another account to move all existing transactions.</string>
+    <string name="replace_account_hint">Select a account</string>
+    <string name="replace_account_warning">All expenses under "%1$s" will be reassigned to the selected account.</string>
+    <string name="change_account">Change Account</string>
+    <string name="delete_account_success">Account %1$s has been deleted successfully!</string>
 
+    <string name="cash">Cash</string>
+    <string name="bank_accounts">Bank Accounts</string>
+    <string name="credit_cards">Credit Cards</string>
+    <string name="loan">Loan</string>
+    <string name="investment">Investment</string>
+    <string name="others">Others</string>
+    <string name="something_went_wrong">Something went wrong!</string>
+    <string name="accounts">Accounts</string>
+    <string name="create_account">Create Account</string>
+    <string name="edit_account">Edit Account</string>
+    <string name="account_name">Account Name</string>
+    <string name="accounts_category_settings">Accounts &amp; Category</string>
+    <string name="manage_categories">Manage Categories</string>
+    <string name="manage_accounts">Manage Accounts</string>
+
+    <string name="account_created">Account %1$s has been created!</string>
+    <string name="account_updated">Account %1$s has been updated!</string>
 </resources>

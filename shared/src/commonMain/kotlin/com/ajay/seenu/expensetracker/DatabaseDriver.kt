@@ -22,6 +22,6 @@ fun createDatabase(driverFactory: DriverFactory): ExpenseDatabase {
         TransactionDetailEntityAdapter = TransactionDetailEntity.Adapter(
             typeAdapter = EnumColumnAdapter()
         ),
-        AccountGroupEntityAdapter = AccountGroupEntity.Adapter(EnumColumnAdapter())
+        AccountEntityAdapter = AccountEntity.Adapter(EnumColumnAdapter())
     )
 }

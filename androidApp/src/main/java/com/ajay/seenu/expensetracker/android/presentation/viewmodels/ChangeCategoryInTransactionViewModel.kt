@@ -6,9 +6,9 @@ import com.ajay.seenu.expensetracker.android.presentation.state.Error
 import com.ajay.seenu.expensetracker.android.presentation.state.UiState
 import com.ajay.seenu.expensetracker.domain.model.Category
 import com.ajay.seenu.expensetracker.domain.model.TransactionType
-import com.ajay.seenu.expensetracker.domain.usecase.category.ChangeCategoriesUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.category.DeleteCategoryUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.category.GetAllCategoriesUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.transaction.ChangeCategoriesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

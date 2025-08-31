@@ -1,61 +1,42 @@
 package com.ajay.seenu.expensetracker.data.mapper
 
 import com.ajay.seenu.expensetracker.AccountEntity
-import com.ajay.seenu.expensetracker.AccountGroupEntity
-import com.ajay.seenu.expensetracker.data.model.AccountGroupTypeEntity
+import com.ajay.seenu.expensetracker.data.model.AccountTypeEntity
 import com.ajay.seenu.expensetracker.domain.model.Account
-import com.ajay.seenu.expensetracker.domain.model.AccountGroup
 import com.ajay.seenu.expensetracker.domain.model.AccountType
-
-fun AccountGroupEntity.toDomain(accounts: List<Account>): AccountGroup {
-    require(accounts.all { it.groupId == id }) {
-        "All accounts must belong to the group with id $id"
-    }
-
-    return AccountGroup(
-        id = id,
-        name = name,
-        type = type.toDomain(),
-        accounts = accounts,
-    )
-}
-
-fun AccountGroup.toEntity(): AccountGroupEntity {
-    return AccountGroupEntity(
-        id = id,
-        name = name,
-        type = type.toEntity(),
-    )
-}
 
 fun AccountEntity.toDomain(): Account {
     return Account(
         id = id,
-        groupId = groupId,
         name = name,
+        isDefault = isDefault == 1L,
+        type = type.toDomain(),
     )
 }
 
 fun Account.toEntity(): AccountEntity {
     return AccountEntity(
         id = id,
-        groupId = groupId,
         name = name,
+        isDefault = if (isDefault) 1L else 0L,
+        type = type.toEntity(),
     )
 }
 
-fun AccountType.toEntity(): AccountGroupTypeEntity {
+fun AccountType.toEntity(): AccountTypeEntity {
     return when (this) {
-        AccountType.CASH -> AccountGroupTypeEntity.CASH
-        AccountType.BANK_ACCOUNT -> AccountGroupTypeEntity.BANK_ACCOUNT
-        AccountType.CREDIT_CARD -> AccountGroupTypeEntity.CREDIT_CARD
+        AccountType.CASH -> AccountTypeEntity.CASH
+        AccountType.BANK_ACCOUNT -> AccountTypeEntity.BANK_ACCOUNT
+        AccountType.CREDIT_CARD -> AccountTypeEntity.CREDIT_CARD
+        else -> TODO()
     }
 }
 
-fun AccountGroupTypeEntity.toDomain(): AccountType {
+fun AccountTypeEntity.toDomain(): AccountType {
     return when (this) {
-        AccountGroupTypeEntity.CASH -> AccountType.CASH
-        AccountGroupTypeEntity.BANK_ACCOUNT -> AccountType.BANK_ACCOUNT
-        AccountGroupTypeEntity.CREDIT_CARD -> AccountType.CREDIT_CARD
+        AccountTypeEntity.CASH -> AccountType.CASH
+        AccountTypeEntity.BANK_ACCOUNT -> AccountType.BANK_ACCOUNT
+        AccountTypeEntity.CREDIT_CARD -> AccountType.CREDIT_CARD
+        else -> TODO()
     }
 }

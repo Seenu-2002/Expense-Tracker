@@ -190,7 +190,7 @@ class TransactionRepository constructor(
             ).mapNotNull {
                 it.totalAmount?.let { sum ->
                     ExpensePerDay(
-                        Instant.fromEpochSeconds(it.createdAt),
+                        Instant.fromEpochMilliseconds(it.createdAt),
                         categories.find { category -> category.id == it.categoryId }!!,
                         sum
                     )
@@ -230,6 +230,18 @@ class TransactionRepository constructor(
     suspend fun getTransactionCountByCategory(categoryId: Long): Long {
         return withContext(Dispatchers.IO) {
             transactionLocalDataSource.getTransactionCountByCategory(categoryId)
+        }
+    }
+
+    suspend fun getTransactionCountByAccountId(accountId: Long): Long {
+        return withContext(Dispatchers.IO) {
+            transactionLocalDataSource.getTransactionCountByAccount(accountId)
+        }
+    }
+
+    suspend fun replaceAccountInTransactions(oldAccountId: Long, newAccountId: Long) {
+        withContext(Dispatchers.IO) {
+            transactionLocalDataSource.replaceAccount(oldAccountId, newAccountId)
         }
     }
 

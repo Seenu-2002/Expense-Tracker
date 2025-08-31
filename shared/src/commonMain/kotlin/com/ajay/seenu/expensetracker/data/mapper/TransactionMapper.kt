@@ -26,7 +26,7 @@ fun TransactionDetailEntity.toDomain(
         amount = this.amount,
         category = category,
         account = account,
-        createdAt = Instant.fromEpochSeconds(this.createdAt),
+        createdAt = Instant.fromEpochMilliseconds(this.createdAt),
         note = this.note
     )
 }
@@ -39,7 +39,7 @@ fun Transaction.toEntity(): TransactionDetailEntity {
         amount = this.amount,
         categoryId = this.category.id,
         accountId = this.account.id,
-        createdAt = this.createdAt.epochSeconds,
+        createdAt = this.createdAt.toEpochMilliseconds(),
         note = this.note,
         place = null // TODO: Feature to be supported
     )
