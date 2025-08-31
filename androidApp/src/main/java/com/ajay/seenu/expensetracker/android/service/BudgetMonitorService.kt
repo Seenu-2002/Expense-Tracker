@@ -17,7 +17,7 @@ class BudgetMonitorService @Inject constructor(
     suspend fun checkBudgetExceeded(transactionAmount: Double,
                                     categoryId: Long?,
                                     range: DateRange) {
-    val activeBudgets = budgetRepository.getBudgetsByCategory(categoryId)
+        val activeBudgets = budgetRepository.getBudgetsByCategory(categoryId)
         activeBudgets.forEach { budget ->
             if (budget.alertEnabled) {
                 val currentPeriodSpent = calculateCurrentPeriodSpent(budget, range)

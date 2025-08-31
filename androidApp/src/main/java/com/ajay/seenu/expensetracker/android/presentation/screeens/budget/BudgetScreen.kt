@@ -293,7 +293,7 @@ fun BudgetCard(
                     .height(8.dp)
                     .clip(RoundedCornerShape(4.dp)),
                 color = if (isOverBudget) MaterialTheme.colorScheme.error else Orange,
-                trackColor = Gray100
+                trackColor = LocalContentColor.current.copy(alpha = 0.1F)
             )
 
             Spacer(modifier = Modifier.height(4.dp))
