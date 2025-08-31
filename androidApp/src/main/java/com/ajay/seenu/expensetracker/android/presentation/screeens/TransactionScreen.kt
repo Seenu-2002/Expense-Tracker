@@ -166,7 +166,7 @@ fun TransactionScreen(
         AccountsBottomSheet(
             state = accountBottomSheetState,
             onDismiss = {
-                showCategoriesBottomSheet = false
+                showAccountBottomSheet = false
             },
             selectedAccount = selectedAccount,
             accountsUiModel = AccountsListUiModel(accounts = accounts)
