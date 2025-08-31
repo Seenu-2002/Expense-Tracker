@@ -159,7 +159,6 @@ fun BudgetDetailScreen(
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 32.dp),
             contentPadding = PaddingValues(vertical = 15.dp),
-            shape = RoundedCornerShape(16.dp)
         ) {
             Text(
                 "Edit",

@@ -22,7 +22,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -51,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ajay.seenu.expensetracker.android.data.FilterPreference
+import com.ajay.seenu.expensetracker.android.presentation.state.UiState
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.BudgetViewModel
 import com.ajay.seenu.expensetracker.domain.model.budget.BudgetWithSpending
 
@@ -66,44 +66,44 @@ fun BudgetScreen(
     LaunchedEffect(Unit) {
         budgetViewModel.loadBudgets(filter)
     }
-    val budgets by budgetViewModel.budgets.collectAsState()
-    val uiState by budgetViewModel.uiState.collectAsState()
+    val budgetsUiState by budgetViewModel.budgets.collectAsState()
 
-
-    LaunchedEffect(uiState.error) {
-        uiState.error?.let {
-            // Show error snackbar or toast
-            budgetViewModel.clearError()
+    when(val state = budgetsUiState) {
+        is UiState.Loading -> {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.background
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
         }
-    }
-
-    LaunchedEffect(uiState.message) {
-        uiState.message?.let {
-            // Show success snackbar or toast
-            budgetViewModel.clearMessage()
-        }
-    }
-
-    if(!uiState.isLoading) {
-        budgets?.let {
+        is UiState.Success -> {
             BudgetListScreen(
-                budgets = it,
+                budgets = state.data,
                 onCreateBudget = onCreateBudget,
                 onBudgetClick = onBudgetClick,
             )
         }
-    } else {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            Box(
+        is UiState.Failure -> {
+            Surface(
                 modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+                color = MaterialTheme.colorScheme.background
             ) {
-                CircularProgressIndicator()
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "Error loading budgets")
+                }
             }
         }
+
+        UiState.Empty -> {}
     }
 }
 
