@@ -82,6 +82,12 @@ interface TransactionDataSource {
         endDate: Long
     ): List<GetTotalAmountByCategoryAndTypeBetween>
 
+    fun getTotalExpenseByCategoryInPeriod(
+        categoryId: Long?,
+        startDate: Long,
+        endDate: Long
+    ): Double
+
     fun replaceCategory(oldCategory: Long, newCategory: Long)
     fun getTransactionCountByCategory(categoryId: Long): Long
     fun getTransactionCountByAccount(id: Long): Long

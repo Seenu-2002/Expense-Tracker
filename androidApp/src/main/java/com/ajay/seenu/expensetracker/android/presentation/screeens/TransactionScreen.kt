@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ajay.seenu.expensetracker.android.R
+import com.ajay.seenu.expensetracker.android.data.FilterPreference
 import com.ajay.seenu.expensetracker.android.presentation.components.CategoryRow
 import com.ajay.seenu.expensetracker.android.presentation.components.TransactionForm
 import com.ajay.seenu.expensetracker.android.presentation.state.AccountsListUiModel
@@ -72,6 +73,7 @@ fun TransactionScreen(
     }
 
     val context = LocalContext.current
+    val filter = FilterPreference.getCurrentFilter(context)
     val transaction by viewModel.transaction.collectAsStateWithLifecycle()
     val attachments by viewModel.attachments.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
@@ -140,7 +142,7 @@ fun TransactionScreen(
                 if (transactionMode is TransactionMode.Edit)
                     viewModel.updateTransaction(newTransaction, newAttachments)
                 else
-                    viewModel.addTransaction(newTransaction, newAttachments)
+                    viewModel.addTransaction(newTransaction, newAttachments, filter)
                 Toast.makeText(context, "Transaction added Successfully!", Toast.LENGTH_SHORT)
                     .show()
                 onNavigateBack.invoke()

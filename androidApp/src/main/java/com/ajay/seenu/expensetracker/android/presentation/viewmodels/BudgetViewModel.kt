@@ -3,6 +3,7 @@ package com.ajay.seenu.expensetracker.android.presentation.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ajay.seenu.expensetracker.android.data.FilterPreference
+import com.ajay.seenu.expensetracker.android.presentation.state.UiState
 import com.ajay.seenu.expensetracker.data.repository.BudgetRepository
 import com.ajay.seenu.expensetracker.data.repository.CategoryRepository
 import com.ajay.seenu.expensetracker.domain.model.Category
@@ -31,14 +32,14 @@ class BudgetViewModel @Inject constructor(
     @Inject
     internal lateinit var dateRangeCalculatorUseCase: DateRangeCalculatorUseCase
 
-    private val _uiState = MutableStateFlow(BudgetUiState())
-    val uiState: StateFlow<BudgetUiState> = _uiState.asStateFlow()
+//    private val _uiState = MutableStateFlow(BudgetUiState())
+//    val uiState: StateFlow<BudgetUiState> = _uiState.asStateFlow()
 
-    private val _budgets: MutableStateFlow<List<BudgetWithSpending>?> = MutableStateFlow(null)
-    val budgets: StateFlow<List<BudgetWithSpending>?> = _budgets.stateIn(
+    private val _budgets: MutableStateFlow<UiState<List<BudgetWithSpending>>> = MutableStateFlow(UiState.Loading)
+    val budgets: StateFlow<UiState<List<BudgetWithSpending>>> = _budgets.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
+        initialValue = UiState.Loading
     )
 
     val categories: StateFlow<List<Category>> = flow {
@@ -54,14 +55,10 @@ class BudgetViewModel @Inject constructor(
 
     fun loadBudgets(filter: DateFilter) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
+            _budgets.emit(UiState.Loading)
             val range = dateRangeCalculatorUseCase(filter)
             budgetRepository.getAllBudgetsWithSpending(range).collect {
-                _budgets.emit(it)
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    message = "Budgets loaded successfully"
-                )
+                _budgets.emit(UiState.Success(it))
             }
         }
     }
@@ -73,9 +70,7 @@ class BudgetViewModel @Inject constructor(
                 val budget = budgetRepository.getBudgetWithSpending(budgetId, range)
                 _selectedBudget.value = budget
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    error = e.message ?: "Failed to load budget"
-                )
+                //error
             }
         }
     }
@@ -83,17 +78,9 @@ class BudgetViewModel @Inject constructor(
     fun createBudget(budgetRequest: BudgetRequest) {
         viewModelScope.launch {
             try {
-                _uiState.value = _uiState.value.copy(isLoading = true)
                 budgetRepository.createBudget(budgetRequest)
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    message = "Budget created successfully"
-                )
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = e.message ?: "Failed to create budget"
-                )
+                //error
             }
         }
     }
@@ -101,19 +88,10 @@ class BudgetViewModel @Inject constructor(
     fun updateBudget(budgetId: Long, budgetRequest: BudgetRequest, filter: DateFilter) {
         viewModelScope.launch {
             try {
-                _uiState.value = _uiState.value.copy(isLoading = true)
                 budgetRepository.updateBudget(budgetId, budgetRequest)
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    message = "Budget updated successfully"
-                )
-                // Reload the budget
                 loadBudget(budgetId, filter)
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = e.message ?: "Failed to update budget"
-                )
+                //error
             }
         }
     }
@@ -121,33 +99,11 @@ class BudgetViewModel @Inject constructor(
     fun deleteBudget(budgetId: Long) {
         viewModelScope.launch {
             try {
-                _uiState.value = _uiState.value.copy(isLoading = true)
                 budgetRepository.deleteBudget(budgetId)
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    message = "Budget deleted successfully"
-                )
                 _selectedBudget.value = null
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = e.message ?: "Failed to delete budget"
-                )
+                //error
             }
         }
     }
-
-    fun clearError() {
-        _uiState.value = _uiState.value.copy(error = null)
-    }
-
-    fun clearMessage() {
-        _uiState.value = _uiState.value.copy(message = null)
-    }
 }
-
-data class BudgetUiState(
-    val isLoading: Boolean = false,
-    val error: String? = null,
-    val message: String? = null
-)

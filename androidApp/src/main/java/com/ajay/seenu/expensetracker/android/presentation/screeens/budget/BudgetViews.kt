@@ -10,10 +10,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 val Orange = Color(0xFFF59E0B)
-val Gray100 = Color(0xFFF3F4F6)
-val Gray600 = Color(0xFF4B5563)
-val Gray800 = Color(0xFF1F2937)
-
 @Composable
 fun DeleteBudgetDialog(
     budgetName: String,
@@ -31,7 +27,6 @@ fun DeleteBudgetDialog(
         text = {
             Text(
                 "Are you sure do you wanna remove this budget?",
-                color = Gray600
             )
         },
         confirmButton = {
@@ -45,7 +40,7 @@ fun DeleteBudgetDialog(
             TextButton(
                 onClick = onDismiss
             ) {
-                Text("No", color = Gray600)
+                Text("No")
             }
         },
         containerColor = Color.White,

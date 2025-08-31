@@ -2,6 +2,7 @@ package com.ajay.seenu.expensetracker.android.di
 
 import android.content.Context
 import com.ajay.seenu.expensetracker.UserConfigurationsManager
+import com.ajay.seenu.expensetracker.android.service.NotificationService
 import com.ajay.seenu.expensetracker.domain.AndroidFileManager
 import com.ajay.seenu.expensetracker.domain.FileManager
 import dagger.Module
@@ -25,6 +26,12 @@ object AppModule {
     @Provides
     fun provideFileManager(@ApplicationContext context: Context): FileManager {
         return AndroidFileManager(context)
+    }
+
+    @Singleton
+    @Provides
+    fun provideNotificationService(@ApplicationContext context: Context): NotificationService {
+        return NotificationService(context)
     }
 
 }

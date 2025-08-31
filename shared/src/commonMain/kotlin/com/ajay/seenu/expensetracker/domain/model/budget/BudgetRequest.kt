@@ -3,6 +3,7 @@ package com.ajay.seenu.expensetracker.domain.model.budget
 import com.ajay.seenu.expensetracker.domain.model.DateFilter
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 data class BudgetRequest @OptIn(ExperimentalTime::class) constructor(
     val name: String,
@@ -11,5 +12,7 @@ data class BudgetRequest @OptIn(ExperimentalTime::class) constructor(
     val periodType: DateFilter,
     val startDate: Long = Clock.System.now().toEpochMilliseconds(),
     val endDate: Long? = null,
-    val isRecurring: Boolean = true
+    val isRecurring: Boolean = true,
+    val alertEnabled: Boolean,
+    val alertThresholdPercentage: Double,
 )

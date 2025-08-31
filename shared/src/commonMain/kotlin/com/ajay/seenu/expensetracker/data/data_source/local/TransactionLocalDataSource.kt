@@ -231,6 +231,15 @@ class TransactionLocalDataSource constructor(
             .executeAsList()
     }
 
+    override fun getTotalExpenseByCategoryInPeriod(
+        categoryId: Long?,
+        startDate: Long,
+        endDate: Long
+    ): Double {
+        return queries.getTotalExpenseByCategoryInPeriod(categoryId, startDate, endDate)
+            .executeAsOne()
+    }
+
     override fun replaceCategory(oldCategory: Long, newCategory: Long) {
         return queries.changeCategory(oldCategory = oldCategory, newCategory = newCategory)
     }

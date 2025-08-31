@@ -221,6 +221,20 @@ class TransactionRepository constructor(
         }
     }
 
+    suspend fun getTotalExpenseByCategoryInPeriod(
+        categoryId: Long?,
+        startDate: Long,
+        endDate: Long
+    ): Double {
+        return withContext(Dispatchers.IO) {
+            transactionLocalDataSource.getTotalExpenseByCategoryInPeriod(
+                categoryId,
+                startDate,
+                endDate
+            )
+        }
+    }
+
     suspend fun replaceCategoryInTransactions(oldCategory: Long, newCategory: Long) {
         withContext(Dispatchers.IO) {
             transactionLocalDataSource.replaceCategory(oldCategory, newCategory)

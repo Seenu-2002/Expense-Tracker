@@ -3,18 +3,22 @@ package com.ajay.seenu.expensetracker.android.presentation.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ajay.seenu.expensetracker.data.repository.AccountRepository
+import com.ajay.seenu.expensetracker.android.service.BudgetMonitorService
 import com.ajay.seenu.expensetracker.data.repository.CategoryRepository
 import com.ajay.seenu.expensetracker.domain.model.Account
 import com.ajay.seenu.expensetracker.domain.model.Attachment
 import com.ajay.seenu.expensetracker.domain.model.Category
+import com.ajay.seenu.expensetracker.domain.model.DateFilter
 import com.ajay.seenu.expensetracker.domain.model.Transaction
 import com.ajay.seenu.expensetracker.domain.model.TransactionType
+import com.ajay.seenu.expensetracker.domain.usecase.DateRangeCalculatorUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.attachment.AddAttachmentUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.attachment.GetAttachmentsUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.AddTransactionUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.GetTransactionUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.UpdateTransactionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,7 +32,8 @@ class AddTransactionViewModel @Inject constructor(
     private val categoryRepository: CategoryRepository,
     private val addTransactionUseCase: AddTransactionUseCase,
     private val accountsRepository: AccountRepository,
-    private val updateTransactionUseCase: UpdateTransactionUseCase
+    private val updateTransactionUseCase: UpdateTransactionUseCase,
+    private val budgetMonitorService: BudgetMonitorService
 ) : ViewModel() {
 
     @Inject
@@ -39,6 +44,9 @@ class AddTransactionViewModel @Inject constructor(
 
     @Inject
     internal lateinit var addAttachmentUseCase: AddAttachmentUseCase
+
+    @Inject
+    internal lateinit var dateRangeCalculatorUseCase: DateRangeCalculatorUseCase
 
     private val _transaction: MutableStateFlow<Transaction?> = MutableStateFlow(null)
     val transaction = _transaction.asStateFlow()
@@ -60,9 +68,11 @@ class AddTransactionViewModel @Inject constructor(
 
     fun addTransaction(
         transaction: Transaction,
-        attachments: List<Attachment>
+        attachments: List<Attachment>,
+        filter: DateFilter
     ) {
         viewModelScope.launch {
+            val range = dateRangeCalculatorUseCase(filter)
             try {
                 val transactionId = addTransactionUseCase.addTransaction(transaction)
                 attachments.forEach { attachment ->
@@ -73,6 +83,13 @@ class AddTransactionViewModel @Inject constructor(
                         filePath = attachment.filePath,
                         size = attachment.size,
                         imageUri = attachment.imageUri
+                    )
+                }
+                GlobalScope.launch {
+                    budgetMonitorService.checkBudgetExceeded(
+                        transactionAmount = transaction.amount,
+                        categoryId = transaction.category.id,
+                        range = range
                     )
                 }
             } catch (exp: Exception) {
