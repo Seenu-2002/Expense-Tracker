@@ -1,7 +1,9 @@
 package com.ajay.seenu.expensetracker.android.presentation.activities
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -28,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -68,6 +71,7 @@ import com.ajay.seenu.expensetracker.domain.model.TransactionType
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 import javax.inject.Inject
+import androidx.core.content.edit
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -77,6 +81,12 @@ class MainActivity : AppCompatActivity() {
     private val viewModel: MainViewModel by viewModels()
     private val promptManager by lazy {
         BiometricPromptManager(this)
+    }
+
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        saveNotificationPermissionRequested()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -193,6 +203,7 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("UnrememberedGetBackStackEntry")
     @Composable
     fun App() {
+        checkAndRequestNotificationPermission()
         val navController = rememberNavController()
         val budgetViewModel: BudgetViewModel = hiltViewModel()
         val context = LocalContext.current
@@ -494,5 +505,28 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun checkAndRequestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val hasPermission = ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+
+            val hasAskedBefore = getSharedPreferences("app_prefs", MODE_PRIVATE)
+                .getBoolean("notification_permission_requested", false)
+
+            if (!hasPermission && !hasAskedBefore) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
+
+    private fun saveNotificationPermissionRequested() {
+        getSharedPreferences("permission_prefs", MODE_PRIVATE)
+            .edit {
+                putBoolean("notification_permission_requested", true)
+            }
     }
 }

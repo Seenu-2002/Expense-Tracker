@@ -18,7 +18,10 @@ fun BudgetEntity.toDomain(): Budget {
         isRecurring = isRecurring,
         createdAt = Instant.fromEpochSeconds(createdAt),
         updatedAt = Instant.fromEpochSeconds(updatedAt),
-        isActive = isActive
+        isActive = isActive,
+        alertEnabled = if(alertEnabled == 1L) true else false,
+        alertThresholdPercentage = alertThresholdPercentage,
+        lastAlertTriggeredAt = lastAlertTriggeredAt?.let {  Instant.fromEpochSeconds(lastAlertTriggeredAt) }
     )
 }
 
@@ -35,6 +38,9 @@ fun Budget.toEntity(): BudgetEntity {
         isRecurring = isRecurring,
         createdAt = createdAt.epochSeconds,
         updatedAt = updatedAt.epochSeconds,
-        isActive = isActive
+        isActive = isActive,
+        alertEnabled = if(alertEnabled) 1L else 0L,
+        alertThresholdPercentage = alertThresholdPercentage,
+        lastAlertTriggeredAt = lastAlertTriggeredAt?.epochSeconds,
     )
 }

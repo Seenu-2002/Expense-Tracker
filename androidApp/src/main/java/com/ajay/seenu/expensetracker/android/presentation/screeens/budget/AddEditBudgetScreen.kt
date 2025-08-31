@@ -75,7 +75,7 @@ fun AddEditBudgetScreen(
     val budget = if(arg is AddEditBudgetArg.Edit) arg.budget else null
     var amount by remember { mutableStateOf(budget?.amount?.toInt()?.toString() ?: "") }
     var selectedCategory by remember { mutableStateOf(budget?.categoryId ?: categories.firstOrNull()?.id) }
-    var receiveAlert by rememberSaveable { mutableStateOf(false) }
+    var receiveAlert by rememberSaveable { mutableStateOf(if(arg is AddEditBudgetArg.Edit) arg.budget.alertEnabled else true) }
     var showAmountError by rememberSaveable {
         mutableStateOf(false)
     }
@@ -83,7 +83,7 @@ fun AddEditBudgetScreen(
         mutableStateOf(false)
     }
     val interactionSource = remember { MutableInteractionSource() }
-    val sliderState = remember { SliderState(value = 0f) }
+    val sliderState = remember { SliderState(value = if(arg is AddEditBudgetArg.Edit) arg.budget.alertThresholdPercentage.toFloat() else 0.8F) }
 
     Column(
         modifier = Modifier
@@ -309,7 +309,9 @@ fun AddEditBudgetScreen(
                                 name = selectedCategoryName,
                                 categoryId = selectedCategory,
                                 amount = amount.toDoubleOrNull() ?: 0.0,
-                                periodType = DateFilter.ThisMonth
+                                periodType = DateFilter.ThisMonth,
+                                alertEnabled = receiveAlert,
+                                alertThresholdPercentage = sliderState.value.toDouble()
                             )
                         )
                     } else {

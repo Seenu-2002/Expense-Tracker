@@ -32,13 +32,14 @@ class BudgetRepository(
     }
 
     // Get budgets by category
-    fun getBudgetsByCategory(categoryId: Long): Flow<List<Budget>> {
+    fun getBudgetsByCategory(categoryId: Long?): List<Budget> {
         return database.expenseDatabaseQueries.selectBudgetsByCategory(categoryId)
-            .asFlow()
-            .mapToList(Dispatchers.IO)
-            .map { budgets ->
-                budgets.map { it.toDomain() }
-            }
+            .executeAsList()
+            //.asFlow()
+            //.mapToList(Dispatchers.IO)
+            .map { it.toDomain() }
+//                budgets.map { it.toDomain() }
+//            }
     }
 
     // Get overall budgets (not tied to specific categories)
@@ -66,7 +67,9 @@ class BudgetRepository(
             periodType = budgetRequest.periodType.toString(),
             startDate = budgetRequest.startDate,
             endDate = budgetRequest.endDate,
-            isRecurring = if (budgetRequest.isRecurring) 1L else 0L
+            isRecurring = if (budgetRequest.isRecurring) 1L else 0L,
+            alertEnabled = if (budgetRequest.alertEnabled) 1L else 0L,
+            alertThresholdPercentage = budgetRequest.alertThresholdPercentage,
         )
 
         return database.expenseDatabaseQueries.getLastInsertTransactionRowId().executeAsOne()
@@ -82,7 +85,9 @@ class BudgetRepository(
             startDate = budgetRequest.startDate,
             endDate = budgetRequest.endDate,
             isRecurring = if (budgetRequest.isRecurring) 1L else 0L,
-            id = id
+            id = id,
+            alertEnabled = if (budgetRequest.alertEnabled) 1L else 0L,
+            alertThresholdPercentage = budgetRequest.alertThresholdPercentage,
         )
     }
 
@@ -201,5 +206,13 @@ class BudgetRepository(
         }
 
         return exceededBudgets
+    }
+
+    @OptIn(ExperimentalTime::class)
+    suspend fun updateLastAlertTime(
+        budgetId: Long,
+        now: Long = Clock.System.now().toEpochMilliseconds()
+    ) {
+        database.expenseDatabaseQueries.updateLastAlertTime(now, budgetId)
     }
 }

@@ -134,6 +134,15 @@ SELECT categoryId, SUM(amount) AS totalAmount FROM TransactionDetailEntity WHERE
 getTotalAmountByCategoryAndTypeBetween:
 SELECT categoryId, SUM(amount) AS total FROM TransactionDetailEntity WHERE type = :type AND createdAt >= :startUTCValue AND createdAt <= :endUTCValue GROUP BY categoryId ORDER BY categoryId ASC;
 
+getTotalExpenseByCategoryInPeriod:
+SELECT COALESCE(SUM(amount), 0) AS totalAmount
+FROM TransactionDetailEntity
+WHERE
+   (:categoryId IS NULL OR categoryId = :categoryId)
+   AND createdAt >= :startDate
+   AND createdAt <= :endDate
+   AND type = 'EXPENSE';
+
 getAllAttachmentsForTransaction:
 SELECT * FROM AttachmentEntity WHERE transactionId = ?;
 
@@ -176,7 +185,10 @@ CREATE TABLE BudgetEntity (
     isRecurring INTEGER NOT NULL DEFAULT 1, -- 0 for false, 1 for true
     createdAt INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
     updatedAt INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
-    isActive INTEGER NOT NULL DEFAULT 1
+    isActive INTEGER NOT NULL DEFAULT 1,
+    alertEnabled INTEGER NOT NULL DEFAULT 1,
+    alertThresholdPercentage REAL NOT NULL DEFAULT 0.8,
+    lastAlertTriggeredAt INTEGER
 );
 
 -- Index for better query performance
@@ -211,14 +223,14 @@ AND (
 );
 
 insertBudget:
-INSERT INTO BudgetEntity (name, categoryId, amount, periodType, startDate, endDate, isRecurring)
-VALUES (?, ?, ?, ?, ?, ?, ?);
+INSERT INTO BudgetEntity (name, categoryId, amount, periodType, startDate, endDate, isRecurring, alertEnabled, alertThresholdPercentage)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 updateBudget:
 UPDATE BudgetEntity
 SET name = ?, categoryId = ?, amount = ?, periodType = ?,
     startDate = ?, endDate = ?, isRecurring = ?,
-    updatedAt = strftime('%s', 'now')
+    updatedAt = strftime('%s', 'now'), alertEnabled = ?, alertThresholdPercentage = ?
 WHERE id = ?;
 
 deleteBudget:
@@ -244,6 +256,11 @@ LEFT JOIN TransactionDetailEntity t ON (
 WHERE b.isActive = 1
 AND b.id = ?
 GROUP BY b.id;
+
+updateLastAlertTime:
+UPDATE BudgetEntity
+SET lastAlertTriggeredAt = ?
+WHERE id = ?;
 
 getTransactionCountByAccount:
 SELECT COUNT(*) AS count FROM TransactionDetailEntity WHERE accountId = ?;

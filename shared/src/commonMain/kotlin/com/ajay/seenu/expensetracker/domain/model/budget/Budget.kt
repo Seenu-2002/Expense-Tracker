@@ -15,4 +15,7 @@ data class Budget @OptIn(ExperimentalTime::class) constructor(
     val createdAt: Instant,
     val updatedAt: Instant,
     val isActive: Long,
+    val alertEnabled: Boolean,
+    val alertThresholdPercentage: Double,
+    val lastAlertTriggeredAt: Instant?
 )
