@@ -44,11 +44,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.data.FilterPreference
 import com.ajay.seenu.expensetracker.android.presentation.state.UiState
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.BudgetViewModel
@@ -125,26 +127,10 @@ fun BudgetListScreen(
         CenterAlignedTopAppBar(
             title = {
                 Text(
-                    "May",
-                    fontSize = 18.sp,
+                    stringResource(R.string.budget),
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Medium
                 )
-            },
-            navigationIcon = {
-                IconButton(onClick = {}) {
-                    Icon(
-                        Icons.Default.ArrowBack,
-                        contentDescription = "Back",
-                    )
-                }
-            },
-            actions = {
-                IconButton(onClick = { }) {
-                    Icon(
-                        Icons.Default.ChevronRight,
-                        contentDescription = "Next",
-                    )
-                }
             },
             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                 containerColor = Color.Transparent
@@ -177,7 +163,8 @@ fun BudgetListScreen(
             }
 
             Spacer(modifier = Modifier.weight(1f))
-            Button(modifier = Modifier.fillMaxWidth()
+            Button(modifier = Modifier
+                .fillMaxWidth()
                 .padding(bottom = 10.dp),
                 onClick = onCreateBudget,
                 contentPadding = PaddingValues(vertical = 15.dp)) {
@@ -202,7 +189,8 @@ fun BudgetListScreen(
                         )
                     }
                 }
-                Button(modifier = Modifier.fillMaxWidth()
+                Button(modifier = Modifier
+                    .fillMaxWidth()
                     .padding(bottom = 10.dp),
                     onClick = onCreateBudget,
                     contentPadding = PaddingValues(vertical = 15.dp)) {
