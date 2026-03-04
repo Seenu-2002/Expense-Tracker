@@ -4,6 +4,7 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import com.ajay.seenu.expensetracker.ExpenseDatabase
 import com.ajay.seenu.expensetracker.data.mapper.toDomain
+import com.ajay.seenu.expensetracker.domain.model.DateFilter
 import com.ajay.seenu.expensetracker.domain.model.DateRange
 import com.ajay.seenu.expensetracker.domain.model.budget.Budget
 import com.ajay.seenu.expensetracker.domain.model.budget.BudgetRequest
@@ -71,7 +72,7 @@ class BudgetRepository(
             name = budgetRequest.name,
             categoryId = budgetRequest.categoryId,
             amount = budgetRequest.amount,
-            periodType = budgetRequest.periodType.toString(),
+            periodType = dateFilterToPeriodType(budgetRequest.periodType),
             startDate = budgetRequest.startDate,
             endDate = budgetRequest.endDate,
             isRecurring = if (budgetRequest.isRecurring) 1L else 0L,
@@ -82,13 +83,22 @@ class BudgetRepository(
         return database.expenseDatabaseQueries.getLastInsertTransactionRowId().executeAsOne()
     }
 
+    private fun dateFilterToPeriodType(filter: DateFilter): String {
+        return when (filter) {
+            DateFilter.ThisWeek -> "WEEKLY"
+            DateFilter.ThisMonth -> "MONTHLY"
+            DateFilter.ThisYear -> "YEARLY"
+            is DateFilter.Custom -> "CUSTOM"
+        }
+    }
+
     // Update existing budget
     suspend fun updateBudget(id: Long, budgetRequest: BudgetRequest) {
         database.expenseDatabaseQueries.updateBudget(
             name = budgetRequest.name,
             categoryId = budgetRequest.categoryId,
             amount = budgetRequest.amount,
-            periodType = budgetRequest.periodType.toString(),
+            periodType = dateFilterToPeriodType(budgetRequest.periodType),
             startDate = budgetRequest.startDate,
             endDate = budgetRequest.endDate,
             isRecurring = if (budgetRequest.isRecurring) 1L else 0L,

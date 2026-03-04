@@ -81,6 +81,7 @@ fun AddEditBudgetScreen(
         } ?: "")
     }
     var selectedCategory by remember { mutableStateOf(budget?.categoryId ?: categories.firstOrNull()?.id) }
+    var isRecurring by rememberSaveable { mutableStateOf(if (arg is AddEditBudgetArg.Edit) (arg.budget.isRecurring == 1L) else true) }
     var receiveAlert by rememberSaveable { mutableStateOf(if(arg is AddEditBudgetArg.Edit) arg.budget.alertEnabled else true) }
     var showAmountError by rememberSaveable {
         mutableStateOf(false)
@@ -262,6 +263,32 @@ fun AddEditBudgetScreen(
                 }
             }
             Spacer(modifier = Modifier.height(24.dp))
+
+            // Recurring toggle
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        "Recurring",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
+                        "If enabled, this budget will recur every period (e.g., every month)",
+                        fontSize = 13.sp,
+                        lineHeight = 16.sp
+                    )
+                }
+
+                Switch(
+                    checked = isRecurring,
+                    onCheckedChange = { isRecurring = it },
+                )
+            }
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -324,6 +351,7 @@ fun AddEditBudgetScreen(
                                 categoryId = selectedCategory,
                                 amount = parsedAmount,
                                 periodType = DateFilter.ThisMonth,
+                                isRecurring = isRecurring,
                                 alertEnabled = receiveAlert,
                                 alertThresholdPercentage = sliderState.value.toDouble()
                             )
