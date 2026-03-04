@@ -10,7 +10,7 @@ data class BudgetRequest @OptIn(ExperimentalTime::class) constructor(
     val categoryId: Long? = null,
     val amount: Double,
     val periodType: DateFilter,
-    val startDate: Long = Clock.System.now().toEpochMilliseconds(),
+    val startDate: Long = Clock.System.now().epochSeconds,
     val endDate: Long? = null,
     val isRecurring: Boolean = true,
     val alertEnabled: Boolean,

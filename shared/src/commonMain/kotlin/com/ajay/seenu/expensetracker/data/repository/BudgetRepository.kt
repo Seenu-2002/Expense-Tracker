@@ -52,6 +52,13 @@ class BudgetRepository(
             }
     }
 
+    // Get overall budgets as a one-shot list
+    fun getOverallBudgetsList(): List<Budget> {
+        return database.expenseDatabaseQueries.selectOverallBudgets()
+            .executeAsList()
+            .map { it.toDomain() }
+    }
+
     // Get budget by ID
     suspend fun getBudgetById(id: Long): Budget? {
         return database.expenseDatabaseQueries.selectBudgetById(id).executeAsOneOrNull()

@@ -17,14 +17,16 @@ class BudgetMonitorService @Inject constructor(
     suspend fun checkBudgetExceeded(transactionAmount: Double,
                                     categoryId: Long?,
                                     range: DateRange) {
-        val activeBudgets = budgetRepository.getBudgetsByCategory(categoryId)
+        val categoryBudgets = if (categoryId != null) budgetRepository.getBudgetsByCategory(categoryId) else emptyList()
+        val overallBudgets = budgetRepository.getOverallBudgetsList()
+        val activeBudgets = categoryBudgets + overallBudgets
         activeBudgets.forEach { budget ->
             if (budget.alertEnabled) {
                 val currentPeriodSpent = calculateCurrentPeriodSpent(budget, range)
-                val spentPercentage = (currentPeriodSpent / budget.amount) * 100
+                val spentRatio = if (budget.amount > 0) currentPeriodSpent / budget.amount else 0.0
 
-                if (spentPercentage >= budget.alertThresholdPercentage) {
-                    triggerBudgetAlert(budget, spentPercentage, currentPeriodSpent)
+                if (spentRatio >= budget.alertThresholdPercentage) {
+                    triggerBudgetAlert(budget, spentRatio * 100, currentPeriodSpent)
                 }
             }
         }

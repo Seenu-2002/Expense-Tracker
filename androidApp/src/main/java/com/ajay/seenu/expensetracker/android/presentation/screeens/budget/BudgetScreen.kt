@@ -105,7 +105,13 @@ fun BudgetScreen(
             }
         }
 
-        UiState.Empty -> {}
+        UiState.Empty -> {
+            BudgetListScreen(
+                budgets = emptyList(),
+                onCreateBudget = onCreateBudget,
+                onBudgetClick = onBudgetClick,
+            )
+        }
     }
 }
 
