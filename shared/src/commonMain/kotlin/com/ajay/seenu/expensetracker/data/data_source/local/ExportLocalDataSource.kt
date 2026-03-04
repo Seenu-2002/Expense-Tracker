@@ -69,6 +69,7 @@ class ExportLocalDataSource constructor(
             val content = when (format) {
                 ExportFormat.JSON -> json.encodeToString(exportData)
                 ExportFormat.CSV -> generateCsv(exportTransactions)
+                ExportFormat.XLSX -> json.encodeToString(exportData) // Binary generation handled in Android layer
             }
 
             val fileName = generateFileName(format)
@@ -89,6 +90,32 @@ class ExportLocalDataSource constructor(
             _exportState.value = ExportState.Error(e.message ?: "Export failed")
             errorResult
         }
+    }
+
+    override suspend fun getExportData(): ExportData {
+        val transactions = transactionRepository.getAllTransactions(1, Int.MAX_VALUE).data
+        val exportTransactions = transactions.map { transaction ->
+            TransactionExport(
+                id = transaction.id,
+                amount = transaction.amount,
+                description = transaction.note,
+                category = transaction.category.id,
+                date = formatDate(transaction.createdAt.toEpochMilliseconds()),
+                type = transaction.type
+            )
+        }
+
+        val totalIncome = transactions.filter { it.type == TransactionType.INCOME }.sumOf { it.amount }
+        val totalExpense = transactions.filter { it.type == TransactionType.EXPENSE }.sumOf { it.amount }
+
+        return ExportData(
+            exportDate = getCurrentDateTime(),
+            appVersion = appVersion,
+            totalTransactions = transactions.size,
+            totalIncome = totalIncome,
+            totalExpense = totalExpense,
+            transactions = exportTransactions
+        )
     }
 
     override suspend fun getTransactionCount(): Int {

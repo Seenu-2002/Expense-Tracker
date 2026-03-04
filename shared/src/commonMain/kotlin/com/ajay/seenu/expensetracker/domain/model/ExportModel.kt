@@ -24,7 +24,8 @@ data class ExportData(
 
 enum class ExportFormat(val displayName: String, val extension: String, val mimeType: String) {
     JSON("JSON", "json", "application/json"),
-    CSV("CSV", "csv", "text/csv")
+    CSV("CSV", "csv", "text/csv"),
+    XLSX("Excel", "xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 }
 
 data class ExportResult(

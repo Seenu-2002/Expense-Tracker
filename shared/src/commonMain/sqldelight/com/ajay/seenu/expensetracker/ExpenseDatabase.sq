@@ -218,9 +218,9 @@ selectActiveBudgetsForPeriod:
 SELECT * FROM BudgetEntity
 WHERE isActive = 1
 AND (
-    -- Recurring monthly budgets that are within their active window and relevant for the requested range
-    (isRecurring = 1 AND periodType = 'MONTHLY' AND startDate <= ?2 AND (endDate IS NULL OR endDate >= ?1))
-    -- Non-recurring budgets that overlap the requested range (any overlap)
+    -- Recurring budgets that are within their active window and relevant for the requested range
+    (isRecurring = 1 AND startDate <= ?2 AND (endDate IS NULL OR endDate >= ?1))
+    -- Non-recurring budgets that overlap the requested range
     OR
     (isRecurring = 0 AND startDate <= ?2 AND (endDate IS NULL OR endDate >= ?1))
 );

@@ -270,7 +270,7 @@ fun AddEditBudgetScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         "Recurring",
                         fontSize = 16.sp,
@@ -283,11 +283,15 @@ fun AddEditBudgetScreen(
                     )
                 }
 
+                Spacer(modifier = Modifier.width(12.dp))
+
                 Switch(
                     checked = isRecurring,
                     onCheckedChange = { isRecurring = it },
                 )
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
