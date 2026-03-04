@@ -13,8 +13,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -73,7 +75,11 @@ fun AddEditBudgetScreen(
     onNavigateBack: () -> Unit
 ) {
     val budget = if(arg is AddEditBudgetArg.Edit) arg.budget else null
-    var amount by remember { mutableStateOf(budget?.amount?.toInt()?.toString() ?: "") }
+    var amount by remember {
+        mutableStateOf(budget?.amount?.let {
+            if (it % 1.0 == 0.0) it.toLong().toString() else it.toString()
+        } ?: "")
+    }
     var selectedCategory by remember { mutableStateOf(budget?.categoryId ?: categories.firstOrNull()?.id) }
     var receiveAlert by rememberSaveable { mutableStateOf(if(arg is AddEditBudgetArg.Edit) arg.budget.alertEnabled else true) }
     var showAmountError by rememberSaveable {
@@ -140,9 +146,13 @@ fun AddEditBudgetScreen(
                     color = Color.White
                 ),
                 singleLine = true,
-                onValueChange = {
-                    amount = it
-                    showAmountError = it.isEmpty()
+                onValueChange = { newValue ->
+                    val filtered = newValue.filter { it.isDigit() || it == '.' }
+                    // Allow only one decimal point
+                    if (filtered.count { it == '.' } <= 1) {
+                        amount = filtered
+                    }
+                    showAmountError = filtered.isEmpty()
                 },
                 decorationBox = { innerTextField ->
                     OutlinedTextFieldDefaults.DecorationBox(
@@ -195,7 +205,8 @@ fun AddEditBudgetScreen(
                         bottomEnd = 0.dp
                     )
                 )
-                .padding(start = 15.dp, end = 15.dp, top = 40.dp, bottom = 60.dp),
+                .verticalScroll(rememberScrollState())
+                .padding(start = 15.dp, end = 15.dp, top = 40.dp, bottom = 32.dp),
         ) {
             var expandedCategory by remember { mutableStateOf(false) }
             val selectedCategoryName = categories.find { it.id == selectedCategory }?.label ?: "Category"
@@ -256,18 +267,20 @@ fun AddEditBudgetScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         "Receive Alert",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        "Receive alert when it reaches\nsome point",
+                        "Receive alert when it reaches some point",
                         fontSize = 13.sp,
                         lineHeight = 16.sp
                     )
                 }
+
+                Spacer(modifier = Modifier.width(12.dp))
 
                 Switch(
                     checked = receiveAlert,
@@ -276,7 +289,7 @@ fun AddEditBudgetScreen(
             }
             AnimatedVisibility(receiveAlert) {
                 Slider(
-                    modifier = Modifier.padding(top = 32.dp),
+                    modifier = Modifier.padding(top = 16.dp),
                     state = sliderState,
                     colors = SliderDefaults.colors(
                         activeTrackColor = MaterialTheme.colorScheme.primary,
@@ -285,10 +298,10 @@ fun AddEditBudgetScreen(
                     thumb = {
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(15.dp))
+                                .height(32.dp)
+                                .clip(RoundedCornerShape(16.dp))
                                 .background(MaterialTheme.colorScheme.primary)
-                                .padding(horizontal = 8.dp)
-                                .size(32.dp),
+                                .padding(horizontal = 10.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
@@ -303,19 +316,20 @@ fun AddEditBudgetScreen(
             Spacer(modifier = Modifier.height(32.dp))
             Button(
                 onClick = {
-                    if (amount.isNotEmpty() && selectedCategory != null) {
+                    val parsedAmount = amount.toDoubleOrNull()
+                    if (parsedAmount != null && parsedAmount > 0 && selectedCategory != null) {
                         onSave(
                             BudgetRequest(
                                 name = selectedCategoryName,
                                 categoryId = selectedCategory,
-                                amount = amount.toDoubleOrNull() ?: 0.0,
+                                amount = parsedAmount,
                                 periodType = DateFilter.ThisMonth,
                                 alertEnabled = receiveAlert,
                                 alertThresholdPercentage = sliderState.value.toDouble()
                             )
                         )
                     } else {
-                        showAmountError = amount.isEmpty()
+                        showAmountError = parsedAmount == null || parsedAmount <= 0
                         showCategoryError = selectedCategory == null
                     }
                 },
