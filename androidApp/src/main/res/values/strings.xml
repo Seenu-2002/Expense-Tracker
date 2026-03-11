@@ -133,4 +133,5 @@
 
     <string name="account_created">Account %1$s has been created!</string>
     <string name="account_updated">Account %1$s has been updated!</string>
+    <string name="budget">Budget</string>
 </resources>

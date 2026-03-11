@@ -18,7 +18,6 @@ import com.ajay.seenu.expensetracker.domain.usecase.transaction.AddTransactionUs
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.GetTransactionUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.UpdateTransactionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -85,7 +84,7 @@ class AddTransactionViewModel @Inject constructor(
                         imageUri = attachment.imageUri
                     )
                 }
-                GlobalScope.launch {
+                viewModelScope.launch {
                     budgetMonitorService.checkBudgetExceeded(
                         transactionAmount = transaction.amount,
                         categoryId = transaction.category.id,

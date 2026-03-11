@@ -218,8 +218,11 @@ selectActiveBudgetsForPeriod:
 SELECT * FROM BudgetEntity
 WHERE isActive = 1
 AND (
-    (isRecurring = 1) OR
-    (startDate <= ? AND (endDate IS NULL OR endDate >= ?))
+    -- Recurring budgets that are within their active window and relevant for the requested range
+    (isRecurring = 1 AND startDate <= ?2 AND (endDate IS NULL OR endDate >= ?1))
+    -- Non-recurring budgets that overlap the requested range
+    OR
+    (isRecurring = 0 AND startDate <= ?2 AND (endDate IS NULL OR endDate >= ?1))
 );
 
 insertBudget:

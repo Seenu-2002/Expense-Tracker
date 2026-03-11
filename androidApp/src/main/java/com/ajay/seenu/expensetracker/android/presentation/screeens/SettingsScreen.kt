@@ -87,6 +87,7 @@ fun SettingsScreen(
     var showDateFormatBottomSheet by remember { mutableStateOf(false) }
     var showThemeBottomSheet by remember { mutableStateOf(false) }
     var showDeleteAllTransactionDialog by remember { mutableStateOf(false) }
+    var showExportFormatDialog by remember { mutableStateOf(false) }
     val weekStartsFromBottomSheet = rememberModalBottomSheetState()
     val dateFormatBottomSheet = rememberModalBottomSheetState()
     val themeBottomSheet = rememberModalBottomSheetState()
@@ -257,8 +258,7 @@ fun SettingsScreen(
                             .clickable(
                                 enabled = exportUiState.exportState !is ExportState.Loading,
                                 onClick = {
-                                    exportViewModel.selectFormat(ExportFormat.CSV)
-                                    exportViewModel.exportAndSave()
+                                    showExportFormatDialog = true
                                 }),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -302,6 +302,45 @@ fun SettingsScreen(
                 }
             }
         }
+    }
+    if (showExportFormatDialog) {
+        AlertDialog(
+            onDismissRequest = { showExportFormatDialog = false },
+            title = { Text("Export as") },
+            text = {
+                Column {
+                    ExportFormat.entries.forEach { format ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                                .clickable {
+                                    showExportFormatDialog = false
+                                    exportViewModel.selectFormat(format)
+                                    exportViewModel.exportAndSave()
+                                },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = format.displayName,
+                                fontSize = 16.sp,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                text = ".${format.extension}",
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showExportFormatDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
     if (exportUiState.showSuccessDialog) {
         AlertDialog(
