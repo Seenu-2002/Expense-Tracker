@@ -4,6 +4,7 @@ import com.ajay.seenu.expensetracker.AccountEntity
 import com.ajay.seenu.expensetracker.CategoryEntity
 import com.ajay.seenu.expensetracker.GetAllTransactionsBetweenWithDetails
 import com.ajay.seenu.expensetracker.GetAllTransactionsWithDetails
+import com.ajay.seenu.expensetracker.GetOverallDataBetween
 import com.ajay.seenu.expensetracker.GetTotalAmountByCategoryAndTypeBetween
 import com.ajay.seenu.expensetracker.GetTotalExpenseByCategoryBetween
 import com.ajay.seenu.expensetracker.GetTotalTransactionPerDayByTypeBetween
@@ -85,6 +86,7 @@ interface TransactionDataSource {
         fromValue: Long,
         toValue: Long
     ): Double
+    fun getOverallDataBetween(startDate: Long, endDate: Long): GetOverallDataBetween
 
     fun getAllCategories(): List<CategoryEntity>
     fun getCategories(type: TransactionTypeEntity): List<CategoryEntity>

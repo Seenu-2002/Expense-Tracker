@@ -49,7 +49,7 @@ class BudgetViewModel @Inject constructor(
             emit(categoryRepository.getCategories(TransactionType.EXPENSE))
         }.stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.Eagerly,
             initialValue = emptyList()
         )
 

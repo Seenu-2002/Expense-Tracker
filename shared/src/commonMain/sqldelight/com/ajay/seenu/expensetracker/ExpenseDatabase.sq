@@ -126,6 +126,13 @@ getSumOfAmountBetweenByType:
 SELECT SUM(amount) AS sum FROM TransactionDetailEntity WHERE type = :type
 AND createdAt >= :startUTCValue AND createdAt <= :endUTCValue;
 
+getOverallDataBetween:
+SELECT
+    COALESCE(SUM(CASE WHEN type = 'INCOME' THEN amount ELSE 0 END), 0) AS income,
+    COALESCE(SUM(CASE WHEN type = 'EXPENSE' THEN amount ELSE 0 END), 0) AS expense
+FROM TransactionDetailEntity
+WHERE createdAt >= :startUTCValue AND createdAt <= :endUTCValue;
+
 getAllCategories:
 SELECT * FROM CategoryEntity;
 
@@ -242,13 +249,8 @@ WHERE id = ?;
 selectActiveBudgetsForPeriod:
 SELECT * FROM BudgetEntity
 WHERE isActive = 1
-AND (
-    -- Recurring budgets that are within their active window and relevant for the requested range
-    (isRecurring = 1 AND startDate <= ?2 AND (endDate IS NULL OR endDate >= ?1))
-    -- Non-recurring budgets that overlap the requested range
-    OR
-    (isRecurring = 0 AND startDate <= ?2 AND (endDate IS NULL OR endDate >= ?1))
-);
+AND startDate <= ?2
+AND (endDate IS NULL OR endDate >= ?1);
 
 insertBudget:
 INSERT INTO BudgetEntity (name, categoryId, amount, periodType, startDate, endDate, isRecurring, alertEnabled, alertThresholdPercentage)

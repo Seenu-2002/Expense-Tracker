@@ -142,19 +142,11 @@ class TransactionRepository constructor(
 
     suspend fun getOverallDataBetween(dateRange: DateRange): OverallData {
         return withContext(Dispatchers.IO) {
-            val start = dateRange.start.toEpochMillis()
-            val end = dateRange.end.toEpochMillis()
-            val income = transactionLocalDataSource.getSumOfAmountBetweenByType(
-                TransactionTypeEntity.INCOME,
-                start,
-                end
+            val result = transactionLocalDataSource.getOverallDataBetween(
+                dateRange.start.toEpochMillis(),
+                dateRange.end.toEpochMillis()
             )
-            val expense = transactionLocalDataSource.getSumOfAmountBetweenByType(
-                TransactionTypeEntity.EXPENSE,
-                start,
-                end
-            )
-            OverallData(income = income, expense = expense)
+            OverallData(income = result.income, expense = result.expense)
         }
     }
 

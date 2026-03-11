@@ -15,7 +15,6 @@ class GetFilteredOverallDataUseCase constructor(
 
     suspend operator fun invoke(dateRange: DateRange): Flow<OverallData> {
         return withContext(Dispatchers.IO) {
-            // TODO: Change to flow from SQLDelight and combine the queries to one query
             flowOf(repository.getOverallDataBetween(dateRange))
         }
     }

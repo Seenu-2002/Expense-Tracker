@@ -39,103 +39,86 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object UseCaseModule {
 
-    @Singleton
     @Provides
     fun provideAddAttachmentUseCase(repository: AttachmentRepository): AddAttachmentUseCase {
         return AddAttachmentUseCase(repository)
     }
 
-    @Singleton
     @Provides
     fun provideGetAttachmentsUseCase(repository: AttachmentRepository): GetAttachmentsUseCase {
         return GetAttachmentsUseCase(repository)
     }
 
-    @Singleton
     @Provides
     fun provideAddCategoryUseCase(repository: CategoryRepository): AddCategoryUseCase {
         return AddCategoryUseCase(repository)
     }
 
-    @Singleton
     @Provides
     fun provideChangeCategoriesUseCase(repository: TransactionRepository): ChangeCategoriesUseCase {
         return ChangeCategoriesUseCase(repository)
     }
 
-    @Singleton
     @Provides
     fun provideDeleteCategoryUseCase(repository: CategoryRepository): DeleteCategoryUseCase {
         return DeleteCategoryUseCase(repository)
     }
 
-    @Singleton
     @Provides
     fun provideGetAllCategoriesAsFlowUseCase(repository: CategoryRepository): GetAllCategoriesAsFlowUseCase {
         return GetAllCategoriesAsFlowUseCase(repository)
     }
 
-    @Singleton
     @Provides
     fun provideGetAllCategoriesUseCase(repository: CategoryRepository): GetAllCategoriesUseCase {
         return GetAllCategoriesUseCase(repository)
     }
 
-    @Singleton
     @Provides
     fun provideGetCategoryUseCase(repository: CategoryRepository): GetCategoryUseCase {
         return GetCategoryUseCase(repository)
     }
 
-    @Singleton
     @Provides
     fun provideUpdateCategoryUseCase(repository: CategoryRepository): UpdateCategoryUseCase {
         return UpdateCategoryUseCase(repository)
     }
 
-    @Singleton
     @Provides
     fun provideAddTransactionUseCase(repository: TransactionRepository): AddTransactionUseCase {
         return AddTransactionUseCase(repository)
     }
 
-    @Singleton
     @Provides
     fun provideDeleteTransactionUseCase(repository: TransactionRepository): DeleteTransactionUseCase {
         return DeleteTransactionUseCase(repository)
     }
 
-    @Singleton
     @Provides
     fun provideDeleteAllTransactionsUseCase(repository: TransactionRepository): DeleteAllTransactionsUseCase {
         return DeleteAllTransactionsUseCase(repository)
     }
 
-    @Singleton
     @Provides
     fun provideGetTransactionUseCase(repository: TransactionRepository): GetTransactionUseCase {
         return GetTransactionUseCase(repository)
     }
 
-    @Singleton
     @Provides
     fun provideUpdateTransactionUseCase(repository: TransactionRepository): UpdateTransactionUseCase {
         return UpdateTransactionUseCase(repository)
     }
 
-    @Singleton
     @Provides
     fun provideGetTransactionCountByCategoryUseCase(repository: TransactionRepository): GetTransactionCountByCategoryUseCase {
         return GetTransactionCountByCategoryUseCase(repository)
     }
 
-    @Singleton
     @Provides
     fun provideGetExpenseByCategoryUseCase(
         categoryRepository: CategoryRepository,
@@ -144,85 +127,71 @@ object UseCaseModule {
         return GetExpenseByCategoryUseCase(categoryRepository, transactionRepository)
     }
 
-    @Singleton
     @Provides
     fun provideGetFilteredOverallDataUseCase(repository: TransactionRepository): GetFilteredOverallDataUseCase {
         return GetFilteredOverallDataUseCase(repository)
     }
 
-    @Singleton
     @Provides
     fun provideGetFilteredTransactionsUseCase(repository: TransactionRepository): GetFilteredTransactionsUseCase {
         return GetFilteredTransactionsUseCase(repository)
     }
 
-    @Singleton
     @Provides
     fun provideGetRecentTransactionsUseCase(repository: TransactionRepository): GetRecentTransactionsUseCase {
         return GetRecentTransactionsUseCase(repository)
     }
 
-    @Singleton
     @Provides
     fun provideGetTotalTransactionPerDayByCategoryUseCase(repository: TransactionRepository): GetTotalTransactionPerDayByCategoryUseCase {
         return GetTotalTransactionPerDayByCategoryUseCase(repository)
     }
 
-    @Singleton
     @Provides
     fun provideDateRangeCalculatorUseCase(userConfigurationsManager: UserConfigurationsManager): DateRangeCalculatorUseCase {
         return DateRangeCalculatorUseCase(userConfigurationsManager)
     }
 
-    @Singleton
     @Provides
     fun provideInsertDefaultAccountsUseCase(repository: AccountRepository): InsertDefaultAccountsUseCase {
         return InsertDefaultAccountsUseCase(repository)
     }
 
-    @Singleton
     @Provides
     fun provideGetAccountsUseCase(repository: AccountRepository): GetAccountsUseCase {
         return GetAccountsUseCase(repository)
     }
 
-    @Singleton
     @Provides
     fun provideGetAccountsAsFlowUseCase(repository: AccountRepository): GetAccountsAsFlowUseCase {
         return GetAccountsAsFlowUseCase(repository)
     }
 
-    @Singleton
     @Provides
     fun provideGetAccountUseCase(repository: AccountRepository): GetAccountUseCase {
         return GetAccountUseCase(repository)
     }
 
-    @Singleton
     @Provides
     fun provideCreateAccountUseCase(repository: AccountRepository): CreateAccountUseCase {
         return CreateAccountUseCase(repository)
     }
 
-    @Singleton
     @Provides
     fun provideUpdateAccountUseCase(repository: AccountRepository): UpdateAccountUseCase {
         return UpdateAccountUseCase(repository)
     }
 
-    @Singleton
     @Provides
     fun provideDeleteAccountUseCase(repository: AccountRepository): DeleteAccountUseCase {
         return DeleteAccountUseCase(repository)
     }
 
-    @Singleton
     @Provides
     fun provideGetTransactionCountByUseCase(repository: TransactionRepository): GetTransactionCountByAccountUseCase {
         return GetTransactionCountByAccountUseCase(repository)
     }
 
-    @Singleton
     @Provides
     fun provideChangeAccountUseCase(repository: TransactionRepository): ChangeAccountUseCase {
         return ChangeAccountUseCase(repository)

@@ -11,9 +11,8 @@ import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -44,13 +43,12 @@ class ExpenseByCategoryChartViewModel @Inject constructor(
     private fun getData(filter: DateFilter) {
         viewModelScope.launch {
             _chartState.emit(ChartState.Fetching)
-            val data = async (Dispatchers.Default) {
-                delay((0 .. 400L).random())
+            val data = withContext(Dispatchers.Default) {
                 val dateRange = dateRangeCalculatorUseCase(filter)
                 getExpenseByCategory(dateRange).associate {
                     it.category to it.amount
                 }
-            }.await()
+            }
 
             if (data.isEmpty()) {
                 return@launch _chartState.emit(ChartState.Failed.InSufficientData)
