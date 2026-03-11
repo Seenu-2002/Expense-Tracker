@@ -18,8 +18,11 @@ import com.ajay.seenu.expensetracker.domain.usecase.transaction.AddTransactionUs
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.GetTransactionUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.UpdateTransactionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -46,6 +49,9 @@ class AddTransactionViewModel @Inject constructor(
 
     @Inject
     internal lateinit var dateRangeCalculatorUseCase: DateRangeCalculatorUseCase
+
+    private val _events = MutableSharedFlow<AddTransactionEvent>(extraBufferCapacity = 1)
+    val events: SharedFlow<AddTransactionEvent> = _events.asSharedFlow()
 
     private val _transaction: MutableStateFlow<Transaction?> = MutableStateFlow(null)
     val transaction = _transaction.asStateFlow()
@@ -84,7 +90,8 @@ class AddTransactionViewModel @Inject constructor(
                         imageUri = attachment.imageUri
                     )
                 }
-                viewModelScope.launch {
+                _events.emit(AddTransactionEvent.TransactionSaved)
+                launch {
                     budgetMonitorService.checkBudgetExceeded(
                         transactionAmount = transaction.amount,
                         categoryId = transaction.category.id,
@@ -92,10 +99,9 @@ class AddTransactionViewModel @Inject constructor(
                     )
                 }
             } catch (exp: Exception) {
-                // FIXME: Show exception
                 Timber.e(exp, "Error adding transaction")
+                _events.emit(AddTransactionEvent.Error(exp.message ?: "Failed to save transaction"))
             }
-
         }
     }
 
@@ -116,11 +122,17 @@ class AddTransactionViewModel @Inject constructor(
                         imageUri = attachment.imageUri
                     )
                 }
+                _events.emit(AddTransactionEvent.TransactionSaved)
             } catch (exp: Exception) {
-                // FIXME: Show exception
+                Timber.e(exp, "Error updating transaction")
+                _events.emit(AddTransactionEvent.Error(exp.message ?: "Failed to update transaction"))
             }
-
         }
+    }
+
+    sealed class AddTransactionEvent {
+        data object TransactionSaved : AddTransactionEvent()
+        data class Error(val message: String) : AddTransactionEvent()
     }
 
     fun getTransaction(id: Long) {

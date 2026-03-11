@@ -18,6 +18,8 @@ CREATE TABLE TransactionDetailEntity (
         ON DELETE RESTRICT
 );
 CREATE INDEX transaction_time ON TransactionDetailEntity(createdAt);
+CREATE INDEX transaction_category_id ON TransactionDetailEntity(categoryId);
+CREATE INDEX transaction_account_id ON TransactionDetailEntity(accountId);
 
 CREATE TABLE CategoryEntity (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -59,6 +61,29 @@ getAllTransactionsBetween:
 SELECT *
 FROM TransactionDetailEntity WHERE createdAt >= :startUTCValue AND createdAt <= :endUTCValue
 ORDER BY createdAt DESC LIMIT :limit OFFSET :offset;
+
+getAllTransactionsWithDetails:
+SELECT
+    t.id, t.type, t.amount, t.categoryId, t.accountId, t.createdAt, t.note, t.place,
+    c.label AS categoryLabel, c.type AS categoryType, c.iconRes AS categoryIconRes, c.color AS categoryColor,
+    a.name AS accountName, a.type AS accountType, a.isDefault AS accountIsDefault
+FROM TransactionDetailEntity t
+INNER JOIN CategoryEntity c ON t.categoryId = c.id
+INNER JOIN AccountEntity a ON t.accountId = a.id
+ORDER BY t.createdAt DESC
+LIMIT :limit OFFSET :offset;
+
+getAllTransactionsBetweenWithDetails:
+SELECT
+    t.id, t.type, t.amount, t.categoryId, t.accountId, t.createdAt, t.note, t.place,
+    c.label AS categoryLabel, c.type AS categoryType, c.iconRes AS categoryIconRes, c.color AS categoryColor,
+    a.name AS accountName, a.type AS accountType, a.isDefault AS accountIsDefault
+FROM TransactionDetailEntity t
+INNER JOIN CategoryEntity c ON t.categoryId = c.id
+INNER JOIN AccountEntity a ON t.accountId = a.id
+WHERE t.createdAt >= :startUTCValue AND t.createdAt <= :endUTCValue
+ORDER BY t.createdAt DESC
+LIMIT :limit OFFSET :offset;
 
 getAllTransactionsByType:
 SELECT *
@@ -270,3 +295,61 @@ SELECT COUNT(*) AS count FROM TransactionDetailEntity WHERE accountId = ?;
 
 changeAccount:
 UPDATE TransactionDetailEntity SET accountId = :newAccount WHERE accountId = :oldAccount;
+
+-- Fetch all active budgets with their spending aggregated in a single query
+getAllActiveBudgetsWithSpending:
+SELECT
+    b.id,
+    b.name,
+    b.categoryId,
+    b.amount,
+    b.periodType,
+    b.startDate,
+    b.endDate,
+    b.isRecurring,
+    b.createdAt,
+    b.updatedAt,
+    b.isActive,
+    b.alertEnabled,
+    b.alertThresholdPercentage,
+    b.lastAlertTriggeredAt,
+    COALESCE(SUM(CASE WHEN t.type = 'EXPENSE' THEN t.amount ELSE 0 END), 0) AS spentAmount
+FROM BudgetEntity b
+LEFT JOIN TransactionDetailEntity t ON (
+    (b.categoryId IS NULL OR b.categoryId = t.categoryId)
+    AND t.createdAt >= :startDate
+    AND t.createdAt <= :endDate
+    AND t.type = 'EXPENSE'
+)
+WHERE b.isActive = 1
+GROUP BY b.id
+ORDER BY b.createdAt DESC;
+
+-- Fetch active budgets relevant to a specific category (category-specific + overall) with spending
+getActiveBudgetsWithSpendingForCategory:
+SELECT
+    b.id,
+    b.name,
+    b.categoryId,
+    b.amount,
+    b.periodType,
+    b.startDate,
+    b.endDate,
+    b.isRecurring,
+    b.createdAt,
+    b.updatedAt,
+    b.isActive,
+    b.alertEnabled,
+    b.alertThresholdPercentage,
+    b.lastAlertTriggeredAt,
+    COALESCE(SUM(CASE WHEN t.type = 'EXPENSE' THEN t.amount ELSE 0 END), 0) AS spentAmount
+FROM BudgetEntity b
+LEFT JOIN TransactionDetailEntity t ON (
+    (b.categoryId IS NULL OR b.categoryId = t.categoryId)
+    AND t.createdAt >= :startDate
+    AND t.createdAt <= :endDate
+    AND t.type = 'EXPENSE'
+)
+WHERE b.isActive = 1
+AND (b.categoryId = :categoryId OR b.categoryId IS NULL)
+GROUP BY b.id;

@@ -1,45 +1,30 @@
 package com.ajay.seenu.expensetracker.android.service
 
 import com.ajay.seenu.expensetracker.data.repository.BudgetRepository
-import com.ajay.seenu.expensetracker.data.repository.TransactionRepository
 import com.ajay.seenu.expensetracker.domain.model.DateRange
 import com.ajay.seenu.expensetracker.domain.model.budget.Budget
-import com.ajay.seenu.expensetracker.util.toEpochMillis
 import javax.inject.Inject
 import kotlin.time.ExperimentalTime
 
 class BudgetMonitorService @Inject constructor(
-    private val transactionRepository: TransactionRepository,
     private val budgetRepository: BudgetRepository,
     private val notificationService: NotificationService
 ) {
 
+    // Single query fetches all relevant budgets + spending — no N+1
     suspend fun checkBudgetExceeded(transactionAmount: Double,
                                     categoryId: Long?,
                                     range: DateRange) {
-        val categoryBudgets = if (categoryId != null) budgetRepository.getBudgetsByCategory(categoryId) else emptyList()
-        val overallBudgets = budgetRepository.getOverallBudgetsList()
-        val activeBudgets = categoryBudgets + overallBudgets
-        activeBudgets.forEach { budget ->
+        val budgetsWithSpending = budgetRepository.getActiveBudgetsWithSpendingForCategory(categoryId, range)
+        budgetsWithSpending.forEach { budgetWithSpending ->
+            val budget = budgetWithSpending.budget
             if (budget.alertEnabled) {
-                val currentPeriodSpent = calculateCurrentPeriodSpent(budget, range)
-                val spentRatio = if (budget.amount > 0) currentPeriodSpent / budget.amount else 0.0
-
+                val spentRatio = if (budget.amount > 0) budgetWithSpending.spentAmount / budget.amount else 0.0
                 if (spentRatio >= budget.alertThresholdPercentage) {
-                    triggerBudgetAlert(budget, spentRatio * 100, currentPeriodSpent)
+                    triggerBudgetAlert(budget, spentRatio * 100, budgetWithSpending.spentAmount)
                 }
             }
         }
-    }
-
-    @OptIn(ExperimentalTime::class)
-    private suspend fun calculateCurrentPeriodSpent(budget: Budget, range: DateRange): Double {
-
-        return transactionRepository.getTotalExpenseByCategoryInPeriod(
-            categoryId = budget.categoryId,
-            startDate = range.start.toEpochMillis(),
-            endDate = range.end.toEpochMillis()
-        )
     }
 
     @OptIn(ExperimentalTime::class)

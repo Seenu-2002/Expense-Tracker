@@ -25,6 +25,7 @@ import kotlinx.coroutines.withContext
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
+
 @OptIn(ExperimentalTime::class)
 class TransactionRepository constructor(
     private val transactionLocalDataSource: TransactionDataSource,
@@ -34,9 +35,8 @@ class TransactionRepository constructor(
 
     suspend fun getAllTransactions(pageNo: Int, count: Int): PaginationData<List<Transaction>> {
         return withContext(Dispatchers.IO) {
-            val paginationData = transactionLocalDataSource.getAllTransactions(pageNo, count)
-            val transactions = parseTransactions(paginationData.data)
-            PaginationData(transactions, paginationData.hasMoreData)
+            val paginationData = transactionLocalDataSource.getAllTransactionsWithDetails(pageNo, count)
+            PaginationData(paginationData.data.map { it.toDomain() }, paginationData.hasMoreData)
         }
     }
 
@@ -45,9 +45,8 @@ class TransactionRepository constructor(
         count: Int
     ): Flow<PaginationData<List<Transaction>>> {
         return withContext(Dispatchers.IO) {
-            transactionLocalDataSource.getAllTransactionsAsFlow(pageNo, count).map {
-                val transactions = parseTransactions(it.data)
-                PaginationData(transactions, it.hasMoreData)
+            transactionLocalDataSource.getAllTransactionsWithDetailsAsFlow(pageNo, count).map {
+                PaginationData(it.data.map { row -> row.toDomain() }, it.hasMoreData)
             }
         }
     }
@@ -58,32 +57,14 @@ class TransactionRepository constructor(
         dateRange: DateRange
     ): Flow<PaginationData<List<Transaction>>> {
         return withContext(Dispatchers.IO) {
-            transactionLocalDataSource.getAllTransactionsBetweenAsFlow(
+            transactionLocalDataSource.getAllTransactionsBetweenWithDetailsAsFlow(
                 pageNo,
                 count,
                 dateRange.start.toEpochMillis(),
                 dateRange.end.toEpochMillis()
             ).map {
-                val transactions = parseTransactions(it.data)
-                PaginationData(transactions, it.hasMoreData)
+                PaginationData(it.data.map { row -> row.toDomain() }, it.hasMoreData)
             }
-        }
-    }
-
-    private suspend fun parseTransactions(transactions: List<TransactionDetailEntity>): List<Transaction> {
-        val categories = categoryRepository.getAllCategories().associateBy { it.id }
-        val accounts = accountRepository.getAllAccounts().associateBy { it.id }
-        return transactions.mapNotNull { transaction ->
-            val category = categories[transaction.categoryId] ?: run {
-                Logger.e("Category(${transaction.categoryId}) not found for transaction: ${transaction.id}")
-                return@mapNotNull null
-            }
-
-            val account = accounts[transaction.accountId] ?: run {
-                Logger.e("Account(${transaction.accountId}) not found for transaction: ${transaction.id}")
-                return@mapNotNull null
-            }
-            transaction.toDomain(category = category, account = account)
         }
     }
 
@@ -189,9 +170,13 @@ class TransactionRepository constructor(
                 dateRange.end.toEpochMillis()
             ).mapNotNull {
                 it.totalAmount?.let { sum ->
+                    val category = categories.find { category -> category.id == it.categoryId } ?: run {
+                        Logger.e("Category(${it.categoryId}) not found for daily aggregate, skipping")
+                        return@mapNotNull null
+                    }
                     ExpensePerDay(
                         Instant.fromEpochMilliseconds(it.createdAt),
-                        categories.find { category -> category.id == it.categoryId }!!,
+                        category,
                         sum
                     )
                 }

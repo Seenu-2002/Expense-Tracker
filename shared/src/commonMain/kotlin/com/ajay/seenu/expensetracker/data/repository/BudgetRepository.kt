@@ -149,22 +149,27 @@ class BudgetRepository(
         )
     }
 
-    // Get all budgets with spending for current period
+    // Get all budgets with spending for current period — single JOIN query, no N+1
     fun getAllBudgetsWithSpending(range: DateRange): Flow<List<BudgetWithSpending>> {
-        return getAllActiveBudgets().map { budgets ->
-            budgets.map { budget ->
-                val spentAmount = database.expenseDatabaseQueries.getBudgetSpendingForPeriod(
-                    range.start.toEpochMillis(),
-                    range.end.toEpochMillis(),
-                    budget.id
-                ).executeAsOneOrNull()?.COALESCE ?: 0.0
+        return database.expenseDatabaseQueries.getAllActiveBudgetsWithSpending(
+            startDate = range.start.toEpochMillis(),
+            endDate = range.end.toEpochMillis()
+        )
+            .asFlow()
+            .mapToList(Dispatchers.IO)
+            .map { rows -> rows.map { it.toDomain() } }
+    }
 
-                BudgetWithSpending(
-                    budget = budget,
-                    spentAmount = spentAmount
-                )
-            }
-        }
+    // Get budgets relevant to a category (category-specific + overall) with spending — single query
+    suspend fun getActiveBudgetsWithSpendingForCategory(
+        categoryId: Long?,
+        range: DateRange
+    ): List<BudgetWithSpending> {
+        return database.expenseDatabaseQueries.getActiveBudgetsWithSpendingForCategory(
+            startDate = range.start.toEpochMillis(),
+            endDate = range.end.toEpochMillis(),
+            categoryId = categoryId
+        ).executeAsList().map { it.toDomain() }
     }
 
     // Get budget summary
