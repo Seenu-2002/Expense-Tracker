@@ -31,7 +31,7 @@ class AttachmentRepository constructor(
         size: Long,
         imageUri: String
     ): Boolean {
-        withContext(Dispatchers.IO) {
+        return withContext(Dispatchers.IO) {
             val currentAttachments = localDataSource.getAllAttachmentsForTransaction(transactionId)
             if (currentAttachments.size < 5) {
                 localDataSource.insertAttachment(
@@ -43,10 +43,10 @@ class AttachmentRepository constructor(
                     imageUri = imageUri
                 )
                 true
-            } else
+            } else {
                 false
+            }
         }
-        return false
     }
 
     suspend fun deleteAttachmentById(id: Long) {

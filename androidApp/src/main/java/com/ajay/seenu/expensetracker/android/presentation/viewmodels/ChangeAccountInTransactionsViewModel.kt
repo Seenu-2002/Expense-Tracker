@@ -24,8 +24,8 @@ class ChangeAccountInTransactionsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private var _accountIdToBeDeleted: Account? = null
-    val accountToBeDeleted: Account
-        get() = _accountIdToBeDeleted!!
+    val accountToBeDeleted: Account?
+        get() = _accountIdToBeDeleted
 
     private val _accounts: MutableStateFlow<UiState<List<Account>>> =
         MutableStateFlow(UiState.Empty)
@@ -47,7 +47,6 @@ class ChangeAccountInTransactionsViewModel @Inject constructor(
                     return@launch
                 }
 
-
                 _accounts.value = UiState.Success(accounts.filter { it.id != accountToBeDeletedId })
             } catch (e: Exception) {
                 Timber.e(e, "Error while fetching accounts")
@@ -59,15 +58,23 @@ class ChangeAccountInTransactionsViewModel @Inject constructor(
     }
 
     fun updateAccount(account: Account) {
-        if (account == accountToBeDeleted) {
-            throw IllegalArgumentException("Cannot change to the same account")
+        val toBeDeleted = _accountIdToBeDeleted ?: run {
+            Timber.e("updateAccount called before init() completed")
+            return
+        }
+
+        if (account == toBeDeleted) {
+            _updateStatus.value = UiState.Failure(Error.Unhandled(
+                IllegalArgumentException("Cannot change to the same account")
+            ))
+            return
         }
 
         viewModelScope.launch {
             _updateStatus.value = UiState.Loading
             try {
-                changeAccountUseCase(accountToBeDeleted, account)
-                deleteAccountUseCase(accountToBeDeleted)
+                changeAccountUseCase(toBeDeleted, account)
+                deleteAccountUseCase(toBeDeleted)
                 _updateStatus.value = UiState.Success(true)
             } catch (e: Exception) {
                 Timber.e(e, "Error while changing account in transactions")

@@ -32,7 +32,10 @@ class SplashActivity : ComponentActivity() {
     private fun attachObserver() {
         lifecycleScope.launch {
             viewModel.isUserLoggedIn.collectLatest {
-                val targetActivityKClass: KClass<*> = when (it) {
+                // Skip the null initial value — wait for the actual login check result
+                val isLoggedIn = it ?: return@collectLatest
+
+                val targetActivityKClass: KClass<*> = when (isLoggedIn) {
                     true -> {
                         MainActivity::class
                     }

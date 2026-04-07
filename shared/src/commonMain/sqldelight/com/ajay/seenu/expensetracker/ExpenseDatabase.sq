@@ -27,7 +27,7 @@ CREATE TABLE CategoryEntity (
     type TEXT AS TransactionTypeEntity NOT NULL,
     iconRes INTEGER NOT NULL,
     color INTEGER NOT NULL,
-    UNIQUE (label, type) ON CONFLICT REPLACE
+    UNIQUE (label, type) ON CONFLICT ABORT
 );
 
 CREATE TABLE AttachmentEntity (
@@ -47,7 +47,7 @@ CREATE TABLE AccountEntity (
     name TEXT NOT NULL,
     type TEXT AS AccountTypeEntity NOT NULL,
     isDefault INTEGER DEFAULT 0 NOT NULL,
-    UNIQUE (name, type) ON CONFLICT REPLACE
+    UNIQUE (name, type) ON CONFLICT ABORT
 );
 
 getAllTransactions:

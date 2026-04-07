@@ -35,17 +35,17 @@ class BudgetMonitorService @Inject constructor(
     ) {
         // Check if we already alerted recently (e.g., within last 24 hours)
         val lastAlert = budget.lastAlertTriggeredAt
-        val now = System.currentTimeMillis()
+        val nowMillis = System.currentTimeMillis()
         val twentyFourHours = 24 * 60 * 60 * 1000L
 
-        if (lastAlert != null && (now - lastAlert.toEpochMilliseconds()) < twentyFourHours) {
+        if (lastAlert != null && (nowMillis - lastAlert.toEpochMilliseconds()) < twentyFourHours) {
             return // Skip alert to avoid spam
         }
 
         // Send notification
         notificationService.sendBudgetAlert(budget, percentage, spentAmount)
 
-        // Update last alert timestamp
-        budgetRepository.updateLastAlertTime(budget.id, now)
+        // Update last alert timestamp — store as epoch seconds (budget schema convention)
+        budgetRepository.updateLastAlertTime(budget.id, nowMillis / 1000)
     }
 }

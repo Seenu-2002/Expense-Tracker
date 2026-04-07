@@ -233,8 +233,8 @@ class BudgetRepository(
     @OptIn(ExperimentalTime::class)
     suspend fun updateLastAlertTime(
         budgetId: Long,
-        now: Long = Clock.System.now().toEpochMilliseconds()
+        nowEpochSeconds: Long = Clock.System.now().epochSeconds
     ) {
-        database.expenseDatabaseQueries.updateLastAlertTime(now, budgetId)
+        database.expenseDatabaseQueries.updateLastAlertTime(nowEpochSeconds, budgetId)
     }
 }

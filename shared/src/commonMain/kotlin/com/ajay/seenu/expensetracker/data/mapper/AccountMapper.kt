@@ -28,7 +28,9 @@ fun AccountType.toEntity(): AccountTypeEntity {
         AccountType.CASH -> AccountTypeEntity.CASH
         AccountType.BANK_ACCOUNT -> AccountTypeEntity.BANK_ACCOUNT
         AccountType.CREDIT_CARD -> AccountTypeEntity.CREDIT_CARD
-        else -> TODO()
+        AccountType.LOAN -> AccountTypeEntity.LOAN
+        AccountType.INVESTMENT -> AccountTypeEntity.INVESTMENT
+        AccountType.OTHERS -> AccountTypeEntity.OTHERS
     }
 }
 
@@ -37,6 +39,8 @@ fun AccountTypeEntity.toDomain(): AccountType {
         AccountTypeEntity.CASH -> AccountType.CASH
         AccountTypeEntity.BANK_ACCOUNT -> AccountType.BANK_ACCOUNT
         AccountTypeEntity.CREDIT_CARD -> AccountType.CREDIT_CARD
-        else -> TODO()
+        AccountTypeEntity.LOAN -> AccountType.LOAN
+        AccountTypeEntity.INVESTMENT -> AccountType.INVESTMENT
+        AccountTypeEntity.OTHERS -> AccountType.OTHERS
     }
 }

@@ -31,8 +31,8 @@ class ChangeCategoryInTransactionViewModel @Inject constructor() : ViewModel() {
 
 
     private var _categoryIdToBeDeleted: Category? = null
-    val categoryToBeDeleted: Category
-        get() = _categoryIdToBeDeleted!!
+    val categoryToBeDeleted: Category?
+        get() = _categoryIdToBeDeleted
 
     private val _categories: MutableStateFlow<UiState<List<Category>>> =
         MutableStateFlow(UiState.Empty)
@@ -67,15 +67,25 @@ class ChangeCategoryInTransactionViewModel @Inject constructor() : ViewModel() {
     }
 
     fun updateCategory(category: Category) {
-        if (category == categoryToBeDeleted) {
-            throw IllegalArgumentException("Cannot update the category that is being deleted")
+        val toBeDeleted = _categoryIdToBeDeleted ?: run {
+            Timber.e("updateCategory called before init() completed")
+            return
+        }
+
+        if (category == toBeDeleted) {
+            viewModelScope.launch {
+                _updateStatus.value = UiState.Failure(Error.Unhandled(
+                    IllegalArgumentException("Cannot update the category that is being deleted")
+                ))
+            }
+            return
         }
 
         viewModelScope.launch {
             _updateStatus.value = UiState.Loading
             try {
-                changeCategoriesUseCase(categoryToBeDeleted, category)
-                deleteCategoryUseCase(categoryToBeDeleted.id)
+                changeCategoriesUseCase(toBeDeleted, category)
+                deleteCategoryUseCase(toBeDeleted.id)
                 _updateStatus.value = UiState.Success(true)
             } catch (exp: Exception) {
                 Timber.e("Error updating category: ${exp.message}")

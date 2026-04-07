@@ -100,7 +100,7 @@ fun ChangeCategoryInTransactionScreen(
                 }
 
                 is UiState.Success -> {
-                    val categoryToBeDeleted = viewmodel.categoryToBeDeleted
+                    val categoryToBeDeleted = viewmodel.categoryToBeDeleted ?: return@Box
                     ChangeCategoryInTransactionContent(
                         modifier = Modifier.matchParentSize(),
                         recordCount = transactionCount,
@@ -142,7 +142,7 @@ fun ChangeCategoryInTransactionScreen(
                     if (updateStatus.data) {
                         val msg = stringResource(
                             R.string.delete_category_success,
-                            viewmodel.categoryToBeDeleted.label
+                            viewmodel.categoryToBeDeleted?.label ?: ""
                         )
                         LaunchedEffect(updateStatus) {
                             Toast.makeText(
@@ -172,7 +172,7 @@ fun ChangeCategoryInTransactionScreen(
                 title = stringResource(R.string.replace_category_title),
                 message = stringResource(
                     R.string.replace_category_message,
-                    viewmodel.categoryToBeDeleted.label,
+                    viewmodel.categoryToBeDeleted?.label ?: "",
                     categoryIdToBeReplacedWith.label
                 ),
                 confirmButtonText = stringResource(R.string.action_replace_delete),
