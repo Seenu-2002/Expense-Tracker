@@ -9,3 +9,8 @@ captures
 local.properties
 xcuserdata
 gradle/wrapper/gradle-wrapper.jar
+
+# AI assistant context files
+AGENTS.md
+CLAUDE.md
+memory/
