@@ -7,6 +7,7 @@ import com.ajay.seenu.expensetracker.ExpenseDatabase
 import com.ajay.seenu.expensetracker.data.data_source.AccountDataSource
 import com.ajay.seenu.expensetracker.data.model.AccountTypeEntity
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 
 class AccountLocalDataSource constructor(
     database: ExpenseDatabase
@@ -24,7 +25,7 @@ class AccountLocalDataSource constructor(
 
     override fun getAllAccountsAsFlow(): kotlinx.coroutines.flow.Flow<List<AccountEntity>> {
         return queries.getAllAccounts().asFlow().mapToList(
-            Dispatchers.Main
+            Dispatchers.IO
         )
     }
 

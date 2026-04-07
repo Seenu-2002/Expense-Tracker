@@ -71,6 +71,7 @@ class AddEditAccountViewModel @Inject constructor() : ViewModel() {
             _status.value = UiState.Loading
             try {
                 updateAccountUseCase(id, name, type)
+                _status.value = UiState.Success(true)
             } catch (e: Exception) {
                 Timber.e(e, "Error updating account")
                 _status.value = UiState.Failure(error = Error.Unhandled(e))

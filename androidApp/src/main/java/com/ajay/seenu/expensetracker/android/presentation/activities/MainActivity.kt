@@ -207,7 +207,7 @@ class MainActivity : AppCompatActivity() {
         val navController = rememberNavController()
         val budgetViewModel: BudgetViewModel = hiltViewModel()
         val context = LocalContext.current
-        val filter = FilterPreference.getCurrentFilter(context)
+        val filter = remember { FilterPreference.getCurrentFilter(context) }
 
         NavHost(
             navController = navController,
@@ -514,7 +514,7 @@ class MainActivity : AppCompatActivity() {
                 Manifest.permission.POST_NOTIFICATIONS
             ) == PackageManager.PERMISSION_GRANTED
 
-            val hasAskedBefore = getSharedPreferences("app_prefs", MODE_PRIVATE)
+            val hasAskedBefore = getSharedPreferences("permission_prefs", MODE_PRIVATE)
                 .getBoolean("notification_permission_requested", false)
 
             if (!hasPermission && !hasAskedBefore) {

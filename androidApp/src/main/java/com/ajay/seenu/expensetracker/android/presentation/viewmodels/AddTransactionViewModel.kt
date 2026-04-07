@@ -137,11 +137,15 @@ class AddTransactionViewModel @Inject constructor(
 
     fun getTransaction(id: Long) {
         viewModelScope.launch {
-            getAttachmentsUseCase.invoke(id).collectLatest {
-                _attachments.emit(it)
+            launch {
+                getAttachmentsUseCase.invoke(id).collectLatest {
+                    _attachments.emit(it)
+                }
             }
-            getTransactionUseCase.invoke(id).collectLatest {
-                _transaction.emit(it)
+            launch {
+                getTransactionUseCase.invoke(id).collectLatest {
+                    _transaction.emit(it)
+                }
             }
         }
     }

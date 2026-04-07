@@ -10,7 +10,6 @@ import com.ajay.seenu.expensetracker.domain.model.DateFilter
 import com.ajay.seenu.expensetracker.domain.model.TransactionType
 import com.ajay.seenu.expensetracker.domain.usecase.DateRangeCalculatorUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,23 +31,20 @@ class SimpleAnalyticsViewModel @Inject constructor(
     private val _data: MutableStateFlow<UiState<AnalyticsScreenData>> = MutableStateFlow(UiState.Loading)
     val data: StateFlow<UiState<AnalyticsScreenData>> = _data.asStateFlow()
 
-    fun changeType(type: TransactionType) {
+    fun changeType(type: TransactionType, filter: DateFilter) {
         viewModelScope.launch {
             _selectedType.emit(type)
-            getData(type)
+            getData(type, filter)
         }
     }
 
-    private suspend fun getData(type: TransactionType) {
+    private suspend fun getData(type: TransactionType, filter: DateFilter) {
         try {
-            val dateRange = dateRangeCalculatorUseCase(DateFilter.ThisMonth)
+            val dateRange = dateRangeCalculatorUseCase(filter)
             val data = getPieChartDataUseCase(
                 type = type,
                 dateRange
             )
-            if (_data.value == UiState.Loading) {
-                delay(500L)
-            }
 
             if (data.chartData.entries.isEmpty()) {
                 _data.emit(UiState.Failure(Error.Empty))

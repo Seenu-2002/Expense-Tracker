@@ -33,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -51,6 +52,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ajay.seenu.expensetracker.android.R
+import com.ajay.seenu.expensetracker.android.data.FilterPreference
 import com.ajay.seenu.expensetracker.android.presentation.common.ChartDefaults
 import com.ajay.seenu.expensetracker.android.presentation.components.SlidingSwitch
 import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.PieChart
@@ -81,8 +83,11 @@ fun SimpleAnalyticsScreen(
     val selectedType by viewmodel.selectedType.collectAsStateWithLifecycle()
     val state by viewmodel.data.collectAsStateWithLifecycle()
 
+    val context = LocalContext.current
+    val filter = remember { FilterPreference.getCurrentFilter(context) }
+
     LaunchedEffect(Unit) {
-        viewmodel.changeType(TransactionType.EXPENSE)
+        viewmodel.changeType(TransactionType.EXPENSE, filter)
     }
 
     var selectedCategory: Category? by rememberSaveable(state /*saver*/) { // TODO: Custom Saver Implementation
@@ -155,7 +160,7 @@ fun SimpleAnalyticsScreen(
                             modifier = Modifier
                                 .weight(1F),
                             onTypeChanged = { type ->
-                                viewmodel.changeType(type)
+                                viewmodel.changeType(type, filter)
                             },
                             onTapped = {
                                 selectedCategory = it
@@ -187,7 +192,7 @@ fun SimpleAnalyticsScreen(
                                 .padding(top = 12.dp)
                                 .weight(1F),
                             onTypeChanged = { type ->
-                                viewmodel.changeType(type)
+                                viewmodel.changeType(type, filter)
                             },
                             onTapped = {
                                 selectedCategory = it
