@@ -11,9 +11,8 @@ import com.ajay.seenu.expensetracker.data.repository.TransactionRepository
 import com.ajay.seenu.expensetracker.domain.model.Category
 import com.ajay.seenu.expensetracker.domain.model.DateRange
 import com.ajay.seenu.expensetracker.domain.model.TransactionType
-import javax.inject.Inject
 
-class GetPieChartDataUseCase @Inject constructor(
+class GetPieChartDataUseCase(
     private val transactionRepository: TransactionRepository,
     private val categoryRepository: CategoryRepository
 ) {

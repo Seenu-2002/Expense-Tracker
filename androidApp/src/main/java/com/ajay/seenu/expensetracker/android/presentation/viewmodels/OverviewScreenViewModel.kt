@@ -16,6 +16,7 @@ import com.ajay.seenu.expensetracker.domain.usecase.data_filter.GetFilteredTrans
 import com.ajay.seenu.expensetracker.domain.usecase.data_filter.GetRecentTransactionsUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.DeleteTransactionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,6 +27,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class OverviewScreenViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val userConfigurationsManager: UserConfigurationsManager
 ) : ViewModel() {
 
@@ -138,14 +140,18 @@ class OverviewScreenViewModel @Inject constructor(
 
     fun deleteTransaction(id: Long) {
         viewModelScope.launch {
-            val currentFilter = _currentFilter.value
-            deleteTransactionUseCase.invoke(id)
-            getOverallData(currentFilter)
-            getRecentTransactions(currentFilter)
+            try {
+                val currentFilter = _currentFilter.value
+                deleteTransactionUseCase.invoke(id)
+                getOverallData(currentFilter)
+                getRecentTransactions(currentFilter)
+            } catch (e: Exception) {
+                Timber.e(e, "Error deleting transaction")
+            }
         }
     }
 
-    fun setFilter(context: Context, filter: DateFilter) {
+    fun setFilter(filter: DateFilter) {
         FilterPreference.setCurrentFilter(context, filter)
         viewModelScope.launch {
             _currentFilter.emit(filter)

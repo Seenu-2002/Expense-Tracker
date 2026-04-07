@@ -82,8 +82,10 @@ class TotalExpensePerDayChartViewModel @Inject constructor(
     }
 
     fun setFilter(filter: DateFilter) {
-        this.filter = filter
-        getData(filter)
+        if (!this::filter.isInitialized || this.filter != filter) {
+            this.filter = filter
+            getData(filter)
+        }
     }
 
 }

@@ -203,7 +203,9 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("UnrememberedGetBackStackEntry")
     @Composable
     fun App() {
-        checkAndRequestNotificationPermission()
+        LaunchedEffect(Unit) {
+            checkAndRequestNotificationPermission()
+        }
         val navController = rememberNavController()
         val budgetViewModel: BudgetViewModel = hiltViewModel()
         val context = LocalContext.current

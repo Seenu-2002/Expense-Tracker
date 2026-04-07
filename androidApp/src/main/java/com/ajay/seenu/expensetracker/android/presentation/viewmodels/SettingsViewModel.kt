@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
+import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -103,7 +104,11 @@ class SettingsViewModel @Inject constructor(
 
     fun deleteAllTransactions() {
         viewModelScope.launch {
-            deleteAllTransactionsUseCase.invoke()
+            try {
+                deleteAllTransactionsUseCase.invoke()
+            } catch (e: Exception) {
+                Timber.e(e, "Error deleting all transactions")
+            }
         }
     }
 

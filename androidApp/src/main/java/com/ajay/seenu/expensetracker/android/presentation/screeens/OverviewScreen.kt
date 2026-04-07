@@ -94,7 +94,7 @@ fun OverviewScreen(
     LaunchedEffect(dateFormat) {
         if(dateFormat.isNotBlank()) {
             val filter = FilterPreference.getCurrentFilter(context)
-            viewModel.setFilter(context, filter)
+            viewModel.setFilter(filter)
         }
     }
 
@@ -264,7 +264,7 @@ fun OverviewScreen(
                 }
                 else -> {
                     openFilterBottomSheet = false
-                    viewModel.setFilter(context, filter)
+                    viewModel.setFilter(filter)
                 }
             }
         }, onDismiss = {
@@ -284,7 +284,7 @@ fun OverviewScreen(
                 openDateRangePicker = false
                 val startDate = startDate.toLocalDate()
                 val endDate = endDate.toLocalDate()
-                viewModel.setFilter(context, DateFilter.Custom(startDate, endDate))
+                viewModel.setFilter(DateFilter.Custom(startDate, endDate))
             })
     }
 }

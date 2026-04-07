@@ -1,6 +1,7 @@
 package com.ajay.seenu.expensetracker.android.di
 
 import com.ajay.seenu.expensetracker.UserConfigurationsManager
+import com.ajay.seenu.expensetracker.android.domain.usecases.GetPieChartDataUseCase
 import com.ajay.seenu.expensetracker.data.repository.AccountRepository
 import com.ajay.seenu.expensetracker.data.repository.AttachmentRepository
 import com.ajay.seenu.expensetracker.data.repository.CategoryRepository
@@ -195,6 +196,14 @@ object UseCaseModule {
     @Provides
     fun provideChangeAccountUseCase(repository: TransactionRepository): ChangeAccountUseCase {
         return ChangeAccountUseCase(repository)
+    }
+
+    @Provides
+    fun provideGetPieChartDataUseCase(
+        transactionRepository: TransactionRepository,
+        categoryRepository: CategoryRepository
+    ): GetPieChartDataUseCase {
+        return GetPieChartDataUseCase(transactionRepository, categoryRepository)
     }
 
 }

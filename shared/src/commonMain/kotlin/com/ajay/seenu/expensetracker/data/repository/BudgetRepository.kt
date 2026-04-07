@@ -1,8 +1,6 @@
 package com.ajay.seenu.expensetracker.data.repository
 
-import app.cash.sqldelight.coroutines.asFlow
-import app.cash.sqldelight.coroutines.mapToList
-import com.ajay.seenu.expensetracker.ExpenseDatabase
+import com.ajay.seenu.expensetracker.data.data_source.BudgetDataSource
 import com.ajay.seenu.expensetracker.data.mapper.toDomain
 import com.ajay.seenu.expensetracker.domain.model.DateFilter
 import com.ajay.seenu.expensetracker.domain.model.DateRange
@@ -11,22 +9,18 @@ import com.ajay.seenu.expensetracker.domain.model.budget.BudgetRequest
 import com.ajay.seenu.expensetracker.domain.model.budget.BudgetSummary
 import com.ajay.seenu.expensetracker.domain.model.budget.BudgetWithSpending
 import com.ajay.seenu.expensetracker.util.toEpochMillis
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 class BudgetRepository(
-    private val database: ExpenseDatabase
+    private val dataSource: BudgetDataSource
 ) {
 
     // Get all active budgets
     fun getAllActiveBudgets(): Flow<List<Budget>> {
-        return database.expenseDatabaseQueries.selectAllActiveBudgets()
-            .asFlow()
-            .mapToList(Dispatchers.IO)
+        return dataSource.selectAllActiveBudgets()
             .map { budgets ->
                 budgets.map { it.toDomain() }
             }
@@ -34,20 +28,13 @@ class BudgetRepository(
 
     // Get budgets by category
     fun getBudgetsByCategory(categoryId: Long?): List<Budget> {
-        return database.expenseDatabaseQueries.selectBudgetsByCategory(categoryId)
-            .executeAsList()
-            //.asFlow()
-            //.mapToList(Dispatchers.IO)
+        return dataSource.selectBudgetsByCategory(categoryId)
             .map { it.toDomain() }
-//                budgets.map { it.toDomain() }
-//            }
     }
 
     // Get overall budgets (not tied to specific categories)
     fun getOverallBudgets(): Flow<List<Budget>> {
-        return database.expenseDatabaseQueries.selectOverallBudgets()
-            .asFlow()
-            .mapToList(Dispatchers.IO)
+        return dataSource.selectOverallBudgets()
             .map { budgets ->
                 budgets.map { it.toDomain() }
             }
@@ -55,20 +42,18 @@ class BudgetRepository(
 
     // Get overall budgets as a one-shot list
     fun getOverallBudgetsList(): List<Budget> {
-        return database.expenseDatabaseQueries.selectOverallBudgets()
-            .executeAsList()
+        return dataSource.selectOverallBudgetsList()
             .map { it.toDomain() }
     }
 
     // Get budget by ID
     suspend fun getBudgetById(id: Long): Budget? {
-        return database.expenseDatabaseQueries.selectBudgetById(id).executeAsOneOrNull()
-            ?.toDomain()
+        return dataSource.selectBudgetById(id)?.toDomain()
     }
 
     // Create new budget
     suspend fun createBudget(budgetRequest: BudgetRequest): Long {
-        database.expenseDatabaseQueries.insertBudget(
+        dataSource.insertBudget(
             name = budgetRequest.name,
             categoryId = budgetRequest.categoryId,
             amount = budgetRequest.amount,
@@ -80,7 +65,7 @@ class BudgetRepository(
             alertThresholdPercentage = budgetRequest.alertThresholdPercentage,
         )
 
-        return database.expenseDatabaseQueries.getLastInsertTransactionRowId().executeAsOne()
+        return dataSource.getLastInsertRowId()
     }
 
     private fun dateFilterToPeriodType(filter: DateFilter): String {
@@ -94,7 +79,8 @@ class BudgetRepository(
 
     // Update existing budget
     suspend fun updateBudget(id: Long, budgetRequest: BudgetRequest) {
-        database.expenseDatabaseQueries.updateBudget(
+        dataSource.updateBudget(
+            id = id,
             name = budgetRequest.name,
             categoryId = budgetRequest.categoryId,
             amount = budgetRequest.amount,
@@ -102,7 +88,6 @@ class BudgetRepository(
             startDate = budgetRequest.startDate,
             endDate = budgetRequest.endDate,
             isRecurring = if (budgetRequest.isRecurring) 1L else 0L,
-            id = id,
             alertEnabled = if (budgetRequest.alertEnabled) 1L else 0L,
             alertThresholdPercentage = budgetRequest.alertThresholdPercentage,
         )
@@ -110,18 +95,18 @@ class BudgetRepository(
 
     // Delete budget (soft delete)
     suspend fun deleteBudget(id: Long) {
-        database.expenseDatabaseQueries.deleteBudget(id)
+        dataSource.deleteBudget(id)
     }
 
     // Get budget with spending information for current period
     suspend fun getBudgetWithSpending(budgetId: Long, range: DateRange): BudgetWithSpending? {
         val budget = getBudgetById(budgetId) ?: return null
 
-        val spentAmount = database.expenseDatabaseQueries.getBudgetSpendingForPeriod(
+        val spentAmount = dataSource.getBudgetSpendingForPeriod(
             range.start.toEpochMillis(),
             range.end.toEpochMillis(),
             budgetId
-        ).executeAsOneOrNull()?.COALESCE ?: 0.0
+        )
 
         return BudgetWithSpending(
             budget = budget,
@@ -137,11 +122,11 @@ class BudgetRepository(
     ): BudgetWithSpending? {
         val budget = getBudgetById(budgetId) ?: return null
 
-        val spentAmount = database.expenseDatabaseQueries.getBudgetSpendingForPeriod(
+        val spentAmount = dataSource.getBudgetSpendingForPeriod(
             startDate,
             endDate,
             budgetId
-        ).executeAsOneOrNull()?.COALESCE ?: 0.0
+        )
 
         return BudgetWithSpending(
             budget = budget,
@@ -151,13 +136,10 @@ class BudgetRepository(
 
     // Get all budgets with spending for current period — single JOIN query, no N+1
     fun getAllBudgetsWithSpending(range: DateRange): Flow<List<BudgetWithSpending>> {
-        return database.expenseDatabaseQueries.getAllActiveBudgetsWithSpending(
+        return dataSource.getAllActiveBudgetsWithSpending(
             startDate = range.start.toEpochMillis(),
             endDate = range.end.toEpochMillis()
-        )
-            .asFlow()
-            .mapToList(Dispatchers.IO)
-            .map { rows -> rows.map { it.toDomain() } }
+        ).map { rows -> rows.map { it.toDomain() } }
     }
 
     // Get budgets relevant to a category (category-specific + overall) with spending — single query
@@ -165,11 +147,11 @@ class BudgetRepository(
         categoryId: Long?,
         range: DateRange
     ): List<BudgetWithSpending> {
-        return database.expenseDatabaseQueries.getActiveBudgetsWithSpendingForCategory(
+        return dataSource.getActiveBudgetsWithSpendingForCategory(
             startDate = range.start.toEpochMillis(),
             endDate = range.end.toEpochMillis(),
             categoryId = categoryId
-        ).executeAsList().map { it.toDomain() }
+        ).map { it.toDomain() }
     }
 
     // Get budget summary
@@ -194,25 +176,17 @@ class BudgetRepository(
     ): List<BudgetWithSpending> {
         val exceededBudgets = mutableListOf<BudgetWithSpending>()
 
-        // Check category-specific budgets
-        val categoryBudgets = database.expenseDatabaseQueries.selectBudgetsByCategory(categoryId)
-            .executeAsList()
-
-        // Check overall budgets
-        val overallBudgets = database.expenseDatabaseQueries.selectOverallBudgets()
-            .executeAsList()
-
+        val categoryBudgets = dataSource.selectBudgetsByCategory(categoryId)
+        val overallBudgets = dataSource.selectOverallBudgetsList()
         val allRelevantBudgets = categoryBudgets + overallBudgets
 
         for (budgetEntity in allRelevantBudgets) {
-
-            // Check if transaction date falls within budgetEntity period
             if (transactionDate >= range.start.toEpochMillis() && transactionDate <= range.end.toEpochMillis()) {
-                val currentSpent = database.expenseDatabaseQueries.getBudgetSpendingForPeriod(
+                val currentSpent = dataSource.getBudgetSpendingForPeriod(
                     range.start.toEpochMillis(),
                     range.end.toEpochMillis(),
                     budgetEntity.id
-                ).executeAsOneOrNull()?.COALESCE ?: 0.0
+                )
 
                 val projectedSpent = currentSpent + amount
 
@@ -235,6 +209,6 @@ class BudgetRepository(
         budgetId: Long,
         nowEpochSeconds: Long = Clock.System.now().epochSeconds
     ) {
-        database.expenseDatabaseQueries.updateLastAlertTime(nowEpochSeconds, budgetId)
+        dataSource.updateLastAlertTime(nowEpochSeconds, budgetId)
     }
 }

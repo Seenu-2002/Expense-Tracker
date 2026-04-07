@@ -39,8 +39,12 @@ class ExportLocalDataSource constructor(
         return try {
             _exportState.value = ExportState.Loading
 
-            val transactions =
-                transactionRepository.getAllTransactions(1, Int.MAX_VALUE).data
+            val totalCount = getTransactionCount()
+            val transactions = if (totalCount > 0) {
+                transactionRepository.getAllTransactions(1, totalCount).data
+            } else {
+                emptyList()
+            }
             val exportTransactions = transactions.map { transaction ->
                 TransactionExport(
                     id = transaction.id,
@@ -93,7 +97,12 @@ class ExportLocalDataSource constructor(
     }
 
     override suspend fun getExportData(): ExportData {
-        val transactions = transactionRepository.getAllTransactions(1, Int.MAX_VALUE).data
+        val totalCount = getTransactionCount()
+        val transactions = if (totalCount > 0) {
+            transactionRepository.getAllTransactions(1, totalCount).data
+        } else {
+            emptyList()
+        }
         val exportTransactions = transactions.map { transaction ->
             TransactionExport(
                 id = transaction.id,
@@ -135,7 +144,7 @@ class ExportLocalDataSource constructor(
         val rows = transactions.joinToString("\n") { transaction ->
             "${transaction.id}," +
                     "${transaction.amount}," +
-                    "\"${transaction.description?.replace("\"", "\"\"\"")}\"," +
+                    "\"${transaction.description?.replace("\"", "\"\"")}\"," +
                     "\"${transaction.category}\"," +
                     "\"${transaction.date}\"," +
                     "\"${transaction.type}\""

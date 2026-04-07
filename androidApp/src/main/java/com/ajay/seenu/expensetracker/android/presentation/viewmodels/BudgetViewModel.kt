@@ -17,12 +17,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,11 +36,7 @@ class BudgetViewModel @Inject constructor(
 //    val uiState: StateFlow<BudgetUiState> = _uiState.asStateFlow()
 
     private val _budgets: MutableStateFlow<UiState<List<BudgetWithSpending>>> = MutableStateFlow(UiState.Loading)
-    val budgets: StateFlow<UiState<List<BudgetWithSpending>>> = _budgets.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = UiState.Loading
-    )
+    val budgets: StateFlow<UiState<List<BudgetWithSpending>>> = _budgets.asStateFlow()
 
     val categories: StateFlow<List<Category>> = flow {
             emit(categoryRepository.getCategories(TransactionType.EXPENSE))

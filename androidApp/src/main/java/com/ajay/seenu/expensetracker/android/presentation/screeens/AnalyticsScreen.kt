@@ -58,7 +58,7 @@ fun AnalyticsScreen(navController: NavController, viewModel: AnalyticsViewModel 
     val context = LocalContext.current
     LaunchedEffect(Unit) {
         val filter = FilterPreference.getCurrentFilter(context)
-        viewModel.setFilter(context, filter)
+        viewModel.setFilter(filter)
     }
 
     val currentFilter by viewModel.currentFilter.collectAsStateWithLifecycle()
@@ -163,7 +163,7 @@ fun AnalyticsScreen(navController: NavController, viewModel: AnalyticsViewModel 
 
                         else -> {
                             openFilterBottomSheet = false
-                            viewModel.setFilter(context, filter)
+                            viewModel.setFilter(filter)
                         }
                     }
                 },
@@ -184,7 +184,7 @@ fun AnalyticsScreen(navController: NavController, viewModel: AnalyticsViewModel 
                     openDateRangePicker = false
                     val startDate = startDate.toLocalDate()
                     val endDate = endDate.toLocalDate()
-                    viewModel.setFilter(context, DateFilter.Custom(startDate, endDate))
+                    viewModel.setFilter(DateFilter.Custom(startDate, endDate))
                 })
         }
     }

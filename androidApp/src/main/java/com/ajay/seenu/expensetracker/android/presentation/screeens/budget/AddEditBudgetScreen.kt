@@ -81,7 +81,7 @@ fun AddEditBudgetScreen(
         } ?: "")
     }
     var selectedCategory by remember { mutableStateOf(budget?.categoryId ?: categories.firstOrNull()?.id) }
-    var isRecurring by rememberSaveable { mutableStateOf(if (arg is AddEditBudgetArg.Edit) (arg.budget.isRecurring == 1L) else true) }
+    var isRecurring by rememberSaveable { mutableStateOf(if (arg is AddEditBudgetArg.Edit) arg.budget.isRecurring else true) }
     var receiveAlert by rememberSaveable { mutableStateOf(if(arg is AddEditBudgetArg.Edit) arg.budget.alertEnabled else true) }
     var showAmountError by rememberSaveable {
         mutableStateOf(false)
