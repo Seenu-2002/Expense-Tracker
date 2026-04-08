@@ -50,6 +50,7 @@ import com.ajay.seenu.expensetracker.android.data.FilterPreference
 import com.ajay.seenu.expensetracker.android.presentation.components.DateRangePickerBottomSheet
 import com.ajay.seenu.expensetracker.android.presentation.components.FilterBottomSheet
 import com.ajay.seenu.expensetracker.android.presentation.components.OverviewCard
+import com.ajay.seenu.expensetracker.android.presentation.components.ChangeConfirmationDialog
 import com.ajay.seenu.expensetracker.android.presentation.components.TransactionPreviewRow
 import com.ajay.seenu.expensetracker.android.presentation.state.UiState
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.OverviewScreenViewModel
@@ -83,6 +84,8 @@ fun OverviewScreen(
     var openDateRangePicker by rememberSaveable {
         mutableStateOf(false)
     }
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
+    var transactionToDelete: Long? by remember { mutableStateOf(null) }
     val formatter = remember {
         SimpleDateFormat(
             "dd MMM, yyyy",
@@ -227,7 +230,8 @@ fun OverviewScreen(
                                             onTransactionClicked.invoke(transaction.id)
                                         },
                                         onDelete = {
-                                            viewModel.deleteTransaction(transaction.id)
+                                            transactionToDelete = transaction.id
+                                            showDeleteConfirmation = true
                                         },
                                         onClone = {
                                             onCloneTransaction.invoke(transaction.id)
@@ -286,5 +290,21 @@ fun OverviewScreen(
                 val endDate = endDate.toLocalDate()
                 viewModel.setFilter(DateFilter.Custom(startDate, endDate))
             })
+    }
+
+    if (showDeleteConfirmation) {
+        ChangeConfirmationDialog(
+            title = "Delete Transaction",
+            message = "Are you sure you want to delete this transaction? This action cannot be undone.",
+            onConfirm = {
+                transactionToDelete?.let { viewModel.deleteTransaction(it) }
+                showDeleteConfirmation = false
+                transactionToDelete = null
+            },
+            onDismiss = {
+                showDeleteConfirmation = false
+                transactionToDelete = null
+            }
+        )
     }
 }

@@ -15,9 +15,14 @@ class MainViewModel @Inject constructor(
     private val _isAppLockEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isAppLockEnabled = _isAppLockEnabled.asStateFlow()
 
+    private val _currencySymbol: MutableStateFlow<String> = MutableStateFlow("$")
+    val currencySymbol = _currencySymbol.asStateFlow()
+
     fun getIsAppLockEnabled() {
         viewModelScope.launch {
-            _isAppLockEnabled.emit(userConfigurationsManager.getConfigs().isAppLockEnabled)
+            val configs = userConfigurationsManager.getConfigs()
+            _isAppLockEnabled.emit(configs.isAppLockEnabled)
+            _currencySymbol.emit(configs.currencySymbol)
         }
     }
 }

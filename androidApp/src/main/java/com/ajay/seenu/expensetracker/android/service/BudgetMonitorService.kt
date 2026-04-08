@@ -1,5 +1,6 @@
 package com.ajay.seenu.expensetracker.android.service
 
+import com.ajay.seenu.expensetracker.UserConfigurationsManager
 import com.ajay.seenu.expensetracker.data.repository.BudgetRepository
 import com.ajay.seenu.expensetracker.domain.model.DateRange
 import com.ajay.seenu.expensetracker.domain.model.budget.Budget
@@ -8,7 +9,8 @@ import kotlin.time.ExperimentalTime
 
 class BudgetMonitorService @Inject constructor(
     private val budgetRepository: BudgetRepository,
-    private val notificationService: NotificationService
+    private val notificationService: NotificationService,
+    private val userConfigurationsManager: UserConfigurationsManager
 ) {
 
     // Single query fetches all relevant budgets + spending — no N+1
@@ -43,7 +45,10 @@ class BudgetMonitorService @Inject constructor(
         }
 
         // Send notification
-        notificationService.sendBudgetAlert(budget, percentage, spentAmount)
+        val currencySymbol = try {
+            userConfigurationsManager.getConfigs().currencySymbol
+        } catch (_: Exception) { "$" }
+        notificationService.sendBudgetAlert(budget, percentage, spentAmount, currencySymbol)
 
         // Update last alert timestamp — store as epoch seconds (budget schema convention)
         budgetRepository.updateLastAlertTime(budget.id, nowMillis / 1000)

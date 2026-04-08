@@ -14,6 +14,7 @@ import com.ajay.seenu.expensetracker.domain.model.TransactionType
 import com.ajay.seenu.expensetracker.domain.usecase.DateRangeCalculatorUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.attachment.AddAttachmentUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.attachment.GetAttachmentsUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.attachment.ReplaceAttachmentsUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.AddTransactionUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.GetTransactionUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.UpdateTransactionUseCase
@@ -46,6 +47,9 @@ class AddTransactionViewModel @Inject constructor(
 
     @Inject
     internal lateinit var addAttachmentUseCase: AddAttachmentUseCase
+
+    @Inject
+    internal lateinit var replaceAttachmentsUseCase: ReplaceAttachmentsUseCase
 
     @Inject
     internal lateinit var dateRangeCalculatorUseCase: DateRangeCalculatorUseCase
@@ -112,16 +116,7 @@ class AddTransactionViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val transactionId = updateTransactionUseCase.invoke(transaction)
-                attachments.forEach { attachment ->
-                    addAttachmentUseCase.invoke(        //TODO: Update/Modify attachments for the transaction
-                        transactionId = transactionId,
-                        name = attachment.name,
-                        fileType = attachment.fileType,
-                        filePath = attachment.filePath,
-                        size = attachment.size,
-                        imageUri = attachment.imageUri
-                    )
-                }
+                replaceAttachmentsUseCase.invoke(transactionId, attachments)
                 _events.emit(AddTransactionEvent.TransactionSaved)
             } catch (exp: Exception) {
                 Timber.e(exp, "Error updating transaction")

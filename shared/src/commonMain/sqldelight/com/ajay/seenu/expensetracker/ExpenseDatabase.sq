@@ -206,6 +206,9 @@ UPDATE AccountEntity SET name = ?, type = ? WHERE id = :id;
 deleteAccount:
 DELETE FROM AccountEntity WHERE id = ?;
 
+-- NOTE: BudgetEntity dates (startDate, endDate, createdAt, updatedAt) are stored in epoch SECONDS.
+-- TransactionDetailEntity.createdAt is stored in epoch MILLISECONDS.
+-- Spending queries that join both tables use millisecond parameters for filtering transactions.
 CREATE TABLE BudgetEntity (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     name TEXT NOT NULL,

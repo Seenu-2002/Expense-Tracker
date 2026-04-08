@@ -50,6 +50,7 @@ import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.presentation.common.PreviewThemeWrapper
 import com.ajay.seenu.expensetracker.android.presentation.screeens.CategoryIconItem
 import com.ajay.seenu.expensetracker.android.presentation.theme.LocalColors
+import com.ajay.seenu.expensetracker.android.presentation.theme.LocalCurrencySymbol
 import com.ajay.seenu.expensetracker.domain.model.Account
 import com.ajay.seenu.expensetracker.domain.model.AccountType
 import com.ajay.seenu.expensetracker.domain.model.Category
@@ -108,7 +109,7 @@ fun OverviewCard(
 
             Text(modifier = Modifier.padding(bottom = 4.dp), text = "Income", fontSize = 14.sp)
             Text(
-                text = "Rs. ${data.getIncomeLabel()}",
+                text = "${LocalCurrencySymbol.current} ${data.getIncomeLabel()}",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold
             )
@@ -134,7 +135,7 @@ fun OverviewCard(
 
             Text(modifier = Modifier.padding(bottom = 4.dp), text = "Expense", fontSize = 14.sp)
             Text(
-                text = "Rs. ${data.getExpenseLabel()}",
+                text = "${LocalCurrencySymbol.current} ${data.getExpenseLabel()}",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold
             )
@@ -280,6 +281,19 @@ fun TransactionPreviewRow(
     val swipeState = rememberSwipeToDismissBoxState(
         positionalThreshold = {
             it / 4
+        },
+        confirmValueChange = { value ->
+            when (value) {
+                SwipeToDismissBoxValue.EndToStart -> {
+                    onDelete.invoke()
+                    false
+                }
+                SwipeToDismissBoxValue.StartToEnd -> {
+                    onClone.invoke()
+                    false
+                }
+                SwipeToDismissBoxValue.Settled -> true
+            }
         }
     )
     lateinit var icon: @Composable () -> Unit
@@ -311,22 +325,6 @@ fun TransactionPreviewRow(
             }
             alignment = Alignment.CenterStart
             color = Color.Blue.copy(alpha = 0.3f)
-        }
-    }
-    when (swipeState.currentValue) {
-        SwipeToDismissBoxValue.EndToStart -> {
-            onDelete.invoke()
-        }
-
-        SwipeToDismissBoxValue.StartToEnd -> {
-            LaunchedEffect(swipeState) {
-                onClone.invoke()
-                delay(100)
-                swipeState.snapTo(SwipeToDismissBoxValue.Settled)
-            }
-        }
-
-        SwipeToDismissBoxValue.Settled -> {
         }
     }
     SwipeToDismissBox(

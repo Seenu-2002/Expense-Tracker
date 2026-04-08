@@ -16,7 +16,7 @@ import com.ajay.seenu.expensetracker.domain.model.budget.Budget
 
 class NotificationService(private val context: Context) {
 
-    fun sendBudgetAlert(budget: Budget, percentage: Double, spentAmount: Double) {
+    fun sendBudgetAlert(budget: Budget, percentage: Double, spentAmount: Double, currencySymbol: String = "$") {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
                     context,
@@ -45,9 +45,9 @@ class NotificationService(private val context: Context) {
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.account_balance_wallet)
             .setContentTitle("Budget Alert: ${budget.name}")
-            .setContentText("You've spent ${String.format("%.1f", percentage)}% of your budget ($${String.format("%.2f", spentAmount)} / $${String.format("%.2f", budget.amount)})")
+            .setContentText("You've spent ${String.format("%.1f", percentage)}% of your budget ($currencySymbol${String.format("%.2f", spentAmount)} / $currencySymbol${String.format("%.2f", budget.amount)})")
             .setStyle(NotificationCompat.BigTextStyle()
-                .bigText("You've spent ${String.format("%.1f", percentage)}% of your ${budget.name} budget. You've used $${String.format("%.2f", spentAmount)} out of $${String.format("%.2f", budget.amount)}."))
+                .bigText("You've spent ${String.format("%.1f", percentage)}% of your ${budget.name} budget. You've used $currencySymbol${String.format("%.2f", spentAmount)} out of $currencySymbol${String.format("%.2f", budget.amount)}."))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)

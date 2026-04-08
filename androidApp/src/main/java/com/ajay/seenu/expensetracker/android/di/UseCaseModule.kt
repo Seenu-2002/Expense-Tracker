@@ -16,6 +16,7 @@ import com.ajay.seenu.expensetracker.domain.usecase.account.InsertDefaultAccount
 import com.ajay.seenu.expensetracker.domain.usecase.account.UpdateAccountUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.attachment.AddAttachmentUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.attachment.GetAttachmentsUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.attachment.ReplaceAttachmentsUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.category.AddCategoryUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.category.DeleteCategoryUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.category.GetAllCategoriesAsFlowUseCase
@@ -53,6 +54,11 @@ object UseCaseModule {
     @Provides
     fun provideGetAttachmentsUseCase(repository: AttachmentRepository): GetAttachmentsUseCase {
         return GetAttachmentsUseCase(repository)
+    }
+
+    @Provides
+    fun provideReplaceAttachmentsUseCase(repository: AttachmentRepository): ReplaceAttachmentsUseCase {
+        return ReplaceAttachmentsUseCase(repository)
     }
 
     @Provides

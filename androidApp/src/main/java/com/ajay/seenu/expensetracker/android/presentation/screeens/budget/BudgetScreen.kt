@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.data.FilterPreference
+import com.ajay.seenu.expensetracker.android.presentation.theme.LocalCurrencySymbol
 import com.ajay.seenu.expensetracker.android.presentation.state.UiState
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.BudgetViewModel
 import com.ajay.seenu.expensetracker.domain.model.budget.BudgetWithSpending
@@ -142,7 +143,7 @@ fun BudgetListScreen(
             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                 containerColor = Color.Transparent
             ),
-            windowInsets = WindowInsets()
+            windowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp)
         )
 
         if(budgets.isEmpty()) {
@@ -294,7 +295,7 @@ fun BudgetCard(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                "$${String.format("%.0f", budgetWithSpending.spentAmount)} of $${String.format("%.0f", budget.amount)}",
+                "${LocalCurrencySymbol.current}${String.format("%.0f", budgetWithSpending.spentAmount)} of ${LocalCurrencySymbol.current}${String.format("%.0f", budget.amount)}",
                 fontSize = 12.sp,
             )
             if (isOverBudget) {

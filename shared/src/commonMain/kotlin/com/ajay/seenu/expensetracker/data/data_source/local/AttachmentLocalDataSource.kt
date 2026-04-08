@@ -5,6 +5,7 @@ import app.cash.sqldelight.coroutines.mapToList
 import com.ajay.seenu.expensetracker.AttachmentEntity
 import com.ajay.seenu.expensetracker.ExpenseDatabase
 import com.ajay.seenu.expensetracker.data.data_source.AttachmentDateSource
+import com.ajay.seenu.expensetracker.data.data_source.AttachmentInsertParams
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
@@ -46,5 +47,24 @@ class AttachmentLocalDataSource(
 
     override fun deleteAttachmentsByTransactionId(id: Long) {
         queries.deleteAttachmentsByTransactionId(id)
+    }
+
+    override fun deleteAndReinsertAttachments(
+        transactionId: Long,
+        attachments: List<AttachmentInsertParams>
+    ) {
+        database.transaction {
+            queries.deleteAttachmentsByTransactionId(transactionId)
+            attachments.forEach { att ->
+                queries.insertAttachment(
+                    transactionId = transactionId,
+                    name = att.name,
+                    filePath = att.filePath,
+                    fileType = att.fileType,
+                    size = att.size,
+                    imageUri = att.imageUri
+                )
+            }
+        }
     }
 }

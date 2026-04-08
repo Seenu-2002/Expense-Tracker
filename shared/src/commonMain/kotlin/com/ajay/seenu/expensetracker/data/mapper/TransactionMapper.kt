@@ -29,7 +29,8 @@ fun TransactionDetailEntity.toDomain(
         category = category,
         account = account,
         createdAt = Instant.fromEpochMilliseconds(this.createdAt),
-        note = this.note
+        note = this.note,
+        place = this.place
     )
 }
 
@@ -55,7 +56,8 @@ fun GetAllTransactionsWithDetails.toDomain(): Transaction {
         category = category,
         account = account,
         createdAt = Instant.fromEpochMilliseconds(createdAt),
-        note = note
+        note = note,
+        place = place
     )
 }
 
@@ -81,7 +83,8 @@ fun GetAllTransactionsBetweenWithDetails.toDomain(): Transaction {
         category = category,
         account = account,
         createdAt = Instant.fromEpochMilliseconds(createdAt),
-        note = note
+        note = note,
+        place = place
     )
 }
 
@@ -95,6 +98,6 @@ fun Transaction.toEntity(): TransactionDetailEntity {
         accountId = this.account.id,
         createdAt = this.createdAt.toEpochMilliseconds(),
         note = this.note,
-        place = null // TODO: Feature to be supported
+        place = this.place
     )
 }

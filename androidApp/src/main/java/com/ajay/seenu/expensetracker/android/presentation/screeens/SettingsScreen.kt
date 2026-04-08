@@ -23,6 +23,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
@@ -88,7 +89,9 @@ fun SettingsScreen(
     var showThemeBottomSheet by remember { mutableStateOf(false) }
     var showDeleteAllTransactionDialog by remember { mutableStateOf(false) }
     var showExportFormatDialog by remember { mutableStateOf(false) }
+    var showCurrencyBottomSheet by remember { mutableStateOf(false) }
     val weekStartsFromBottomSheet = rememberModalBottomSheetState()
+    val currencyBottomSheet = rememberModalBottomSheetState()
     val dateFormatBottomSheet = rememberModalBottomSheetState()
     val themeBottomSheet = rememberModalBottomSheetState()
 
@@ -197,6 +200,22 @@ fun SettingsScreen(
         }
     }
 
+    if (showCurrencyBottomSheet) {
+        val options = remember { viewModel.supportedCurrencySymbols.map { it.second } }
+        ListBottomSheet(
+            state = currencyBottomSheet,
+            items = options,
+            selectedItem = viewModel.supportedCurrencySymbols.find { it.first == configs.currencySymbol }?.second ?: configs.currencySymbol,
+            onDismiss = {
+                showCurrencyBottomSheet = false
+            }) { index, _ ->
+            scope.launch {
+                currencyBottomSheet.hide()
+            }
+            viewModel.changeCurrencySymbol(viewModel.supportedCurrencySymbols[index].first)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -241,6 +260,11 @@ fun SettingsScreen(
                         Modifier, Icons.Filled.DateRange, "Date Format", configs.dateFormat
                     ) {
                         showDateFormatBottomSheet = true
+                    }
+                    SettingsRow(
+                        Modifier, Icons.Filled.Info, "Currency", configs.currencySymbol
+                    ) {
+                        showCurrencyBottomSheet = true
                     }
                 }
             }

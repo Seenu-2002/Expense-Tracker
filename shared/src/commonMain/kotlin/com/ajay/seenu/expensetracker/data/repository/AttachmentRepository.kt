@@ -2,6 +2,7 @@ package com.ajay.seenu.expensetracker.data.repository
 
 import com.ajay.seenu.expensetracker.AttachmentEntity
 import com.ajay.seenu.expensetracker.data.data_source.AttachmentDateSource
+import com.ajay.seenu.expensetracker.data.data_source.AttachmentInsertParams
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
@@ -58,6 +59,15 @@ class AttachmentRepository constructor(
     suspend fun deleteAttachmentsByTransactionId(id: Long) {
         withContext(Dispatchers.IO) {
             localDataSource.deleteAttachmentsByTransactionId(id)
+        }
+    }
+
+    suspend fun deleteAndReinsertAttachments(
+        transactionId: Long,
+        attachments: List<AttachmentInsertParams>
+    ) {
+        withContext(Dispatchers.IO) {
+            localDataSource.deleteAndReinsertAttachments(transactionId, attachments)
         }
     }
 

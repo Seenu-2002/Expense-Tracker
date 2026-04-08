@@ -15,4 +15,16 @@ interface AttachmentDateSource {
                          imageUri: String)
     fun deleteAttachmentById(id: Long)
     fun deleteAttachmentsByTransactionId(id: Long)
+    fun deleteAndReinsertAttachments(
+        transactionId: Long,
+        attachments: List<AttachmentInsertParams>
+    )
 }
+
+data class AttachmentInsertParams(
+    val name: String,
+    val filePath: String,
+    val fileType: String,
+    val size: Long,
+    val imageUri: String
+)

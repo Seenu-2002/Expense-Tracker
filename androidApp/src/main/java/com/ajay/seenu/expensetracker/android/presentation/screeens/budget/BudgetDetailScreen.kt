@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ajay.seenu.expensetracker.android.presentation.theme.LocalCurrencySymbol
 import com.ajay.seenu.expensetracker.domain.model.budget.BudgetWithSpending
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -118,7 +119,7 @@ fun BudgetDetailScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                "$${String.format("%.0f", budgetWithSpending.remainingAmount.coerceAtLeast(0.0))}",
+                "${LocalCurrencySymbol.current}${String.format("%.0f", budgetWithSpending.remainingAmount.coerceAtLeast(0.0))}",
                 fontSize = 60.sp,
                 fontWeight = FontWeight.SemiBold
             )
