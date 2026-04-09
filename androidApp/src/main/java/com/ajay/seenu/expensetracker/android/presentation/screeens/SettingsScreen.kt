@@ -78,7 +78,8 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
     exportViewModel: ExportViewModel = hiltViewModel(),
     onManageCategoriesClicked: () -> Unit = {},
-    onManageAccountsClicked: () -> Unit = {}
+    onManageAccountsClicked: () -> Unit = {},
+    onTrashClicked: () -> Unit = {}
 ) {
     val configs by viewModel.userConfigs.collectAsStateWithLifecycle()
     val exportUiState by exportViewModel.uiState.collectAsStateWithLifecycle()
@@ -300,6 +301,30 @@ fun SettingsScreen(
                         if (exportUiState.exportState is ExportState.Loading) {
                             CircularProgressIndicator(modifier = Modifier.size(24.dp))
                         }
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp)
+                            .clickable(onClick = onTrashClicked),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            modifier = Modifier.padding(start = 12.dp),
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = "Trash"
+                        )
+                        Text(
+                            modifier = Modifier.padding(start = 12.dp),
+                            text = "Trash",
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        Icon(
+                            modifier = Modifier.padding(end = 4.dp),
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            contentDescription = null
+                        )
                     }
                     Row(
                         modifier = Modifier

@@ -2,11 +2,13 @@ package com.ajay.seenu.expensetracker.data.data_source.local
 
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
+import app.cash.sqldelight.coroutines.mapToOne
 import com.ajay.seenu.expensetracker.AccountEntity
 import com.ajay.seenu.expensetracker.CategoryEntity
 import com.ajay.seenu.expensetracker.ExpenseDatabase
 import com.ajay.seenu.expensetracker.GetAllTransactionsBetweenWithDetails
 import com.ajay.seenu.expensetracker.GetAllTransactionsWithDetails
+import com.ajay.seenu.expensetracker.GetDeletedTransactionsWithDetails
 import com.ajay.seenu.expensetracker.GetOverallDataBetween
 import com.ajay.seenu.expensetracker.GetTotalAmountByCategoryAndTypeBetween
 import com.ajay.seenu.expensetracker.GetTotalExpenseByCategoryBetween
@@ -224,6 +226,43 @@ class TransactionLocalDataSource constructor(
         return queries.getLastInsertTransactionRowId().executeAsOne()
     }
 
+    override fun softDeleteTransaction(id: Long, deletedAt: Long) {
+        queries.softDeleteTransaction(deletedAt = deletedAt, id = id)
+    }
+
+    override fun restoreTransaction(id: Long) {
+        queries.restoreTransaction(id)
+    }
+
+    override fun getDeletedTransactionsWithDetails(
+        pageNo: Int,
+        count: Int
+    ): Flow<PaginationData<List<GetDeletedTransactionsWithDetails>>> {
+        require(pageNo > 0) { "Page number should be greater than 0" }
+        require(count > 0) { "Count should be greater than 0" }
+
+        return queries.getDeletedTransactionsWithDetails(
+            limit = (count + 1).toLong(),
+            offset = (pageNo - 1L) * count
+        ).asFlow().mapToList(Dispatchers.IO).map {
+            val hasMoreData = it.size > count
+            val data = if (hasMoreData) it.subList(0, count) else it
+            PaginationData(data, hasMoreData)
+        }
+    }
+
+    override fun getDeletedTransactionsCount(): Long {
+        return queries.getDeletedTransactionsCount().executeAsOne()
+    }
+
+    override fun permanentlyDeleteTransaction(id: Long) {
+        queries.permanentlyDeleteTransaction(id)
+    }
+
+    override fun purgeOldDeletedTransactions(cutoffMs: Long) {
+        queries.purgeOldDeletedTransactions(cutoffMs)
+    }
+
     override fun deleteAllTransactions() {
         queries.deleteAllTransactions()
     }
@@ -252,11 +291,11 @@ class TransactionLocalDataSource constructor(
         ).executeAsOne().sum ?: 0.0
     }
 
-    override fun getOverallDataBetween(startDate: Long, endDate: Long): GetOverallDataBetween {
+    override fun getOverallDataBetweenAsFlow(startDate: Long, endDate: Long): Flow<GetOverallDataBetween> {
         return queries.getOverallDataBetween(
             startUTCValue = startDate,
             endUTCValue = endDate
-        ).executeAsOne()
+        ).asFlow().mapToOne(Dispatchers.IO)
     }
 
     override fun getAllCategories(): List<CategoryEntity> {

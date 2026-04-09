@@ -1,6 +1,7 @@
 package com.ajay.seenu.expensetracker.data.repository
 
 import co.touchlab.kermit.Logger
+import com.ajay.seenu.expensetracker.GetDeletedTransactionsWithDetails
 import com.ajay.seenu.expensetracker.GetTotalAmountByCategoryAndTypeBetween
 import com.ajay.seenu.expensetracker.GetTotalExpenseByCategoryBetween
 import com.ajay.seenu.expensetracker.TransactionDetailEntity
@@ -22,6 +23,7 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -134,20 +136,53 @@ class TransactionRepository constructor(
         }
     }
 
+    suspend fun softDeleteTransaction(id: Long) {
+        withContext(Dispatchers.IO) {
+            val deletedAt = Clock.System.now().toEpochMilliseconds()
+            transactionLocalDataSource.softDeleteTransaction(id, deletedAt)
+        }
+    }
+
+    suspend fun restoreTransaction(id: Long) {
+        withContext(Dispatchers.IO) {
+            transactionLocalDataSource.restoreTransaction(id)
+        }
+    }
+
+    suspend fun getDeletedTransactions(
+        pageNo: Int,
+        count: Int
+    ): Flow<PaginationData<List<Transaction>>> {
+        return withContext(Dispatchers.IO) {
+            transactionLocalDataSource.getDeletedTransactionsWithDetails(pageNo, count).map {
+                PaginationData(it.data.map { row -> row.toDomain() }, it.hasMoreData)
+            }
+        }
+    }
+
+    suspend fun permanentlyDeleteTransaction(id: Long) {
+        withContext(Dispatchers.IO) {
+            transactionLocalDataSource.permanentlyDeleteTransaction(id)
+        }
+    }
+
+    suspend fun purgeOldDeletedTransactions(cutoffMs: Long) {
+        withContext(Dispatchers.IO) {
+            transactionLocalDataSource.purgeOldDeletedTransactions(cutoffMs)
+        }
+    }
+
     suspend fun deleteTransaction(id: Long) {
         withContext(Dispatchers.IO) {
             transactionLocalDataSource.deleteTransaction(id)
         }
     }
 
-    suspend fun getOverallDataBetween(dateRange: DateRange): OverallData {
-        return withContext(Dispatchers.IO) {
-            val result = transactionLocalDataSource.getOverallDataBetween(
-                dateRange.start.toEpochMillis(),
-                dateRange.end.toEpochMillis()
-            )
-            OverallData(income = result.income, expense = result.expense)
-        }
+    fun getOverallDataBetween(dateRange: DateRange): Flow<OverallData> {
+        return transactionLocalDataSource.getOverallDataBetweenAsFlow(
+            dateRange.start.toEpochMillis(),
+            dateRange.end.toEpochMillis()
+        ).map { OverallData(income = it.income, expense = it.expense) }
     }
 
     suspend fun getTotalTransactionPerDayByType(

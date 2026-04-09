@@ -10,6 +10,7 @@ CREATE TABLE TransactionDetailEntity (
     createdAt INTEGER NOT NULL,
     note TEXT,
     place TEXT,
+    deletedAt INTEGER,
     FOREIGN KEY(categoryId) REFERENCES CategoryEntity(id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT,
@@ -52,14 +53,14 @@ CREATE TABLE AccountEntity (
 
 getAllTransactions:
 SELECT *
-FROM TransactionDetailEntity ORDER BY createdAt DESC LIMIT :limit OFFSET :offset;
+FROM TransactionDetailEntity WHERE deletedAt IS NULL ORDER BY createdAt DESC LIMIT :limit OFFSET :offset;
 
 getTransactionsCount:
-SELECT COUNT(*) FROM TransactionDetailEntity;
+SELECT COUNT(*) FROM TransactionDetailEntity WHERE deletedAt IS NULL;
 
 getAllTransactionsBetween:
 SELECT *
-FROM TransactionDetailEntity WHERE createdAt >= :startUTCValue AND createdAt <= :endUTCValue
+FROM TransactionDetailEntity WHERE deletedAt IS NULL AND createdAt >= :startUTCValue AND createdAt <= :endUTCValue
 ORDER BY createdAt DESC LIMIT :limit OFFSET :offset;
 
 getAllTransactionsWithDetails:
@@ -70,6 +71,7 @@ SELECT
 FROM TransactionDetailEntity t
 INNER JOIN CategoryEntity c ON t.categoryId = c.id
 INNER JOIN AccountEntity a ON t.accountId = a.id
+WHERE t.deletedAt IS NULL
 ORDER BY t.createdAt DESC
 LIMIT :limit OFFSET :offset;
 
@@ -81,13 +83,13 @@ SELECT
 FROM TransactionDetailEntity t
 INNER JOIN CategoryEntity c ON t.categoryId = c.id
 INNER JOIN AccountEntity a ON t.accountId = a.id
-WHERE t.createdAt >= :startUTCValue AND t.createdAt <= :endUTCValue
+WHERE t.deletedAt IS NULL AND t.createdAt >= :startUTCValue AND t.createdAt <= :endUTCValue
 ORDER BY t.createdAt DESC
 LIMIT :limit OFFSET :offset;
 
 getAllTransactionsByType:
 SELECT *
-FROM TransactionDetailEntity WHERE type = :type ORDER BY createdAt DESC LIMIT :limit OFFSET :offset;
+FROM TransactionDetailEntity WHERE deletedAt IS NULL AND type = :type ORDER BY createdAt DESC LIMIT :limit OFFSET :offset;
 
 getTransaction:
 SELECT *
@@ -110,20 +112,47 @@ DELETE FROM TransactionDetailEntity;
 deleteAllTransactionsByType:
 DELETE FROM TransactionDetailEntity WHERE type = :type;
 
+softDeleteTransaction:
+UPDATE TransactionDetailEntity SET deletedAt = :deletedAt WHERE id = :id AND deletedAt IS NULL;
+
+restoreTransaction:
+UPDATE TransactionDetailEntity SET deletedAt = NULL WHERE id = :id;
+
 deleteTransaction:
 DELETE FROM TransactionDetailEntity WHERE id = :id;
+
+permanentlyDeleteTransaction:
+DELETE FROM TransactionDetailEntity WHERE id = :id AND deletedAt IS NOT NULL;
+
+purgeOldDeletedTransactions:
+DELETE FROM TransactionDetailEntity WHERE deletedAt IS NOT NULL AND deletedAt < :cutoffMs;
 
 changeCategory:
 UPDATE TransactionDetailEntity SET categoryId = :newCategory WHERE categoryId = :oldCategory;
 
 numberOfTransactionsByCategory:
-SELECT COUNT(*) AS count FROM TransactionDetailEntity WHERE categoryId = :category;
+SELECT COUNT(*) AS count FROM TransactionDetailEntity WHERE deletedAt IS NULL AND categoryId = :category;
+
+getDeletedTransactionsWithDetails:
+SELECT
+    t.id, t.type, t.amount, t.categoryId, t.accountId, t.createdAt, t.note, t.place, t.deletedAt,
+    c.label AS categoryLabel, c.type AS categoryType, c.iconRes AS categoryIconRes, c.color AS categoryColor,
+    a.name AS accountName, a.type AS accountType, a.isDefault AS accountIsDefault
+FROM TransactionDetailEntity t
+INNER JOIN CategoryEntity c ON t.categoryId = c.id
+INNER JOIN AccountEntity a ON t.accountId = a.id
+WHERE t.deletedAt IS NOT NULL
+ORDER BY t.deletedAt DESC
+LIMIT :limit OFFSET :offset;
+
+getDeletedTransactionsCount:
+SELECT COUNT(*) FROM TransactionDetailEntity WHERE deletedAt IS NOT NULL;
 
 getSumOfAmountByType:
-SELECT SUM(amount) AS sum FROM TransactionDetailEntity WHERE type = :type;
+SELECT SUM(amount) AS sum FROM TransactionDetailEntity WHERE deletedAt IS NULL AND type = :type;
 
 getSumOfAmountBetweenByType:
-SELECT SUM(amount) AS sum FROM TransactionDetailEntity WHERE type = :type
+SELECT SUM(amount) AS sum FROM TransactionDetailEntity WHERE deletedAt IS NULL AND type = :type
 AND createdAt >= :startUTCValue AND createdAt <= :endUTCValue;
 
 getOverallDataBetween:
@@ -131,7 +160,7 @@ SELECT
     COALESCE(SUM(CASE WHEN type = 'INCOME' THEN amount ELSE 0 END), 0) AS income,
     COALESCE(SUM(CASE WHEN type = 'EXPENSE' THEN amount ELSE 0 END), 0) AS expense
 FROM TransactionDetailEntity
-WHERE createdAt >= :startUTCValue AND createdAt <= :endUTCValue;
+WHERE deletedAt IS NULL AND createdAt >= :startUTCValue AND createdAt <= :endUTCValue;
 
 getAllCategories:
 SELECT * FROM CategoryEntity;
@@ -158,19 +187,20 @@ searchCategory:
 SELECT * FROM CategoryEntity WHERE label = :label AND type = :type;
 
 getTotalTransactionPerDayByTypeBetween:
-SELECT createdAt, categoryId, SUM(amount) AS totalAmount FROM TransactionDetailEntity WHERE type = :type AND createdAt >= :startUTCValue AND createdAt <= :endUTCValue GROUP BY createdAt, categoryId ORDER BY createdAt DESC;
+SELECT createdAt, categoryId, SUM(amount) AS totalAmount FROM TransactionDetailEntity WHERE deletedAt IS NULL AND type = :type AND createdAt >= :startUTCValue AND createdAt <= :endUTCValue GROUP BY createdAt, categoryId ORDER BY createdAt DESC;
 
 getTotalExpenseByCategoryBetween:
-SELECT categoryId, SUM(amount) AS totalAmount FROM TransactionDetailEntity WHERE type = "EXPENSE" AND createdAt >= :startUTCValue AND createdAt <= :endUTCValue GROUP BY categoryId ORDER BY totalAmount DESC;
+SELECT categoryId, SUM(amount) AS totalAmount FROM TransactionDetailEntity WHERE deletedAt IS NULL AND type = "EXPENSE" AND createdAt >= :startUTCValue AND createdAt <= :endUTCValue GROUP BY categoryId ORDER BY totalAmount DESC;
 
 getTotalAmountByCategoryAndTypeBetween:
-SELECT categoryId, SUM(amount) AS total FROM TransactionDetailEntity WHERE type = :type AND createdAt >= :startUTCValue AND createdAt <= :endUTCValue GROUP BY categoryId ORDER BY categoryId ASC;
+SELECT categoryId, SUM(amount) AS total FROM TransactionDetailEntity WHERE deletedAt IS NULL AND type = :type AND createdAt >= :startUTCValue AND createdAt <= :endUTCValue GROUP BY categoryId ORDER BY categoryId ASC;
 
 getTotalExpenseByCategoryInPeriod:
 SELECT COALESCE(SUM(amount), 0) AS totalAmount
 FROM TransactionDetailEntity
 WHERE
-   (:categoryId IS NULL OR categoryId = :categoryId)
+   deletedAt IS NULL
+   AND (:categoryId IS NULL OR categoryId = :categoryId)
    AND createdAt >= :startDate
    AND createdAt <= :endDate
    AND type = 'EXPENSE';
@@ -285,6 +315,7 @@ LEFT JOIN TransactionDetailEntity t ON (
     AND t.createdAt >= ?
     AND t.createdAt <= ?
     AND t.type = 'EXPENSE'
+    AND t.deletedAt IS NULL
 )
 WHERE b.isActive = 1
 AND b.id = ?
@@ -296,7 +327,7 @@ SET lastAlertTriggeredAt = ?
 WHERE id = ?;
 
 getTransactionCountByAccount:
-SELECT COUNT(*) AS count FROM TransactionDetailEntity WHERE accountId = ?;
+SELECT COUNT(*) AS count FROM TransactionDetailEntity WHERE deletedAt IS NULL AND accountId = ?;
 
 changeAccount:
 UPDATE TransactionDetailEntity SET accountId = :newAccount WHERE accountId = :oldAccount;
@@ -325,6 +356,7 @@ LEFT JOIN TransactionDetailEntity t ON (
     AND t.createdAt >= :startDate
     AND t.createdAt <= :endDate
     AND t.type = 'EXPENSE'
+    AND t.deletedAt IS NULL
 )
 WHERE b.isActive = 1
 GROUP BY b.id
@@ -354,6 +386,7 @@ LEFT JOIN TransactionDetailEntity t ON (
     AND t.createdAt >= :startDate
     AND t.createdAt <= :endDate
     AND t.type = 'EXPENSE'
+    AND t.deletedAt IS NULL
 )
 WHERE b.isActive = 1
 AND (b.categoryId = :categoryId OR b.categoryId IS NULL)

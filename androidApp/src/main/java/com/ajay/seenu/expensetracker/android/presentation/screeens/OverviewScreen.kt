@@ -25,6 +25,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDateRangePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -33,6 +38,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -45,16 +51,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.data.FilterPreference
 import com.ajay.seenu.expensetracker.android.presentation.components.DateRangePickerBottomSheet
 import com.ajay.seenu.expensetracker.android.presentation.components.FilterBottomSheet
 import com.ajay.seenu.expensetracker.android.presentation.components.OverviewCard
-import com.ajay.seenu.expensetracker.android.presentation.components.ChangeConfirmationDialog
 import com.ajay.seenu.expensetracker.android.presentation.components.TransactionPreviewRow
 import com.ajay.seenu.expensetracker.android.presentation.state.UiState
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.OverviewScreenViewModel
 import com.ajay.seenu.expensetracker.domain.model.DateFilter
+import com.ajay.seenu.expensetracker.domain.model.TransactionFilter
 import com.ajay.seenu.expensetracker.util.getDateLabel
 import com.ajay.seenu.expensetracker.util.toLocalDate
 import java.text.SimpleDateFormat
@@ -73,6 +81,8 @@ fun OverviewScreen(
     val userName by viewModel.userName.collectAsStateWithLifecycle()
     val hasMoreData by viewModel.hasMoreData.collectAsStateWithLifecycle()
     val currentFilter by viewModel.currentFilter.collectAsStateWithLifecycle()
+    val categories by viewModel.categories.collectAsStateWithLifecycle()
+    val accounts by viewModel.accounts.collectAsStateWithLifecycle()
 
     val listState = rememberLazyListState()
     val sheetState = rememberModalBottomSheetState()
@@ -84,8 +94,8 @@ fun OverviewScreen(
     var openDateRangePicker by rememberSaveable {
         mutableStateOf(false)
     }
-    var showDeleteConfirmation by remember { mutableStateOf(false) }
-    var transactionToDelete: Long? by remember { mutableStateOf(null) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     val formatter = remember {
         SimpleDateFormat(
             "dd MMM, yyyy",
@@ -94,21 +104,42 @@ fun OverviewScreen(
     }
     val context = LocalContext.current
 
+    LaunchedEffect(Unit) {
+        viewModel.snackbarEvent.collectLatest { event ->
+            val result = snackbarHostState.showSnackbar(
+                message = event.message,
+                actionLabel = "Undo",
+                duration = SnackbarDuration.Short
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                viewModel.undoDelete(event.transactionId)
+            }
+        }
+    }
+
     LaunchedEffect(dateFormat) {
-        if(dateFormat.isNotBlank()) {
-            val filter = FilterPreference.getCurrentFilter(context)
-            viewModel.setFilter(filter)
+        if (dateFormat.isNotBlank()) {
+            val savedDateFilter = FilterPreference.getCurrentFilter(context)
+            viewModel.setDateFilter(savedDateFilter)
         }
     }
 
     LaunchedEffect(currentFilter) {
-        val filter = currentFilter
-        if (filter is DateFilter.Custom) {
-            dateRangePickerState.setSelection(filter.startDateInMillis, filter.endDateInMillis)
+        val dateFilter = currentFilter.dateFilter
+        if (dateFilter is DateFilter.Custom) {
+            dateRangePickerState.setSelection(dateFilter.startDateInMillis, dateFilter.endDateInMillis)
         }
     }
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.padding(bottom = 80.dp)
+            ) { data ->
+                Snackbar(snackbarData = data)
+            }
+        },
         topBar = {
             Row(
                 modifier = Modifier.fillMaxWidth()
@@ -123,7 +154,9 @@ fun OverviewScreen(
                 Spacer(modifier = Modifier.weight(1f))
                 BadgedBox(
                     badge = {
-                        if (currentFilter != DateFilter.ThisMonth) {
+                        val isFiltered = currentFilter.dateFilter != DateFilter.ThisMonth ||
+                                currentFilter.hasActiveFilters
+                        if (isFiltered) {
                             Box(
                                 modifier = Modifier
                                     .size(10.dp)
@@ -230,8 +263,7 @@ fun OverviewScreen(
                                             onTransactionClicked.invoke(transaction.id)
                                         },
                                         onDelete = {
-                                            transactionToDelete = transaction.id
-                                            showDeleteConfirmation = true
+                                            viewModel.deleteTransaction(transaction.id)
                                         },
                                         onClone = {
                                             onCloneTransaction.invoke(transaction.id)
@@ -260,20 +292,24 @@ fun OverviewScreen(
     }
 
     if (openFilterBottomSheet) {
-        FilterBottomSheet(sheetState = sheetState, filter = currentFilter, formatter = formatter, onFilterSelected = { filter ->
-            when (filter) {
-                DateFilter.Custom.MOCK -> {
-                    openDateRangePicker = true
-                    openFilterBottomSheet = false
-                }
-                else -> {
-                    openFilterBottomSheet = false
-                    viewModel.setFilter(filter)
-                }
+        FilterBottomSheet(
+            sheetState = sheetState,
+            filter = currentFilter,
+            categories = categories,
+            accounts = accounts,
+            formatter = formatter,
+            onFilterSelected = { newFilter ->
+                openFilterBottomSheet = false
+                viewModel.setFilter(newFilter)
+            },
+            onCustomDateRequested = {
+                openDateRangePicker = true
+                openFilterBottomSheet = false
+            },
+            onDismiss = {
+                openFilterBottomSheet = false
             }
-        }, onDismiss = {
-            openFilterBottomSheet = false
-        })
+        )
     }
 
     if (openDateRangePicker) {
@@ -284,27 +320,15 @@ fun OverviewScreen(
                 openDateRangePicker = false
             },
             formatter = formatter,
-            onDateSelected = { startDate, endDate ->
+            onDateSelected = { startMs, endMs ->
                 openDateRangePicker = false
-                val startDate = startDate.toLocalDate()
-                val endDate = endDate.toLocalDate()
-                viewModel.setFilter(DateFilter.Custom(startDate, endDate))
-            })
-    }
-
-    if (showDeleteConfirmation) {
-        ChangeConfirmationDialog(
-            title = "Delete Transaction",
-            message = "Are you sure you want to delete this transaction? This action cannot be undone.",
-            onConfirm = {
-                transactionToDelete?.let { viewModel.deleteTransaction(it) }
-                showDeleteConfirmation = false
-                transactionToDelete = null
-            },
-            onDismiss = {
-                showDeleteConfirmation = false
-                transactionToDelete = null
+                val startDate = startMs.toLocalDate()
+                val endDate = endMs.toLocalDate()
+                viewModel.setFilter(
+                    currentFilter.copy(dateFilter = DateFilter.Custom(startDate, endDate))
+                )
             }
         )
     }
+
 }

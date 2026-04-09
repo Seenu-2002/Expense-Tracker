@@ -33,9 +33,14 @@ import com.ajay.seenu.expensetracker.domain.usecase.transaction.ChangeAccountUse
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.ChangeCategoriesUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.DeleteAllTransactionsUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.DeleteTransactionUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.transaction.GetTrashTransactionsUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.GetTransactionCountByCategoryUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.GetTransactionCountByAccountUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.GetTransactionUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.transaction.PermanentlyDeleteTransactionUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.transaction.PurgeOldTrashUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.transaction.RestoreTransactionUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.transaction.SoftDeleteTransactionUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.UpdateTransactionUseCase
 import dagger.Module
 import dagger.Provides
@@ -104,6 +109,31 @@ object UseCaseModule {
     @Provides
     fun provideDeleteTransactionUseCase(repository: TransactionRepository): DeleteTransactionUseCase {
         return DeleteTransactionUseCase(repository)
+    }
+
+    @Provides
+    fun provideSoftDeleteTransactionUseCase(repository: TransactionRepository): SoftDeleteTransactionUseCase {
+        return SoftDeleteTransactionUseCase(repository)
+    }
+
+    @Provides
+    fun provideRestoreTransactionUseCase(repository: TransactionRepository): RestoreTransactionUseCase {
+        return RestoreTransactionUseCase(repository)
+    }
+
+    @Provides
+    fun provideGetTrashTransactionsUseCase(repository: TransactionRepository): GetTrashTransactionsUseCase {
+        return GetTrashTransactionsUseCase(repository)
+    }
+
+    @Provides
+    fun providePermanentlyDeleteTransactionUseCase(repository: TransactionRepository): PermanentlyDeleteTransactionUseCase {
+        return PermanentlyDeleteTransactionUseCase(repository)
+    }
+
+    @Provides
+    fun providePurgeOldTrashUseCase(repository: TransactionRepository): PurgeOldTrashUseCase {
+        return PurgeOldTrashUseCase(repository)
     }
 
     @Provides

@@ -54,6 +54,7 @@ import com.ajay.seenu.expensetracker.android.presentation.screeens.CategoryListS
 import com.ajay.seenu.expensetracker.android.presentation.screeens.ChangeAccountInTransactionScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.ChangeCategoryInTransactionScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.DetailTransactionScreen
+import com.ajay.seenu.expensetracker.android.presentation.screeens.TrashScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.TransactionScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.budget.AddEditBudgetArg
 import com.ajay.seenu.expensetracker.android.presentation.state.TransactionMode
@@ -250,6 +251,9 @@ class MainActivity : AppCompatActivity() {
                     },
                     onAccountListScreen = {
                         navController.navigate(Screen.AccountList.route)
+                    },
+                    onTrashScreen = {
+                        navController.navigate(Screen.Trash.route)
                     }
                 )
             }
@@ -441,6 +445,9 @@ class MainActivity : AppCompatActivity() {
                     accountToBeDeletedId = accountId,
                     transactionCount = count
                 )
+            }
+            composable(Screen.Trash.route) {
+                TrashScreen(onBack = { navController.popBackStack() })
             }
             composable("${Screen.AddBudget.route}/{budgetId}",
                 arguments = listOf(navArgument("budgetId") { type = NavType.LongType })

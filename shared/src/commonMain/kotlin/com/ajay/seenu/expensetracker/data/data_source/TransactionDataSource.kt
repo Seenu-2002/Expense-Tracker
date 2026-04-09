@@ -4,6 +4,7 @@ import com.ajay.seenu.expensetracker.AccountEntity
 import com.ajay.seenu.expensetracker.CategoryEntity
 import com.ajay.seenu.expensetracker.GetAllTransactionsBetweenWithDetails
 import com.ajay.seenu.expensetracker.GetAllTransactionsWithDetails
+import com.ajay.seenu.expensetracker.GetDeletedTransactionsWithDetails
 import com.ajay.seenu.expensetracker.GetOverallDataBetween
 import com.ajay.seenu.expensetracker.GetTotalAmountByCategoryAndTypeBetween
 import com.ajay.seenu.expensetracker.GetTotalExpenseByCategoryBetween
@@ -77,6 +78,12 @@ interface TransactionDataSource {
         place: String?
     ): Long
 
+    fun softDeleteTransaction(id: Long, deletedAt: Long)
+    fun restoreTransaction(id: Long)
+    fun getDeletedTransactionsWithDetails(pageNo: Int, count: Int): Flow<PaginationData<List<GetDeletedTransactionsWithDetails>>>
+    fun getDeletedTransactionsCount(): Long
+    fun permanentlyDeleteTransaction(id: Long)
+    fun purgeOldDeletedTransactions(cutoffMs: Long)
     fun deleteAllTransactions()
     fun deleteAllTransactionsByType(type: TransactionTypeEntity)
     fun deleteTransaction(id: Long)
@@ -86,7 +93,7 @@ interface TransactionDataSource {
         fromValue: Long,
         toValue: Long
     ): Double
-    fun getOverallDataBetween(startDate: Long, endDate: Long): GetOverallDataBetween
+    fun getOverallDataBetweenAsFlow(startDate: Long, endDate: Long): Flow<GetOverallDataBetween>
 
     fun getAllCategories(): List<CategoryEntity>
     fun getCategories(type: TransactionTypeEntity): List<CategoryEntity>
