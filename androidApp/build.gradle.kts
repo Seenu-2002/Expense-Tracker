@@ -103,6 +103,9 @@ dependencies {
     // Timber
     implementation(libs.timber)
 
+    // Unit tests
+    testImplementation(libs.junit)
+
     //Biometric
     implementation(libs.androidx.biometric)
 

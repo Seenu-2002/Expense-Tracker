@@ -14,3 +14,8 @@ gradle/wrapper/gradle-wrapper.jar
 AGENTS.md
 CLAUDE.md
 memory/
+
+# Developer seed/query utilities
+queries.sqlite
+**/QueryMaker.kt
+**/QueryMakerRunner.kt

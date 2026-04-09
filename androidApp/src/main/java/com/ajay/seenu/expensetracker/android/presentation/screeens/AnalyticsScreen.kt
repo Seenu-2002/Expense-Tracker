@@ -49,6 +49,7 @@ import com.ajay.seenu.expensetracker.android.presentation.viewmodels.Charts
 import com.ajay.seenu.expensetracker.android.presentation.components.DateRangePickerBottomSheet
 import com.ajay.seenu.expensetracker.android.presentation.components.FilterBottomSheet
 import com.ajay.seenu.expensetracker.domain.model.DateFilter
+import com.ajay.seenu.expensetracker.domain.model.TransactionFilter
 import com.ajay.seenu.expensetracker.util.toLocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -152,20 +153,15 @@ fun AnalyticsScreen(navController: NavController, viewModel: AnalyticsViewModel 
         if (openFilterBottomSheet) {
             FilterBottomSheet(
                 sheetState = sheetState,
-                filter = currentFilter,
+                filter = TransactionFilter(dateFilter = currentFilter),
                 formatter = viewModel.getDateFormatter(),
-                onFilterSelected = { filter ->
-                    when (filter) {
-                        DateFilter.Custom.MOCK -> {
-                            openDateRangePicker = true
-                            openFilterBottomSheet = false
-                        }
-
-                        else -> {
-                            openFilterBottomSheet = false
-                            viewModel.setFilter(filter)
-                        }
-                    }
+                onFilterSelected = { transactionFilter ->
+                    openFilterBottomSheet = false
+                    viewModel.setFilter(transactionFilter.dateFilter)
+                },
+                onCustomDateRequested = {
+                    openDateRangePicker = true
+                    openFilterBottomSheet = false
                 },
                 onDismiss = {
                     openFilterBottomSheet = false
