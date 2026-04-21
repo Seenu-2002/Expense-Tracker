@@ -63,8 +63,8 @@ import com.ajay.seenu.expensetracker.android.presentation.state.UiState
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.OverviewScreenViewModel
 import com.ajay.seenu.expensetracker.domain.model.DateFilter
 import com.ajay.seenu.expensetracker.domain.model.TransactionFilter
-import com.ajay.seenu.expensetracker.util.getDateLabel
 import com.ajay.seenu.expensetracker.util.toLocalDate
+import com.ajay.seenu.expensetracker.util.toSectionLabel
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -243,8 +243,7 @@ fun OverviewScreen(
                                         .fillParentMaxWidth()
                                         .background(MaterialTheme.colorScheme.background)
                                         .padding(horizontal = 15.dp, vertical = 8.dp),
-                                    // TODO: User config format
-                                    text = transactionsByDate.rawDate.getDateLabel(),
+                                    text = transactionsByDate.rawDate.toSectionLabel(),
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight.W500
                                 )

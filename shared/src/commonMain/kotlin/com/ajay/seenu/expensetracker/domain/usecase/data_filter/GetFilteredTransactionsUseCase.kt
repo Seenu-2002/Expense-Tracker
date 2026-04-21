@@ -34,19 +34,10 @@ class GetFilteredTransactionsUseCase constructor(
                 data.data
             }
 
-            val transactions = filtered.sortedBy { transaction -> transaction.createdAt }
-            val map = HashMap<String, MutableList<Transaction>>()
-            for (transaction in transactions) {
-                val date = transaction.createdAt.getDateLabel()
-                if (!map.contains(date)) {
-                    map[date] = mutableListOf()
-                }
-                map[date]!!.add(transaction)
-            }
-
-            val expensesByDate = map.map { (dateLabel, txns) ->
-                TransactionsByDate(dateLabel.toLocalDate(), txns)
-            }
+            val transactions = filtered.sortedByDescending { transaction -> transaction.createdAt }
+            val expensesByDate = transactions
+                .groupBy { it.createdAt.getDateLabel() }
+                .map { (dateLabel, txns) -> TransactionsByDate(dateLabel.toLocalDate(), txns) }
             PaginationData(data = expensesByDate, hasMoreData = data.hasMoreData)
         }
     }
