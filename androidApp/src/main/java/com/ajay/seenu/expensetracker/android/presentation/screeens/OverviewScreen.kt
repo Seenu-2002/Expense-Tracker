@@ -85,7 +85,7 @@ fun OverviewScreen(
     val accounts by viewModel.accounts.collectAsStateWithLifecycle()
 
     val listState = rememberLazyListState()
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var openFilterBottomSheet by rememberSaveable {
         mutableStateOf(false)
     }

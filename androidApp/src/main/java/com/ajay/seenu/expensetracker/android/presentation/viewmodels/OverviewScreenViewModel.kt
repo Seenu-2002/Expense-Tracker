@@ -169,11 +169,27 @@ class OverviewScreenViewModel @Inject constructor(
                         if (lastFetchedPage == 1)
                             it.data
                         else
-                            (currentState as UiState.Success).data + it.data
+                            mergeTransactionPages((currentState as UiState.Success).data, it.data)
                     )
                 )
                 _hasMoreData.emit(it.hasMoreData)
             }
+        }
+    }
+
+    private fun mergeTransactionPages(
+        existing: List<TransactionsByDate>,
+        newPage: List<TransactionsByDate>
+    ): List<TransactionsByDate> {
+        if (newPage.isEmpty()) return existing
+        val last = existing.lastOrNull() ?: return newPage
+        val first = newPage.first()
+        return if (last.rawDate == first.rawDate) {
+            existing.dropLast(1) +
+                TransactionsByDate(last.rawDate, last.transactions + first.transactions) +
+                newPage.drop(1)
+        } else {
+            existing + newPage
         }
     }
 
