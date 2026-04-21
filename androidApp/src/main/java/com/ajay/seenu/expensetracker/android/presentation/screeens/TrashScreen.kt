@@ -14,7 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Undo
+import androidx.compose.material.icons.filled.RestoreFromTrash
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ajay.seenu.expensetracker.android.presentation.components.TransactionPreviewContent
 import com.ajay.seenu.expensetracker.android.presentation.components.TransactionPreviewRow
 import com.ajay.seenu.expensetracker.android.presentation.state.UiState
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.TrashViewModel
@@ -213,7 +214,7 @@ private fun TrashTransactionRow(
                 if (isRestoreDirection) {
                     Icon(
                         modifier = Modifier.padding(horizontal = 16.dp),
-                        imageVector = Icons.AutoMirrored.Filled.Undo,
+                        imageVector = Icons.Filled.RestoreFromTrash,
                         contentDescription = "Restore"
                     )
                 } else {
@@ -226,14 +227,12 @@ private fun TrashTransactionRow(
             }
         }
     ) {
-        TransactionPreviewRow(
+        TransactionPreviewContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.background),
             transaction = transaction,
             onClick = {},
-            onDelete = onPermanentlyDelete,
-            onClone = onRestore
         )
     }
 }

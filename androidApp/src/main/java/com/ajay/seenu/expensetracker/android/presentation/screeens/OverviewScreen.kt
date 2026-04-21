@@ -133,10 +133,7 @@ fun OverviewScreen(
 
     Scaffold(
         snackbarHost = {
-            SnackbarHost(
-                hostState = snackbarHostState,
-                modifier = Modifier.padding(bottom = 80.dp)
-            ) { data ->
+            SnackbarHost(hostState = snackbarHostState) { data ->
                 Snackbar(snackbarData = data)
             }
         },

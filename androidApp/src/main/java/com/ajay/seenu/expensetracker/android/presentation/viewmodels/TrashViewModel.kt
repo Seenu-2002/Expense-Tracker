@@ -17,16 +17,11 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-class TrashViewModel @Inject constructor() : ViewModel() {
-
-    @Inject
-    internal lateinit var getTrashTransactionsUseCase: GetTrashTransactionsUseCase
-
-    @Inject
-    internal lateinit var restoreTransactionUseCase: RestoreTransactionUseCase
-
-    @Inject
-    internal lateinit var permanentlyDeleteTransactionUseCase: PermanentlyDeleteTransactionUseCase
+class TrashViewModel @Inject constructor(
+    private val getTrashTransactionsUseCase: GetTrashTransactionsUseCase,
+    private val restoreTransactionUseCase: RestoreTransactionUseCase,
+    private val permanentlyDeleteTransactionUseCase: PermanentlyDeleteTransactionUseCase
+) : ViewModel() {
 
     private val _transactions: MutableStateFlow<UiState<List<Transaction>>> =
         MutableStateFlow(UiState.Loading)
