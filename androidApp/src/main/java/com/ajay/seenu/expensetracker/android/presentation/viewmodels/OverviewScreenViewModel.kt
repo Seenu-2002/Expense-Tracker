@@ -38,7 +38,15 @@ import javax.inject.Inject
 @HiltViewModel
 class OverviewScreenViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val userConfigurationsManager: UserConfigurationsManager
+    private val userConfigurationsManager: UserConfigurationsManager,
+    private val getRecentTransactions: GetRecentTransactionsUseCase,
+    private val getFilteredTransactionsUseCase: GetFilteredTransactionsUseCase,
+    private val getFilteredOverallDataUseCase: GetFilteredOverallDataUseCase,
+    private val softDeleteTransactionUseCase: SoftDeleteTransactionUseCase,
+    private val restoreTransactionUseCase: RestoreTransactionUseCase,
+    private val getAllCategoriesUseCase: GetAllCategoriesUseCase,
+    private val getAccountsUseCase: GetAccountsUseCase,
+    private val dateRangeCalculatorUseCase: DateRangeCalculatorUseCase
 ) : ViewModel() {
 
     private val _overallData: MutableStateFlow<UiState<OverallData>> =
@@ -72,30 +80,6 @@ class OverviewScreenViewModel @Inject constructor(
 
     private val _updatedDateFormat: MutableStateFlow<String> = MutableStateFlow("")
     val updatedDateFormat = _updatedDateFormat.asStateFlow()
-
-    @Inject
-    internal lateinit var getRecentTransactions: GetRecentTransactionsUseCase
-
-    @Inject
-    internal lateinit var getFilteredTransactionsUseCase: GetFilteredTransactionsUseCase
-
-    @Inject
-    internal lateinit var getFilteredOverallDataUseCase: GetFilteredOverallDataUseCase
-
-    @Inject
-    internal lateinit var softDeleteTransactionUseCase: SoftDeleteTransactionUseCase
-
-    @Inject
-    internal lateinit var restoreTransactionUseCase: RestoreTransactionUseCase
-
-    @Inject
-    internal lateinit var getAllCategoriesUseCase: GetAllCategoriesUseCase
-
-    @Inject
-    internal lateinit var getAccountsUseCase: GetAccountsUseCase
-
-    @Inject
-    internal lateinit var dateRangeCalculatorUseCase: DateRangeCalculatorUseCase
 
     init {
         init()
