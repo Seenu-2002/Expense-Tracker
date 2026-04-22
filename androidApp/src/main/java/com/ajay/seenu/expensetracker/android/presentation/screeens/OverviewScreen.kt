@@ -1,5 +1,6 @@
 package com.ajay.seenu.expensetracker.android.presentation.screeens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -19,11 +20,18 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
@@ -44,9 +52,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -62,7 +73,6 @@ import com.ajay.seenu.expensetracker.android.presentation.components.Transaction
 import com.ajay.seenu.expensetracker.android.presentation.state.UiState
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.OverviewScreenViewModel
 import com.ajay.seenu.expensetracker.domain.model.DateFilter
-import com.ajay.seenu.expensetracker.domain.model.TransactionFilter
 import com.ajay.seenu.expensetracker.util.toLocalDate
 import com.ajay.seenu.expensetracker.util.toSectionLabel
 import java.text.SimpleDateFormat
@@ -83,26 +93,30 @@ fun OverviewScreen(
     val currentFilter by viewModel.currentFilter.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     val accounts by viewModel.accounts.collectAsStateWithLifecycle()
+    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
+
+    var isSearchActive by rememberSaveable { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
 
     val listState = rememberLazyListState()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var openFilterBottomSheet by rememberSaveable {
-        mutableStateOf(false)
-    }
+    var openFilterBottomSheet by rememberSaveable { mutableStateOf(false) }
     val dateRangePickerState = rememberDateRangePickerState()
     val dateRangeSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var openDateRangePicker by rememberSaveable {
-        mutableStateOf(false)
-    }
+    var openDateRangePicker by rememberSaveable { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    val formatter = remember {
-        SimpleDateFormat(
-            "dd MMM, yyyy",
-            Locale.ENGLISH
-        ) // TODO: User configured date format
-    }
+    val formatter = remember { SimpleDateFormat("dd MMM, yyyy", Locale.ENGLISH) }
     val context = LocalContext.current
+
+    BackHandler(enabled = isSearchActive) {
+        isSearchActive = false
+        viewModel.setSearchQuery("")
+    }
+
+    LaunchedEffect(isSearchActive) {
+        if (isSearchActive) focusRequester.requestFocus()
+    }
 
     LaunchedEffect(Unit) {
         viewModel.snackbarEvent.collectLatest { event ->
@@ -138,147 +152,216 @@ fun OverviewScreen(
             }
         },
         topBar = {
-            Row(
-                modifier = Modifier.fillMaxWidth()
-                    .padding(horizontal = 15.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Welcome, $userName",
-                    modifier = Modifier.padding(vertical = 12.dp),
-                    fontSize = 24.sp
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                BadgedBox(
-                    badge = {
-                        val isFiltered = currentFilter.dateFilter != DateFilter.ThisMonth ||
-                                currentFilter.hasActiveFilters
-                        if (isFiltered) {
-                            Box(
-                                modifier = Modifier
-                                    .size(10.dp)
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .background(color = MaterialTheme.colorScheme.error)
-                            )
-                        }
-                    }
+            if (isSearchActive) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        modifier = Modifier.size(30.dp)
-                            .clickable {
-                                openFilterBottomSheet = true
-                            },
-                        painter = painterResource(id = R.drawable.icon_filter_list),
-                        contentDescription = "filter"
+                    IconButton(onClick = {
+                        isSearchActive = false
+                        viewModel.setSearchQuery("")
+                    }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = viewModel::setSearchQuery,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 8.dp)
+                            .focusRequester(focusRequester),
+                        placeholder = { Text("Search transactions...") },
+                        trailingIcon = {
+                            if (searchQuery.isNotEmpty()) {
+                                IconButton(onClick = { viewModel.setSearchQuery("") }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Clear,
+                                        contentDescription = "Clear"
+                                    )
+                                }
+                            }
+                        },
+                        singleLine = true,
+                        shape = RoundedCornerShape(50),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search)
                     )
                 }
-                Spacer(modifier = Modifier.width(10.dp))
+            } else {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 15.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Welcome, $userName",
+                        modifier = Modifier.padding(vertical = 12.dp),
+                        fontSize = 24.sp
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Icon(
+                        modifier = Modifier
+                            .size(30.dp)
+                            .clickable { isSearchActive = true },
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "search"
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    BadgedBox(
+                        badge = {
+                            val isFiltered = currentFilter.dateFilter != DateFilter.ThisMonth ||
+                                    currentFilter.hasActiveFilters
+                            if (isFiltered) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(10.dp)
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(color = MaterialTheme.colorScheme.error)
+                                )
+                            }
+                        }
+                    ) {
+                        Icon(
+                            modifier = Modifier
+                                .size(30.dp)
+                                .clickable { openFilterBottomSheet = true },
+                            painter = painterResource(id = R.drawable.icon_filter_list),
+                            contentDescription = "filter"
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                }
             }
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            when(val state = recentTransactionsUiState) {
-                UiState.Loading, UiState.Empty -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
+        if (isSearchActive && searchQuery.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        modifier = Modifier.size(80.dp),
+                        imageVector = Icons.Default.Search,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = "Search by note, place, category or account",
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    )
                 }
-                is UiState.Failure -> {
-                    // Fixme
-                }
-                is UiState.Success -> {
-                    val recentTransactions = state.data
-                    if (recentTransactions.isEmpty()) {
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
+                when (val state = recentTransactionsUiState) {
+                    UiState.Loading, UiState.Empty -> {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally
+                            CircularProgressIndicator()
+                        }
+                    }
+                    is UiState.Failure -> {
+                        // Fixme
+                    }
+                    is UiState.Success -> {
+                        val recentTransactions = state.data
+                        if (recentTransactions.isEmpty()) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Icon(
-                                    modifier = Modifier.size(100.dp),
-                                    painter = painterResource(id = R.drawable.icon_database),
-                                    contentDescription = "Empty",
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                Spacer(modifier = Modifier.height(15.dp))
-                                Text(text = "No transactions found.")
-                            }
-                        }
-                        return@Scaffold
-                    }
-
-                    when(val overallDataState = overallDataUiState) {
-                        UiState.Loading, UiState. Empty -> {
-                            Box(modifier = Modifier.fillMaxWidth()
-                                .height(120.dp),
-                                contentAlignment = Alignment.Center) {
-                                CircularProgressIndicator()
-                            }
-                        }
-                        is UiState.Success -> {
-                            OverviewCard(modifier = Modifier.fillMaxWidth(), data = overallDataState.data)
-                        }
-                        is UiState.Failure -> {}
-                    }
-
-                    LazyColumn(
-                        state = listState,
-                        modifier = Modifier
-                            .fillMaxSize()
-                    ) {
-
-                        recentTransactions.forEach { transactionsByDate ->
-                            stickyHeader {
-                                Text(
-                                    modifier = Modifier
-                                        .fillParentMaxWidth()
-                                        .background(MaterialTheme.colorScheme.background)
-                                        .padding(horizontal = 15.dp, vertical = 8.dp),
-                                    text = transactionsByDate.rawDate.toSectionLabel(),
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.W500
-                                )
-                            }
-                            items(transactionsByDate.transactions,
-                                key = { transaction ->
-                                    transaction.id
-                                },
-                                itemContent = { transaction ->
-                                    TransactionPreviewRow(Modifier.fillMaxWidth()
-                                        .animateContentSize(), transaction,
-                                        onClick = {
-                                            onTransactionClicked.invoke(transaction.id)
-                                        },
-                                        onDelete = {
-                                            viewModel.deleteTransaction(transaction.id)
-                                        },
-                                        onClone = {
-                                            onCloneTransaction.invoke(transaction.id)
-                                        }
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Icon(
+                                        modifier = Modifier.size(100.dp),
+                                        painter = painterResource(id = R.drawable.icon_database),
+                                        contentDescription = "Empty",
+                                        tint = MaterialTheme.colorScheme.primary
                                     )
-                                })
-                        }
-                        if (hasMoreData) {
-                            item {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .wrapContentHeight()
-                                        .padding(10.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator()
+                                    Spacer(modifier = Modifier.height(15.dp))
+                                    Text(text = if (isSearchActive) "No results found." else "No transactions found.")
                                 }
-                                viewModel.getNextPageTransactions()
+                            }
+                            return@Scaffold
+                        }
+
+                        if (!isSearchActive) {
+                            when (val overallDataState = overallDataUiState) {
+                                UiState.Loading, UiState.Empty -> {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(120.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator()
+                                    }
+                                }
+                                is UiState.Success -> {
+                                    OverviewCard(modifier = Modifier.fillMaxWidth(), data = overallDataState.data)
+                                }
+                                is UiState.Failure -> {}
+                            }
+                        }
+
+                        LazyColumn(
+                            state = listState,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            recentTransactions.forEach { transactionsByDate ->
+                                stickyHeader {
+                                    Text(
+                                        modifier = Modifier
+                                            .fillParentMaxWidth()
+                                            .background(MaterialTheme.colorScheme.background)
+                                            .padding(horizontal = 15.dp, vertical = 8.dp),
+                                        text = transactionsByDate.rawDate.toSectionLabel(),
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.W500
+                                    )
+                                }
+                                items(
+                                    transactionsByDate.transactions,
+                                    key = { transaction -> transaction.id }
+                                ) { transaction ->
+                                    TransactionPreviewRow(
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .animateContentSize(),
+                                        transaction,
+                                        onClick = { onTransactionClicked(transaction.id) },
+                                        onDelete = { viewModel.deleteTransaction(transaction.id) },
+                                        onClone = { onCloneTransaction(transaction.id) }
+                                    )
+                                }
+                            }
+                            if (hasMoreData) {
+                                item {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .wrapContentHeight()
+                                            .padding(10.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator()
+                                    }
+                                    viewModel.getNextPageTransactions()
+                                }
                             }
                         }
                     }
@@ -312,9 +395,7 @@ fun OverviewScreen(
         DateRangePickerBottomSheet(
             state = dateRangeSheetState,
             dateRangePickerState = dateRangePickerState,
-            onDismiss = {
-                openDateRangePicker = false
-            },
+            onDismiss = { openDateRangePicker = false },
             formatter = formatter,
             onDateSelected = { startMs, endMs ->
                 openDateRangePicker = false
@@ -326,5 +407,4 @@ fun OverviewScreen(
             }
         )
     }
-
 }

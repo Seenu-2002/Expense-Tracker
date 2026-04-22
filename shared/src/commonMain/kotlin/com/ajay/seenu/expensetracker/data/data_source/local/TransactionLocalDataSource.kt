@@ -8,6 +8,7 @@ import com.ajay.seenu.expensetracker.CategoryEntity
 import com.ajay.seenu.expensetracker.ExpenseDatabase
 import com.ajay.seenu.expensetracker.GetAllTransactionsBetweenWithDetails
 import com.ajay.seenu.expensetracker.GetAllTransactionsWithDetails
+import com.ajay.seenu.expensetracker.SearchTransactionsBetweenWithDetails
 import com.ajay.seenu.expensetracker.GetDeletedTransactionsWithDetails
 import com.ajay.seenu.expensetracker.GetOverallDataBetween
 import com.ajay.seenu.expensetracker.GetTotalAmountByCategoryAndTypeBetween
@@ -157,6 +158,29 @@ class TransactionLocalDataSource constructor(
         return queries.getAllTransactionsBetweenWithDetails(
             startUTCValue = fromValue,
             endUTCValue = toValue,
+            limit = (count + 1).toLong(),
+            offset = (pageNo - 1L) * count
+        ).asFlow().mapToList(Dispatchers.IO).map {
+            val hasMoreData = it.size > count
+            val data = if (hasMoreData) it.subList(0, count) else it
+            PaginationData(data, hasMoreData)
+        }
+    }
+
+    override fun searchTransactionsBetweenWithDetailsAsFlow(
+        pageNo: Int,
+        count: Int,
+        fromValue: Long,
+        toValue: Long,
+        query: String
+    ): Flow<PaginationData<List<SearchTransactionsBetweenWithDetails>>> {
+        require(pageNo > 0) { "Page number should be greater than 0" }
+        require(count > 0) { "Count should be greater than 0" }
+
+        return queries.searchTransactionsBetweenWithDetails(
+            startUTCValue = fromValue,
+            endUTCValue = toValue,
+            query = "%$query%",
             limit = (count + 1).toLong(),
             offset = (pageNo - 1L) * count
         ).asFlow().mapToList(Dispatchers.IO).map {

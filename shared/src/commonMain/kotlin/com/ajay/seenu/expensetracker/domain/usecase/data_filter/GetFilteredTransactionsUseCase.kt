@@ -23,7 +23,14 @@ class GetFilteredTransactionsUseCase constructor(
         count: Int = 20,
         transactionFilter: TransactionFilter? = null
     ): Flow<PaginationData<List<TransactionsByDate>>> {
-        return repository.getAllTransactionsBetween(pageNo, count, dateRange).map { data ->
+        val searchQuery = transactionFilter?.searchQuery?.trim() ?: ""
+        val baseFlow = if (searchQuery.isNotEmpty()) {
+            repository.searchTransactionsBetween(pageNo, count, dateRange, searchQuery)
+        } else {
+            repository.getAllTransactionsBetween(pageNo, count, dateRange)
+        }
+
+        return baseFlow.map { data ->
             val filtered = if (transactionFilter != null && transactionFilter.hasActiveFilters) {
                 data.data.filter { transaction ->
                     (transactionFilter.type == null || transaction.type == transactionFilter.type) &&

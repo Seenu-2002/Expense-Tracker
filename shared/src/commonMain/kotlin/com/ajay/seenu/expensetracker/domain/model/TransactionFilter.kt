@@ -4,7 +4,8 @@ data class TransactionFilter(
     val dateFilter: DateFilter = DateFilter.ThisMonth,
     val type: TransactionType? = null,
     val categoryIds: Set<Long> = emptySet(),
-    val accountIds: Set<Long> = emptySet()
+    val accountIds: Set<Long> = emptySet(),
+    val searchQuery: String = ""
 ) {
     val hasActiveFilters: Boolean
         get() = type != null || categoryIds.isNotEmpty() || accountIds.isNotEmpty()

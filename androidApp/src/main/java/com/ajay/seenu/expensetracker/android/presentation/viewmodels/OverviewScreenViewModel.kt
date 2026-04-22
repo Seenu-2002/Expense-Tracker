@@ -24,6 +24,7 @@ import com.ajay.seenu.expensetracker.domain.usecase.transaction.RestoreTransacti
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.SoftDeleteTransactionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -31,6 +32,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -73,6 +75,9 @@ class OverviewScreenViewModel @Inject constructor(
     private val _accounts: MutableStateFlow<List<Account>> = MutableStateFlow(emptyList())
     val accounts: StateFlow<List<Account>> = _accounts.asStateFlow()
 
+    private val _searchQuery: MutableStateFlow<String> = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
     private val _snackbarEvent: MutableSharedFlow<SnackbarEvent> = MutableSharedFlow()
     val snackbarEvent: SharedFlow<SnackbarEvent> = _snackbarEvent.asSharedFlow()
 
@@ -86,6 +91,22 @@ class OverviewScreenViewModel @Inject constructor(
         loadCategoriesAndAccounts()
         viewModelScope.launch {
             _userName.emit("Seenivasan T")
+        }
+        observeSearchQuery()
+    }
+
+    @OptIn(FlowPreview::class)
+    private fun observeSearchQuery() {
+        viewModelScope.launch {
+            _searchQuery.debounce(300L).collectLatest { query ->
+                val current = _currentFilter.value
+                if (current.searchQuery != query) {
+                    val newFilter = current.copy(searchQuery = query)
+                    _currentFilter.emit(newFilter)
+                    _recentTransactions.emit(UiState.Loading)
+                    getRecentTransactions(newFilter)
+                }
+            }
         }
     }
 
@@ -226,12 +247,19 @@ class OverviewScreenViewModel @Inject constructor(
 
     fun setFilter(filter: TransactionFilter) {
         FilterPreference.setCurrentFilter(context, filter.dateFilter)
+        val filterWithQuery = filter.copy(searchQuery = _currentFilter.value.searchQuery)
         viewModelScope.launch {
-            _currentFilter.emit(filter)
+            _currentFilter.emit(filterWithQuery)
             _overallData.emit(UiState.Loading)
             _recentTransactions.emit(UiState.Loading)
-            getOverallData(filter)
-            getRecentTransactions(filter)
+            getOverallData(filterWithQuery)
+            getRecentTransactions(filterWithQuery)
+        }
+    }
+
+    fun setSearchQuery(query: String) {
+        viewModelScope.launch {
+            _searchQuery.emit(query)
         }
     }
 }

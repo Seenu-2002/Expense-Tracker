@@ -4,6 +4,7 @@ import com.ajay.seenu.expensetracker.AccountEntity
 import com.ajay.seenu.expensetracker.CategoryEntity
 import com.ajay.seenu.expensetracker.GetAllTransactionsBetweenWithDetails
 import com.ajay.seenu.expensetracker.GetAllTransactionsWithDetails
+import com.ajay.seenu.expensetracker.SearchTransactionsBetweenWithDetails
 import com.ajay.seenu.expensetracker.GetDeletedTransactionsWithDetails
 import com.ajay.seenu.expensetracker.GetOverallDataBetween
 import com.ajay.seenu.expensetracker.GetTotalAmountByCategoryAndTypeBetween
@@ -37,6 +38,14 @@ interface TransactionDataSource {
         fromValue: Long,
         toValue: Long
     ): Flow<PaginationData<List<GetAllTransactionsBetweenWithDetails>>>
+
+    fun searchTransactionsBetweenWithDetailsAsFlow(
+        pageNo: Int,
+        count: Int,
+        fromValue: Long,
+        toValue: Long,
+        query: String
+    ): Flow<PaginationData<List<SearchTransactionsBetweenWithDetails>>>
     fun getAllTransactionsBetween(
         pageNo: Int,
         count: Int,

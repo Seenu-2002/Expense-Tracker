@@ -70,6 +70,25 @@ class TransactionRepository constructor(
         }
     }
 
+    suspend fun searchTransactionsBetween(
+        pageNo: Int,
+        count: Int,
+        dateRange: DateRange,
+        query: String
+    ): Flow<PaginationData<List<Transaction>>> {
+        return withContext(Dispatchers.IO) {
+            transactionLocalDataSource.searchTransactionsBetweenWithDetailsAsFlow(
+                pageNo,
+                count,
+                dateRange.start.toEpochMillis(),
+                dateRange.end.toEpochMillis(),
+                query
+            ).map {
+                PaginationData(it.data.map { row -> row.toDomain() }, it.hasMoreData)
+            }
+        }
+    }
+
     suspend fun getTransaction(id: Long): Transaction {
         val transactionEntity = transactionLocalDataSource.getTransaction(id)
         val category = categoryRepository.getCategory(transactionEntity.categoryId)
