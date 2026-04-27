@@ -96,7 +96,7 @@ fun ChangeAccountInTransactionScreen(
                 }
 
                 is UiState.Success -> {
-                    val accountToBeDeleted = viewmodel.accountToBeDeleted
+                    val accountToBeDeleted = viewmodel.accountToBeDeleted ?: return@Box
                     ChangeAccountInTransactionContent(
                         modifier = Modifier.matchParentSize(),
                         recordCount = transactionCount,
@@ -135,7 +135,7 @@ fun ChangeAccountInTransactionScreen(
                     if (updateStatus.data) {
                         val msg = stringResource(
                             R.string.delete_account_success,
-                            viewmodel.accountToBeDeleted.name
+                            viewmodel.accountToBeDeleted?.name ?: ""
                         )
                         LaunchedEffect(updateStatus) {
                             Toast.makeText(
@@ -164,7 +164,7 @@ fun ChangeAccountInTransactionScreen(
                     title = stringResource(R.string.replace_account_title),
                     message = stringResource(
                         R.string.replace_account_message,
-                        viewmodel.accountToBeDeleted.name,
+                        viewmodel.accountToBeDeleted?.name ?: "",
                         accountToBeReplacedWith.name
                     ),
                     confirmButtonText = stringResource(R.string.action_replace_delete),

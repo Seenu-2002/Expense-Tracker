@@ -23,6 +23,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
@@ -77,7 +78,8 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
     exportViewModel: ExportViewModel = hiltViewModel(),
     onManageCategoriesClicked: () -> Unit = {},
-    onManageAccountsClicked: () -> Unit = {}
+    onManageAccountsClicked: () -> Unit = {},
+    onTrashClicked: () -> Unit = {}
 ) {
     val configs by viewModel.userConfigs.collectAsStateWithLifecycle()
     val exportUiState by exportViewModel.uiState.collectAsStateWithLifecycle()
@@ -88,7 +90,9 @@ fun SettingsScreen(
     var showThemeBottomSheet by remember { mutableStateOf(false) }
     var showDeleteAllTransactionDialog by remember { mutableStateOf(false) }
     var showExportFormatDialog by remember { mutableStateOf(false) }
+    var showCurrencyBottomSheet by remember { mutableStateOf(false) }
     val weekStartsFromBottomSheet = rememberModalBottomSheetState()
+    val currencyBottomSheet = rememberModalBottomSheetState()
     val dateFormatBottomSheet = rememberModalBottomSheetState()
     val themeBottomSheet = rememberModalBottomSheetState()
 
@@ -197,6 +201,22 @@ fun SettingsScreen(
         }
     }
 
+    if (showCurrencyBottomSheet) {
+        val options = remember { viewModel.supportedCurrencySymbols.map { it.second } }
+        ListBottomSheet(
+            state = currencyBottomSheet,
+            items = options,
+            selectedItem = viewModel.supportedCurrencySymbols.find { it.first == configs.currencySymbol }?.second ?: configs.currencySymbol,
+            onDismiss = {
+                showCurrencyBottomSheet = false
+            }) { index, _ ->
+            scope.launch {
+                currencyBottomSheet.hide()
+            }
+            viewModel.changeCurrencySymbol(viewModel.supportedCurrencySymbols[index].first)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -242,6 +262,11 @@ fun SettingsScreen(
                     ) {
                         showDateFormatBottomSheet = true
                     }
+                    SettingsRow(
+                        Modifier, Icons.Filled.Info, "Currency", configs.currencySymbol
+                    ) {
+                        showCurrencyBottomSheet = true
+                    }
                 }
             }
             AccountAndCategorySettingsGroup(
@@ -276,6 +301,30 @@ fun SettingsScreen(
                         if (exportUiState.exportState is ExportState.Loading) {
                             CircularProgressIndicator(modifier = Modifier.size(24.dp))
                         }
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp)
+                            .clickable(onClick = onTrashClicked),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            modifier = Modifier.padding(start = 12.dp),
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = "Trash"
+                        )
+                        Text(
+                            modifier = Modifier.padding(start = 12.dp),
+                            text = "Trash",
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        Icon(
+                            modifier = Modifier.padding(end = 4.dp),
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            contentDescription = null
+                        )
                     }
                     Row(
                         modifier = Modifier

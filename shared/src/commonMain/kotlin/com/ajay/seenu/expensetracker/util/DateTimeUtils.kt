@@ -1,11 +1,15 @@
 package com.ajay.seenu.expensetracker.util
 
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.char
+import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -34,6 +38,16 @@ private val localDateFormater by lazy {
     }
 }
 
+private val sectionDateFormatter by lazy {
+    LocalDate.Format {
+        day()
+        char(' ')
+        monthName(MonthNames.ENGLISH_ABBREVIATED)
+        chars(", ")
+        year()
+    }
+}
+
 fun String.toLocalDate(): LocalDate {
     return LocalDate.parse(this, localDateFormater)
 }
@@ -45,6 +59,16 @@ fun Instant.getDateLabel(timeZone: TimeZone = TimeZone.currentSystemDefault()): 
 
 fun LocalDate.getDateLabel(): String {
     return localDateFormater.format(this)
+}
+
+@OptIn(ExperimentalTime::class)
+fun LocalDate.toSectionLabel(timeZone: TimeZone = TimeZone.currentSystemDefault()): String {
+    val today = Clock.System.now().toLocalDateTime(timeZone).date
+    return when (this) {
+        today -> "Today"
+        today.minus(1, DateTimeUnit.DAY) -> "Yesterday"
+        else -> sectionDateFormatter.format(this)
+    }
 }
 
 @OptIn(ExperimentalTime::class)

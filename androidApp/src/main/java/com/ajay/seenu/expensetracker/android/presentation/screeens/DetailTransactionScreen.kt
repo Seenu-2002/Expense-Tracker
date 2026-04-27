@@ -59,6 +59,7 @@ import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.presentation.common.PreviewThemeWrapper
+import com.ajay.seenu.expensetracker.android.presentation.theme.LocalCurrencySymbol
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.DetailTransactionViewModel
 import com.ajay.seenu.expensetracker.domain.model.Account
 import com.ajay.seenu.expensetracker.domain.model.AccountType
@@ -157,7 +158,7 @@ fun DetailTransactionView(modifier: Modifier = Modifier,
                     .padding(top = 15.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = "$${transaction.amount}",
+                Text(text = "${LocalCurrencySymbol.current}${transaction.amount}",
                     style = TextStyle(
                         fontSize = 60.sp,
                         color = Color.White
@@ -249,6 +250,13 @@ fun DetailTransactionView(modifier: Modifier = Modifier,
                         Text(text = "--No description available--",
                             color = LocalContentColor.current.copy(alpha = 0.5F))
                     }
+                }
+                transaction.place?.let {
+                    Text(modifier = Modifier.padding(vertical = 15.dp),
+                        text = "Place",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold)
+                    Text(text = it)
                 }
                 Text(modifier = Modifier.padding(vertical = 15.dp),
                     text = "Attachments",

@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
+import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -101,9 +102,38 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    val supportedCurrencySymbols = listOf(
+        "$" to "USD ($)",
+        "€" to "EUR (€)",
+        "£" to "GBP (£)",
+        "₹" to "INR (₹)",
+        "¥" to "JPY (¥)",
+        "₩" to "KRW (₩)",
+        "₽" to "RUB (₽)",
+        "R$" to "BRL (R$)",
+        "CHF" to "CHF",
+        "A$" to "AUD (A$)",
+        "C$" to "CAD (C$)",
+    )
+
+    fun changeCurrencySymbol(symbol: String) {
+        if (_userConfigs.value.currencySymbol == symbol) {
+            return
+        }
+        viewModelScope.launch {
+            val newConfigs = _userConfigs.value.copy(currencySymbol = symbol)
+            configurationManager.storeConfigs(newConfigs)
+            _userConfigs.emit(newConfigs)
+        }
+    }
+
     fun deleteAllTransactions() {
         viewModelScope.launch {
-            deleteAllTransactionsUseCase.invoke()
+            try {
+                deleteAllTransactionsUseCase.invoke()
+            } catch (e: Exception) {
+                Timber.e(e, "Error deleting all transactions")
+            }
         }
     }
 

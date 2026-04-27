@@ -9,3 +9,13 @@ captures
 local.properties
 xcuserdata
 gradle/wrapper/gradle-wrapper.jar
+
+# AI assistant context files
+AGENTS.md
+CLAUDE.md
+memory/
+
+# Developer seed/query utilities
+queries.sqlite
+**/QueryMaker.kt
+**/QueryMakerRunner.kt

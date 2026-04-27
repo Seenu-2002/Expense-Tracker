@@ -10,6 +10,7 @@ CREATE TABLE TransactionDetailEntity (
     createdAt INTEGER NOT NULL,
     note TEXT,
     place TEXT,
+    deletedAt INTEGER,
     FOREIGN KEY(categoryId) REFERENCES CategoryEntity(id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT,
@@ -18,6 +19,8 @@ CREATE TABLE TransactionDetailEntity (
         ON DELETE RESTRICT
 );
 CREATE INDEX transaction_time ON TransactionDetailEntity(createdAt);
+CREATE INDEX transaction_category_id ON TransactionDetailEntity(categoryId);
+CREATE INDEX transaction_account_id ON TransactionDetailEntity(accountId);
 
 CREATE TABLE CategoryEntity (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,7 +28,7 @@ CREATE TABLE CategoryEntity (
     type TEXT AS TransactionTypeEntity NOT NULL,
     iconRes INTEGER NOT NULL,
     color INTEGER NOT NULL,
-    UNIQUE (label, type) ON CONFLICT REPLACE
+    UNIQUE (label, type) ON CONFLICT ABORT
 );
 
 CREATE TABLE AttachmentEntity (
@@ -45,24 +48,63 @@ CREATE TABLE AccountEntity (
     name TEXT NOT NULL,
     type TEXT AS AccountTypeEntity NOT NULL,
     isDefault INTEGER DEFAULT 0 NOT NULL,
-    UNIQUE (name, type) ON CONFLICT REPLACE
+    UNIQUE (name, type) ON CONFLICT ABORT
 );
 
 getAllTransactions:
 SELECT *
-FROM TransactionDetailEntity ORDER BY createdAt DESC LIMIT :limit OFFSET :offset;
+FROM TransactionDetailEntity WHERE deletedAt IS NULL ORDER BY createdAt DESC LIMIT :limit OFFSET :offset;
 
 getTransactionsCount:
-SELECT COUNT(*) FROM TransactionDetailEntity;
+SELECT COUNT(*) FROM TransactionDetailEntity WHERE deletedAt IS NULL;
 
 getAllTransactionsBetween:
 SELECT *
-FROM TransactionDetailEntity WHERE createdAt >= :startUTCValue AND createdAt <= :endUTCValue
+FROM TransactionDetailEntity WHERE deletedAt IS NULL AND createdAt >= :startUTCValue AND createdAt <= :endUTCValue
 ORDER BY createdAt DESC LIMIT :limit OFFSET :offset;
+
+getAllTransactionsWithDetails:
+SELECT
+    t.id, t.type, t.amount, t.categoryId, t.accountId, t.createdAt, t.note, t.place,
+    c.label AS categoryLabel, c.type AS categoryType, c.iconRes AS categoryIconRes, c.color AS categoryColor,
+    a.name AS accountName, a.type AS accountType, a.isDefault AS accountIsDefault
+FROM TransactionDetailEntity t
+INNER JOIN CategoryEntity c ON t.categoryId = c.id
+INNER JOIN AccountEntity a ON t.accountId = a.id
+WHERE t.deletedAt IS NULL
+ORDER BY t.createdAt DESC
+LIMIT :limit OFFSET :offset;
+
+getAllTransactionsBetweenWithDetails:
+SELECT
+    t.id, t.type, t.amount, t.categoryId, t.accountId, t.createdAt, t.note, t.place,
+    c.label AS categoryLabel, c.type AS categoryType, c.iconRes AS categoryIconRes, c.color AS categoryColor,
+    a.name AS accountName, a.type AS accountType, a.isDefault AS accountIsDefault
+FROM TransactionDetailEntity t
+INNER JOIN CategoryEntity c ON t.categoryId = c.id
+INNER JOIN AccountEntity a ON t.accountId = a.id
+WHERE t.deletedAt IS NULL AND t.createdAt >= :startUTCValue AND t.createdAt <= :endUTCValue
+ORDER BY t.createdAt DESC
+LIMIT :limit OFFSET :offset;
+
+searchTransactionsBetweenWithDetails:
+SELECT
+    t.id, t.type, t.amount, t.categoryId, t.accountId, t.createdAt, t.note, t.place,
+    c.label AS categoryLabel, c.type AS categoryType, c.iconRes AS categoryIconRes, c.color AS categoryColor,
+    a.name AS accountName, a.type AS accountType, a.isDefault AS accountIsDefault
+FROM TransactionDetailEntity t
+INNER JOIN CategoryEntity c ON t.categoryId = c.id
+INNER JOIN AccountEntity a ON t.accountId = a.id
+WHERE t.deletedAt IS NULL
+  AND t.createdAt >= :startUTCValue
+  AND t.createdAt <= :endUTCValue
+  AND (t.note LIKE :query OR t.place LIKE :query OR c.label LIKE :query OR a.name LIKE :query)
+ORDER BY t.createdAt DESC
+LIMIT :limit OFFSET :offset;
 
 getAllTransactionsByType:
 SELECT *
-FROM TransactionDetailEntity WHERE type = :type ORDER BY createdAt DESC LIMIT :limit OFFSET :offset;
+FROM TransactionDetailEntity WHERE deletedAt IS NULL AND type = :type ORDER BY createdAt DESC LIMIT :limit OFFSET :offset;
 
 getTransaction:
 SELECT *
@@ -85,21 +127,55 @@ DELETE FROM TransactionDetailEntity;
 deleteAllTransactionsByType:
 DELETE FROM TransactionDetailEntity WHERE type = :type;
 
+softDeleteTransaction:
+UPDATE TransactionDetailEntity SET deletedAt = :deletedAt WHERE id = :id AND deletedAt IS NULL;
+
+restoreTransaction:
+UPDATE TransactionDetailEntity SET deletedAt = NULL WHERE id = :id;
+
 deleteTransaction:
 DELETE FROM TransactionDetailEntity WHERE id = :id;
+
+permanentlyDeleteTransaction:
+DELETE FROM TransactionDetailEntity WHERE id = :id AND deletedAt IS NOT NULL;
+
+purgeOldDeletedTransactions:
+DELETE FROM TransactionDetailEntity WHERE deletedAt IS NOT NULL AND deletedAt < :cutoffMs;
 
 changeCategory:
 UPDATE TransactionDetailEntity SET categoryId = :newCategory WHERE categoryId = :oldCategory;
 
 numberOfTransactionsByCategory:
-SELECT COUNT(*) AS count FROM TransactionDetailEntity WHERE categoryId = :category;
+SELECT COUNT(*) AS count FROM TransactionDetailEntity WHERE deletedAt IS NULL AND categoryId = :category;
+
+getDeletedTransactionsWithDetails:
+SELECT
+    t.id, t.type, t.amount, t.categoryId, t.accountId, t.createdAt, t.note, t.place, t.deletedAt,
+    c.label AS categoryLabel, c.type AS categoryType, c.iconRes AS categoryIconRes, c.color AS categoryColor,
+    a.name AS accountName, a.type AS accountType, a.isDefault AS accountIsDefault
+FROM TransactionDetailEntity t
+INNER JOIN CategoryEntity c ON t.categoryId = c.id
+INNER JOIN AccountEntity a ON t.accountId = a.id
+WHERE t.deletedAt IS NOT NULL
+ORDER BY t.deletedAt DESC
+LIMIT :limit OFFSET :offset;
+
+getDeletedTransactionsCount:
+SELECT COUNT(*) FROM TransactionDetailEntity WHERE deletedAt IS NOT NULL;
 
 getSumOfAmountByType:
-SELECT SUM(amount) AS sum FROM TransactionDetailEntity WHERE type = :type;
+SELECT SUM(amount) AS sum FROM TransactionDetailEntity WHERE deletedAt IS NULL AND type = :type;
 
 getSumOfAmountBetweenByType:
-SELECT SUM(amount) AS sum FROM TransactionDetailEntity WHERE type = :type
+SELECT SUM(amount) AS sum FROM TransactionDetailEntity WHERE deletedAt IS NULL AND type = :type
 AND createdAt >= :startUTCValue AND createdAt <= :endUTCValue;
+
+getOverallDataBetween:
+SELECT
+    COALESCE(SUM(CASE WHEN type = 'INCOME' THEN amount ELSE 0 END), 0) AS income,
+    COALESCE(SUM(CASE WHEN type = 'EXPENSE' THEN amount ELSE 0 END), 0) AS expense
+FROM TransactionDetailEntity
+WHERE deletedAt IS NULL AND createdAt >= :startUTCValue AND createdAt <= :endUTCValue;
 
 getAllCategories:
 SELECT * FROM CategoryEntity;
@@ -126,19 +202,20 @@ searchCategory:
 SELECT * FROM CategoryEntity WHERE label = :label AND type = :type;
 
 getTotalTransactionPerDayByTypeBetween:
-SELECT createdAt, categoryId, SUM(amount) AS totalAmount FROM TransactionDetailEntity WHERE type = :type AND createdAt >= :startUTCValue AND createdAt <= :endUTCValue GROUP BY createdAt, categoryId ORDER BY createdAt DESC;
+SELECT createdAt, categoryId, SUM(amount) AS totalAmount FROM TransactionDetailEntity WHERE deletedAt IS NULL AND type = :type AND createdAt >= :startUTCValue AND createdAt <= :endUTCValue GROUP BY createdAt, categoryId ORDER BY createdAt DESC;
 
 getTotalExpenseByCategoryBetween:
-SELECT categoryId, SUM(amount) AS totalAmount FROM TransactionDetailEntity WHERE type = "EXPENSE" AND createdAt >= :startUTCValue AND createdAt <= :endUTCValue GROUP BY categoryId ORDER BY totalAmount DESC;
+SELECT categoryId, SUM(amount) AS totalAmount FROM TransactionDetailEntity WHERE deletedAt IS NULL AND type = "EXPENSE" AND createdAt >= :startUTCValue AND createdAt <= :endUTCValue GROUP BY categoryId ORDER BY totalAmount DESC;
 
 getTotalAmountByCategoryAndTypeBetween:
-SELECT categoryId, SUM(amount) AS total FROM TransactionDetailEntity WHERE type = :type AND createdAt >= :startUTCValue AND createdAt <= :endUTCValue GROUP BY categoryId ORDER BY categoryId ASC;
+SELECT categoryId, SUM(amount) AS total FROM TransactionDetailEntity WHERE deletedAt IS NULL AND type = :type AND createdAt >= :startUTCValue AND createdAt <= :endUTCValue GROUP BY categoryId ORDER BY categoryId ASC;
 
 getTotalExpenseByCategoryInPeriod:
 SELECT COALESCE(SUM(amount), 0) AS totalAmount
 FROM TransactionDetailEntity
 WHERE
-   (:categoryId IS NULL OR categoryId = :categoryId)
+   deletedAt IS NULL
+   AND (:categoryId IS NULL OR categoryId = :categoryId)
    AND createdAt >= :startDate
    AND createdAt <= :endDate
    AND type = 'EXPENSE';
@@ -174,6 +251,9 @@ UPDATE AccountEntity SET name = ?, type = ? WHERE id = :id;
 deleteAccount:
 DELETE FROM AccountEntity WHERE id = ?;
 
+-- NOTE: BudgetEntity dates (startDate, endDate, createdAt, updatedAt) are stored in epoch SECONDS.
+-- TransactionDetailEntity.createdAt is stored in epoch MILLISECONDS.
+-- Spending queries that join both tables use millisecond parameters for filtering transactions.
 CREATE TABLE BudgetEntity (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     name TEXT NOT NULL,
@@ -217,13 +297,8 @@ WHERE id = ?;
 selectActiveBudgetsForPeriod:
 SELECT * FROM BudgetEntity
 WHERE isActive = 1
-AND (
-    -- Recurring budgets that are within their active window and relevant for the requested range
-    (isRecurring = 1 AND startDate <= ?2 AND (endDate IS NULL OR endDate >= ?1))
-    -- Non-recurring budgets that overlap the requested range
-    OR
-    (isRecurring = 0 AND startDate <= ?2 AND (endDate IS NULL OR endDate >= ?1))
-);
+AND startDate <= ?2
+AND (endDate IS NULL OR endDate >= ?1);
 
 insertBudget:
 INSERT INTO BudgetEntity (name, categoryId, amount, periodType, startDate, endDate, isRecurring, alertEnabled, alertThresholdPercentage)
@@ -255,6 +330,7 @@ LEFT JOIN TransactionDetailEntity t ON (
     AND t.createdAt >= ?
     AND t.createdAt <= ?
     AND t.type = 'EXPENSE'
+    AND t.deletedAt IS NULL
 )
 WHERE b.isActive = 1
 AND b.id = ?
@@ -266,7 +342,67 @@ SET lastAlertTriggeredAt = ?
 WHERE id = ?;
 
 getTransactionCountByAccount:
-SELECT COUNT(*) AS count FROM TransactionDetailEntity WHERE accountId = ?;
+SELECT COUNT(*) AS count FROM TransactionDetailEntity WHERE deletedAt IS NULL AND accountId = ?;
 
 changeAccount:
 UPDATE TransactionDetailEntity SET accountId = :newAccount WHERE accountId = :oldAccount;
+
+-- Fetch all active budgets with their spending aggregated in a single query
+getAllActiveBudgetsWithSpending:
+SELECT
+    b.id,
+    b.name,
+    b.categoryId,
+    b.amount,
+    b.periodType,
+    b.startDate,
+    b.endDate,
+    b.isRecurring,
+    b.createdAt,
+    b.updatedAt,
+    b.isActive,
+    b.alertEnabled,
+    b.alertThresholdPercentage,
+    b.lastAlertTriggeredAt,
+    COALESCE(SUM(CASE WHEN t.type = 'EXPENSE' THEN t.amount ELSE 0 END), 0) AS spentAmount
+FROM BudgetEntity b
+LEFT JOIN TransactionDetailEntity t ON (
+    (b.categoryId IS NULL OR b.categoryId = t.categoryId)
+    AND t.createdAt >= :startDate
+    AND t.createdAt <= :endDate
+    AND t.type = 'EXPENSE'
+    AND t.deletedAt IS NULL
+)
+WHERE b.isActive = 1
+GROUP BY b.id
+ORDER BY b.createdAt DESC;
+
+-- Fetch active budgets relevant to a specific category (category-specific + overall) with spending
+getActiveBudgetsWithSpendingForCategory:
+SELECT
+    b.id,
+    b.name,
+    b.categoryId,
+    b.amount,
+    b.periodType,
+    b.startDate,
+    b.endDate,
+    b.isRecurring,
+    b.createdAt,
+    b.updatedAt,
+    b.isActive,
+    b.alertEnabled,
+    b.alertThresholdPercentage,
+    b.lastAlertTriggeredAt,
+    COALESCE(SUM(CASE WHEN t.type = 'EXPENSE' THEN t.amount ELSE 0 END), 0) AS spentAmount
+FROM BudgetEntity b
+LEFT JOIN TransactionDetailEntity t ON (
+    (b.categoryId IS NULL OR b.categoryId = t.categoryId)
+    AND t.createdAt >= :startDate
+    AND t.createdAt <= :endDate
+    AND t.type = 'EXPENSE'
+    AND t.deletedAt IS NULL
+)
+WHERE b.isActive = 1
+AND (b.categoryId = :categoryId OR b.categoryId IS NULL)
+GROUP BY b.id;

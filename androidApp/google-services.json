@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "833564629783",
+    "project_id": "expense-tracker-aj",
+    "storage_bucket": "expense-tracker-aj.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:833564629783:android:5e4bd0973d1600d9907552",
+        "android_client_info": {
+          "package_name": "com.ajay.seenu.expensetracker.android"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkAh1WI7fErr3h4b4bo5v9iMszDdRClXs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

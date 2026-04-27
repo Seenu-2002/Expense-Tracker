@@ -54,6 +54,7 @@ import com.ajay.seenu.expensetracker.android.presentation.screeens.CategoryListS
 import com.ajay.seenu.expensetracker.android.presentation.screeens.ChangeAccountInTransactionScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.ChangeCategoryInTransactionScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.DetailTransactionScreen
+import com.ajay.seenu.expensetracker.android.presentation.screeens.TrashScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.TransactionScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.budget.AddEditBudgetArg
 import com.ajay.seenu.expensetracker.android.presentation.state.TransactionMode
@@ -101,13 +102,14 @@ class MainActivity : AppCompatActivity() {
         setContent {
             val theme by viewModel.theme.collectAsStateWithLifecycle()
             val isAppLockEnabled by viewModel.isAppLockEnabled.collectAsStateWithLifecycle()
+            val currencySymbol by viewModel.currencySymbol.collectAsStateWithLifecycle()
 
             val isDarkThemeEnabled = when (theme) {
                 Theme.LIGHT -> false
                 Theme.DARK -> true
                 Theme.SYSTEM_THEME -> isSystemInDarkTheme()
             }
-            ExpenseTrackerTheme(darkTheme = isDarkThemeEnabled) {
+            ExpenseTrackerTheme(darkTheme = isDarkThemeEnabled, currencySymbol = currencySymbol) {
                 val appColors = AppDefaults.colors()
                 CompositionLocalProvider(
                     LocalColors provides appColors
@@ -146,8 +148,8 @@ class MainActivity : AppCompatActivity() {
                                 val observer = LifecycleEventObserver { _, event ->
                                     if (event == Lifecycle.Event.ON_RESUME) {
                                         promptManager.showBiometricPrompt(
-                                            title = "Sample prompt",
-                                            description = "Sample prompt description"
+                                            title = "Unlock Expense Tracker",
+                                            description = "Authenticate to access your financial data"
                                         )
                                     }
                                 }
@@ -203,11 +205,21 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("UnrememberedGetBackStackEntry")
     @Composable
     fun App() {
-        checkAndRequestNotificationPermission()
+        LaunchedEffect(Unit) {
+            checkAndRequestNotificationPermission()
+        }
         val navController = rememberNavController()
         val budgetViewModel: BudgetViewModel = hiltViewModel()
         val context = LocalContext.current
-        val filter = FilterPreference.getCurrentFilter(context)
+        val filter = remember { FilterPreference.getCurrentFilter(context) }
+
+        LaunchedEffect(Unit) {
+            val navigateTo = intent?.getStringExtra("navigate_to")
+            if (navigateTo == "add_transaction") {
+                navController.navigate("${Screen.AddTransaction.route}/-1L/new")
+                intent?.removeExtra("navigate_to")
+            }
+        }
 
         NavHost(
             navController = navController,
@@ -239,6 +251,9 @@ class MainActivity : AppCompatActivity() {
                     },
                     onAccountListScreen = {
                         navController.navigate(Screen.AccountList.route)
+                    },
+                    onTrashScreen = {
+                        navController.navigate(Screen.Trash.route)
                     }
                 )
             }
@@ -431,6 +446,9 @@ class MainActivity : AppCompatActivity() {
                     transactionCount = count
                 )
             }
+            composable(Screen.Trash.route) {
+                TrashScreen(onBack = { navController.popBackStack() })
+            }
             composable("${Screen.AddBudget.route}/{budgetId}",
                 arguments = listOf(navArgument("budgetId") { type = NavType.LongType })
             )
@@ -514,7 +532,7 @@ class MainActivity : AppCompatActivity() {
                 Manifest.permission.POST_NOTIFICATIONS
             ) == PackageManager.PERMISSION_GRANTED
 
-            val hasAskedBefore = getSharedPreferences("app_prefs", MODE_PRIVATE)
+            val hasAskedBefore = getSharedPreferences("permission_prefs", MODE_PRIVATE)
                 .getBoolean("notification_permission_requested", false)
 
             if (!hasPermission && !hasAskedBefore) {

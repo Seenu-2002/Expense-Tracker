@@ -85,6 +85,8 @@ sqldelight {
     databases {
         create("ExpenseDatabase") {
             packageName.set("com.ajay.seenu.expensetracker")
+            schemaOutputDirectory.set(file("src/commonMain/sqldelight/migrations"))
+            verifyMigrations.set(true)
         }
     }
 }

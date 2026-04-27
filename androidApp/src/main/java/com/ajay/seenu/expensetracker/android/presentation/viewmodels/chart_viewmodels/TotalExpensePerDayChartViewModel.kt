@@ -13,9 +13,8 @@ import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -55,11 +54,10 @@ class TotalExpensePerDayChartViewModel @Inject constructor(
     private fun getData(filter: DateFilter) {
         viewModelScope.launch {
             _chartState.emit(ChartState.Fetching)
-            val data = async(Dispatchers.Default) {
-                delay((0 .. 400L).random())
-                val dateRange= dateRangeCalculatorUseCase(filter)
+            val data = withContext(Dispatchers.Default) {
+                val dateRange = dateRangeCalculatorUseCase(filter)
                 useCase(dateRange)
-            }.await()
+            }
 
             if (data.isEmpty()) {
                 return@launch _chartState.emit(ChartState.Failed.InSufficientData)
@@ -84,8 +82,10 @@ class TotalExpensePerDayChartViewModel @Inject constructor(
     }
 
     fun setFilter(filter: DateFilter) {
-        this.filter = filter
-        getData(filter)
+        if (!this::filter.isInitialized || this.filter != filter) {
+            this.filter = filter
+            getData(filter)
+        }
     }
 
 }

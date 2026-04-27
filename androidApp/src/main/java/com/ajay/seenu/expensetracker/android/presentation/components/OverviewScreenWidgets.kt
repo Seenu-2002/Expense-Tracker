@@ -50,6 +50,7 @@ import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.presentation.common.PreviewThemeWrapper
 import com.ajay.seenu.expensetracker.android.presentation.screeens.CategoryIconItem
 import com.ajay.seenu.expensetracker.android.presentation.theme.LocalColors
+import com.ajay.seenu.expensetracker.android.presentation.theme.LocalCurrencySymbol
 import com.ajay.seenu.expensetracker.domain.model.Account
 import com.ajay.seenu.expensetracker.domain.model.AccountType
 import com.ajay.seenu.expensetracker.domain.model.Category
@@ -108,7 +109,7 @@ fun OverviewCard(
 
             Text(modifier = Modifier.padding(bottom = 4.dp), text = "Income", fontSize = 14.sp)
             Text(
-                text = "Rs. ${data.getIncomeLabel()}",
+                text = "${LocalCurrencySymbol.current} ${data.getIncomeLabel()}",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold
             )
@@ -134,7 +135,7 @@ fun OverviewCard(
 
             Text(modifier = Modifier.padding(bottom = 4.dp), text = "Expense", fontSize = 14.sp)
             Text(
-                text = "Rs. ${data.getExpenseLabel()}",
+                text = "${LocalCurrencySymbol.current} ${data.getExpenseLabel()}",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold
             )
@@ -280,6 +281,19 @@ fun TransactionPreviewRow(
     val swipeState = rememberSwipeToDismissBoxState(
         positionalThreshold = {
             it / 4
+        },
+        confirmValueChange = { value ->
+            when (value) {
+                SwipeToDismissBoxValue.EndToStart -> {
+                    onDelete.invoke()
+                    false
+                }
+                SwipeToDismissBoxValue.StartToEnd -> {
+                    onClone.invoke()
+                    false
+                }
+                SwipeToDismissBoxValue.Settled -> true
+            }
         }
     )
     lateinit var icon: @Composable () -> Unit
@@ -313,22 +327,6 @@ fun TransactionPreviewRow(
             color = Color.Blue.copy(alpha = 0.3f)
         }
     }
-    when (swipeState.currentValue) {
-        SwipeToDismissBoxValue.EndToStart -> {
-            onDelete.invoke()
-        }
-
-        SwipeToDismissBoxValue.StartToEnd -> {
-            LaunchedEffect(swipeState) {
-                onClone.invoke()
-                delay(100)
-                swipeState.snapTo(SwipeToDismissBoxValue.Settled)
-            }
-        }
-
-        SwipeToDismissBoxValue.Settled -> {
-        }
-    }
     SwipeToDismissBox(
         modifier = Modifier.animateContentSize(),
         state = swipeState,
@@ -345,88 +343,95 @@ fun TransactionPreviewRow(
             }
         }
     ) {
-        ConstraintLayout(
-            modifier
-                .background(MaterialTheme.colorScheme.background)
-                .padding(horizontal = 15.dp, vertical = 8.dp)
-                .clickable(
-                    remember { MutableInteractionSource() },
-                    null
-                ) {
-                    onClick.invoke()
-                }
-                .clip(RoundedCornerShape(15.dp))
-        ) {
-            val (icon, title, paymentType, amount) = createRefs()
+        TransactionPreviewContent(modifier = modifier, transaction = transaction, onClick = onClick)
+    }
+}
 
-            val decimalFormat = DecimalFormat("#0.00").apply {
-                decimalFormatSymbols.let {
-                    it.decimalSeparator = '.'
-                    it.groupingSeparator = ','
-                }
+@Composable
+fun TransactionPreviewContent(modifier: Modifier = Modifier,
+                              transaction: Transaction,
+                              onClick: () -> Unit,) {
+    ConstraintLayout(
+        modifier
+            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = 15.dp, vertical = 8.dp)
+            .clickable(
+                remember { MutableInteractionSource() },
+                null
+            ) {
+                onClick.invoke()
             }
-            var amountLabel = decimalFormat.format(transaction.amount)
-            val (rotation, color, iconSource) = if (transaction.type == TransactionType.EXPENSE) {
-                amountLabel = "- $amountLabel"
-                Triple(-90F, LocalColors.current.expenseColor, R.drawable.expense)
-            } else {
-                amountLabel = "+ $amountLabel"
-                Triple(90F, LocalColors.current.incomeColor, R.drawable.income)
+            .clip(RoundedCornerShape(15.dp))
+    ) {
+        val (icon, title, paymentType, amount) = createRefs()
+
+        val decimalFormat = DecimalFormat("#0.00").apply {
+            decimalFormatSymbols.let {
+                it.decimalSeparator = '.'
+                it.groupingSeparator = ','
             }
-
-            CategoryIconItem(
-                modifier = Modifier
-                    .size(60.dp)
-                    .constrainAs(icon) {
-                        top.linkTo(parent.top)
-                        start.linkTo(parent.start)
-                        bottom.linkTo(parent.bottom)
-                    }
-                    .padding(4.dp),
-                iconSize = 24.dp,
-                res = transaction.category.iconRes,
-                iconBackground = Color(transaction.category.color)
-            )
-
-            Text(
-                modifier = Modifier.constrainAs(title) {
-                    top.linkTo(parent.top, 5.dp)
-                    linkTo(
-                        start = icon.end,
-                        startMargin = 10.dp,
-                        end = amount.start,
-                        endMargin = 10.dp,
-                        bias = 0F
-                    )
-
-                }, text = transaction.category.label,
-                fontSize = 16.sp,
-                color = LocalContentColor.current
-            )
-            Text(
-                modifier = Modifier.constrainAs(paymentType) {
-                    bottom.linkTo(parent.bottom, 5.dp)
-                    linkTo(
-                        start = icon.end,
-                        startMargin = 10.dp,
-                        end = amount.start,
-                        endMargin = 10.dp,
-                        bias = 0F
-                    )
-                }, text = transaction.account.name,
-                color = LocalContentColor.current.copy(alpha = 0.5F),
-                fontSize = 13.sp
-            )
-            Text(
-                modifier = Modifier.constrainAs(amount) {
-                    top.linkTo(parent.top)
-                    end.linkTo(parent.end)
-                    bottom.linkTo(parent.bottom)
-                }, text = amountLabel,
-                color = color,
-                fontSize = 16.sp
-            )
         }
+        var amountLabel = decimalFormat.format(transaction.amount)
+        val color = if (transaction.type == TransactionType.EXPENSE) {
+            amountLabel = "- $amountLabel"
+            LocalColors.current.expenseColor
+        } else {
+            amountLabel = "+ $amountLabel"
+            LocalColors.current.incomeColor
+        }
+
+        CategoryIconItem(
+            modifier = Modifier
+                .size(60.dp)
+                .constrainAs(icon) {
+                    top.linkTo(parent.top)
+                    start.linkTo(parent.start)
+                    bottom.linkTo(parent.bottom)
+                }
+                .padding(4.dp),
+            iconSize = 24.dp,
+            res = transaction.category.iconRes,
+            iconBackground = Color(transaction.category.color)
+        )
+
+        Text(
+            modifier = Modifier.constrainAs(title) {
+                top.linkTo(parent.top, 5.dp)
+                linkTo(
+                    start = icon.end,
+                    startMargin = 10.dp,
+                    end = amount.start,
+                    endMargin = 10.dp,
+                    bias = 0F
+                )
+
+            }, text = transaction.category.label,
+            fontSize = 16.sp,
+            color = LocalContentColor.current
+        )
+        Text(
+            modifier = Modifier.constrainAs(paymentType) {
+                bottom.linkTo(parent.bottom, 5.dp)
+                linkTo(
+                    start = icon.end,
+                    startMargin = 10.dp,
+                    end = amount.start,
+                    endMargin = 10.dp,
+                    bias = 0F
+                )
+            }, text = transaction.account.name,
+            color = LocalContentColor.current.copy(alpha = 0.5F),
+            fontSize = 13.sp
+        )
+        Text(
+            modifier = Modifier.constrainAs(amount) {
+                top.linkTo(parent.top)
+                end.linkTo(parent.end)
+                bottom.linkTo(parent.bottom)
+            }, text = amountLabel,
+            color = color,
+            fontSize = 16.sp
+        )
     }
 }
 

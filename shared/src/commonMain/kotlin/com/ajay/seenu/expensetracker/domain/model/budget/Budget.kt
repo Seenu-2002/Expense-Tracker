@@ -11,10 +11,10 @@ data class Budget @OptIn(ExperimentalTime::class) constructor(
     val periodType: String,
     val startDate: Instant,
     val endDate: Instant?,
-    val isRecurring: Long,
+    val isRecurring: Boolean,
     val createdAt: Instant,
     val updatedAt: Instant,
-    val isActive: Long,
+    val isActive: Boolean,
     val alertEnabled: Boolean,
     val alertThresholdPercentage: Double,
     val lastAlertTriggeredAt: Instant?

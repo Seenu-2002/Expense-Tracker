@@ -2,6 +2,7 @@ package com.ajay.seenu.expensetracker.data.repository
 
 import com.ajay.seenu.expensetracker.AttachmentEntity
 import com.ajay.seenu.expensetracker.data.data_source.AttachmentDateSource
+import com.ajay.seenu.expensetracker.data.data_source.AttachmentInsertParams
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
@@ -31,7 +32,7 @@ class AttachmentRepository constructor(
         size: Long,
         imageUri: String
     ): Boolean {
-        withContext(Dispatchers.IO) {
+        return withContext(Dispatchers.IO) {
             val currentAttachments = localDataSource.getAllAttachmentsForTransaction(transactionId)
             if (currentAttachments.size < 5) {
                 localDataSource.insertAttachment(
@@ -43,10 +44,10 @@ class AttachmentRepository constructor(
                     imageUri = imageUri
                 )
                 true
-            } else
+            } else {
                 false
+            }
         }
-        return false
     }
 
     suspend fun deleteAttachmentById(id: Long) {
@@ -58,6 +59,15 @@ class AttachmentRepository constructor(
     suspend fun deleteAttachmentsByTransactionId(id: Long) {
         withContext(Dispatchers.IO) {
             localDataSource.deleteAttachmentsByTransactionId(id)
+        }
+    }
+
+    suspend fun deleteAndReinsertAttachments(
+        transactionId: Long,
+        attachments: List<AttachmentInsertParams>
+    ) {
+        withContext(Dispatchers.IO) {
+            localDataSource.deleteAndReinsertAttachments(transactionId, attachments)
         }
     }
 

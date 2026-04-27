@@ -11,7 +11,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SplashViewModel @Inject constructor(userConfigurationsManager: UserConfigurationsManager) : ThemeAwareViewModel(userConfigurationsManager) {
 
-    private val _isUserLoggedIn: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    private val _isUserLoggedIn: MutableStateFlow<Boolean?> = MutableStateFlow(null)
     val isUserLoggedIn = _isUserLoggedIn.asStateFlow()
 
     override fun init() {

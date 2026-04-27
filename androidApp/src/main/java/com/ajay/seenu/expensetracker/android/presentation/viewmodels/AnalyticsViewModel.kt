@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.ajay.seenu.expensetracker.android.data.FilterPreference
 import com.ajay.seenu.expensetracker.domain.model.DateFilter
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,7 +16,9 @@ import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
-class AnalyticsViewModel @Inject constructor() : ViewModel() {
+class AnalyticsViewModel @Inject constructor(
+    @ApplicationContext private val context: Context
+) : ViewModel() {
 
     val chartOrder: List<Charts> = Charts.entries
 
@@ -24,7 +27,7 @@ class AnalyticsViewModel @Inject constructor() : ViewModel() {
 
     private val _updatedDateFormat: MutableStateFlow<String> = MutableStateFlow("dd MMM, yyyy")
 
-    fun setFilter(context: Context, filter: DateFilter) {
+    fun setFilter(filter: DateFilter) {
         FilterPreference.setCurrentFilter(context, filter)
         viewModelScope.launch {
             _currentFilter.emit(filter)

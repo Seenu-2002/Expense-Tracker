@@ -83,7 +83,12 @@ class CategoryScreenViewModel @Inject constructor(
 
     fun deleteCategory(id: Long) {
         viewModelScope.launch {
-            deleteCategoryUseCase.invoke(id)
+            try {
+                deleteCategoryUseCase.invoke(id)
+            } catch (e: Exception) {
+                Timber.e(e, "Error deleting category")
+                _categoriesUiData.emit(UiState.Failure(Error.Unhandled(e)))
+            }
         }
     }
 

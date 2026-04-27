@@ -7,11 +7,13 @@ import com.ajay.seenu.expensetracker.ExpenseDatabase
 import com.ajay.seenu.expensetracker.createDatabase
 import com.ajay.seenu.expensetracker.data.data_source.AccountDataSource
 import com.ajay.seenu.expensetracker.data.data_source.AttachmentDateSource
+import com.ajay.seenu.expensetracker.data.data_source.BudgetDataSource
 import com.ajay.seenu.expensetracker.data.data_source.CategoryDataSource
 import com.ajay.seenu.expensetracker.data.data_source.ExportDataSource
 import com.ajay.seenu.expensetracker.data.data_source.TransactionDataSource
 import com.ajay.seenu.expensetracker.data.data_source.local.AccountLocalDataSource
 import com.ajay.seenu.expensetracker.data.data_source.local.AttachmentLocalDataSource
+import com.ajay.seenu.expensetracker.data.data_source.local.BudgetLocalDataSource
 import com.ajay.seenu.expensetracker.data.data_source.local.CategoryLocalDataSource
 import com.ajay.seenu.expensetracker.data.data_source.local.ExportLocalDataSource
 import com.ajay.seenu.expensetracker.data.data_source.local.TransactionLocalDataSource
@@ -92,8 +94,14 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideBudgetRepository(database: ExpenseDatabase): BudgetRepository {
-        return BudgetRepository(database)
+    fun provideBudgetLocalDataSource(database: ExpenseDatabase): BudgetDataSource {
+        return BudgetLocalDataSource(database)
+    }
+
+    @Provides
+    @Singleton
+    fun provideBudgetRepository(dataSource: BudgetDataSource): BudgetRepository {
+        return BudgetRepository(dataSource)
     }
 
     @Provides

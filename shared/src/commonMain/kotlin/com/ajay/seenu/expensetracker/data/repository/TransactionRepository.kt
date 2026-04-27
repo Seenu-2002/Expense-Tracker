@@ -1,6 +1,7 @@
 package com.ajay.seenu.expensetracker.data.repository
 
 import co.touchlab.kermit.Logger
+import com.ajay.seenu.expensetracker.GetDeletedTransactionsWithDetails
 import com.ajay.seenu.expensetracker.GetTotalAmountByCategoryAndTypeBetween
 import com.ajay.seenu.expensetracker.GetTotalExpenseByCategoryBetween
 import com.ajay.seenu.expensetracker.TransactionDetailEntity
@@ -22,8 +23,10 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
+
 
 @OptIn(ExperimentalTime::class)
 class TransactionRepository constructor(
@@ -34,9 +37,8 @@ class TransactionRepository constructor(
 
     suspend fun getAllTransactions(pageNo: Int, count: Int): PaginationData<List<Transaction>> {
         return withContext(Dispatchers.IO) {
-            val paginationData = transactionLocalDataSource.getAllTransactions(pageNo, count)
-            val transactions = parseTransactions(paginationData.data)
-            PaginationData(transactions, paginationData.hasMoreData)
+            val paginationData = transactionLocalDataSource.getAllTransactionsWithDetails(pageNo, count)
+            PaginationData(paginationData.data.map { it.toDomain() }, paginationData.hasMoreData)
         }
     }
 
@@ -45,9 +47,8 @@ class TransactionRepository constructor(
         count: Int
     ): Flow<PaginationData<List<Transaction>>> {
         return withContext(Dispatchers.IO) {
-            transactionLocalDataSource.getAllTransactionsAsFlow(pageNo, count).map {
-                val transactions = parseTransactions(it.data)
-                PaginationData(transactions, it.hasMoreData)
+            transactionLocalDataSource.getAllTransactionsWithDetailsAsFlow(pageNo, count).map {
+                PaginationData(it.data.map { row -> row.toDomain() }, it.hasMoreData)
             }
         }
     }
@@ -58,32 +59,33 @@ class TransactionRepository constructor(
         dateRange: DateRange
     ): Flow<PaginationData<List<Transaction>>> {
         return withContext(Dispatchers.IO) {
-            transactionLocalDataSource.getAllTransactionsBetweenAsFlow(
+            transactionLocalDataSource.getAllTransactionsBetweenWithDetailsAsFlow(
                 pageNo,
                 count,
                 dateRange.start.toEpochMillis(),
                 dateRange.end.toEpochMillis()
             ).map {
-                val transactions = parseTransactions(it.data)
-                PaginationData(transactions, it.hasMoreData)
+                PaginationData(it.data.map { row -> row.toDomain() }, it.hasMoreData)
             }
         }
     }
 
-    private suspend fun parseTransactions(transactions: List<TransactionDetailEntity>): List<Transaction> {
-        val categories = categoryRepository.getAllCategories().associateBy { it.id }
-        val accounts = accountRepository.getAllAccounts().associateBy { it.id }
-        return transactions.mapNotNull { transaction ->
-            val category = categories[transaction.categoryId] ?: run {
-                Logger.e("Category(${transaction.categoryId}) not found for transaction: ${transaction.id}")
-                return@mapNotNull null
+    suspend fun searchTransactionsBetween(
+        pageNo: Int,
+        count: Int,
+        dateRange: DateRange,
+        query: String
+    ): Flow<PaginationData<List<Transaction>>> {
+        return withContext(Dispatchers.IO) {
+            transactionLocalDataSource.searchTransactionsBetweenWithDetailsAsFlow(
+                pageNo,
+                count,
+                dateRange.start.toEpochMillis(),
+                dateRange.end.toEpochMillis(),
+                query
+            ).map {
+                PaginationData(it.data.map { row -> row.toDomain() }, it.hasMoreData)
             }
-
-            val account = accounts[transaction.accountId] ?: run {
-                Logger.e("Account(${transaction.accountId}) not found for transaction: ${transaction.id}")
-                return@mapNotNull null
-            }
-            transaction.toDomain(category = category, account = account)
         }
     }
 
@@ -153,28 +155,53 @@ class TransactionRepository constructor(
         }
     }
 
+    suspend fun softDeleteTransaction(id: Long) {
+        withContext(Dispatchers.IO) {
+            val deletedAt = Clock.System.now().toEpochMilliseconds()
+            transactionLocalDataSource.softDeleteTransaction(id, deletedAt)
+        }
+    }
+
+    suspend fun restoreTransaction(id: Long) {
+        withContext(Dispatchers.IO) {
+            transactionLocalDataSource.restoreTransaction(id)
+        }
+    }
+
+    suspend fun getDeletedTransactions(
+        pageNo: Int,
+        count: Int
+    ): Flow<PaginationData<List<Transaction>>> {
+        return withContext(Dispatchers.IO) {
+            transactionLocalDataSource.getDeletedTransactionsWithDetails(pageNo, count).map {
+                PaginationData(it.data.map { row -> row.toDomain() }, it.hasMoreData)
+            }
+        }
+    }
+
+    suspend fun permanentlyDeleteTransaction(id: Long) {
+        withContext(Dispatchers.IO) {
+            transactionLocalDataSource.permanentlyDeleteTransaction(id)
+        }
+    }
+
+    suspend fun purgeOldDeletedTransactions(cutoffMs: Long) {
+        withContext(Dispatchers.IO) {
+            transactionLocalDataSource.purgeOldDeletedTransactions(cutoffMs)
+        }
+    }
+
     suspend fun deleteTransaction(id: Long) {
         withContext(Dispatchers.IO) {
             transactionLocalDataSource.deleteTransaction(id)
         }
     }
 
-    suspend fun getOverallDataBetween(dateRange: DateRange): OverallData {
-        return withContext(Dispatchers.IO) {
-            val start = dateRange.start.toEpochMillis()
-            val end = dateRange.end.toEpochMillis()
-            val income = transactionLocalDataSource.getSumOfAmountBetweenByType(
-                TransactionTypeEntity.INCOME,
-                start,
-                end
-            )
-            val expense = transactionLocalDataSource.getSumOfAmountBetweenByType(
-                TransactionTypeEntity.EXPENSE,
-                start,
-                end
-            )
-            OverallData(income = income, expense = expense)
-        }
+    fun getOverallDataBetween(dateRange: DateRange): Flow<OverallData> {
+        return transactionLocalDataSource.getOverallDataBetweenAsFlow(
+            dateRange.start.toEpochMillis(),
+            dateRange.end.toEpochMillis()
+        ).map { OverallData(income = it.income, expense = it.expense) }
     }
 
     suspend fun getTotalTransactionPerDayByType(
@@ -189,9 +216,13 @@ class TransactionRepository constructor(
                 dateRange.end.toEpochMillis()
             ).mapNotNull {
                 it.totalAmount?.let { sum ->
+                    val category = categories.find { category -> category.id == it.categoryId } ?: run {
+                        Logger.e("Category(${it.categoryId}) not found for daily aggregate, skipping")
+                        return@mapNotNull null
+                    }
                     ExpensePerDay(
                         Instant.fromEpochMilliseconds(it.createdAt),
-                        categories.find { category -> category.id == it.categoryId }!!,
+                        category,
                         sum
                     )
                 }

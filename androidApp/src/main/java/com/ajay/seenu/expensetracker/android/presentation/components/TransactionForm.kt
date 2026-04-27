@@ -73,6 +73,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.FileProvider
 import com.ajay.seenu.expensetracker.android.R
+import com.ajay.seenu.expensetracker.android.presentation.theme.LocalCurrencySymbol
 import com.ajay.seenu.expensetracker.android.presentation.common.PreviewThemeWrapper
 import com.ajay.seenu.expensetracker.android.presentation.common.TransactionFieldView
 import com.ajay.seenu.expensetracker.android.presentation.screeens.AttachmentsView
@@ -218,6 +219,9 @@ fun TransactionForm(
     var description by remember {
         mutableStateOf(transaction?.note ?: "")
     }
+    var place by remember {
+        mutableStateOf(transaction?.place ?: "")
+    }
     var date by remember {
         mutableStateOf(transaction?.createdAt ?: kotlin.time.Clock.System.now())
     }
@@ -229,8 +233,8 @@ fun TransactionForm(
     }
 
     val datePickerState by remember {
-        // FIXME: Year is hardcoded
-        mutableStateOf(DatePickerState(Locale.ENGLISH, null, null, 2020..2025, DisplayMode.Picker))
+        val currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)
+        mutableStateOf(DatePickerState(Locale.ENGLISH, null, null, 2015..(currentYear + 1), DisplayMode.Picker))
     }
     val focusRequester = remember {
         FocusRequester()
@@ -399,7 +403,7 @@ fun TransactionForm(
                         value = amount,
                         prefix = {
                             Text(
-                                text = "$",
+                                text = LocalCurrencySymbol.current,
                                 style = LocalTextStyle.current.copy(
                                     color = Color.White,
                                     fontSize = 60.sp
@@ -550,6 +554,26 @@ fun TransactionForm(
                                 unfocusedBorderColor = LocalContentColor.current.copy(alpha = 0.2F)
                             )
                         )
+                        OutlinedTextField(
+                            modifier = Modifier.fillMaxWidth(),
+                            value = place,
+                            maxLines = 1,
+                            singleLine = true,
+                            label = {
+                                Text(
+                                    text = "Place",
+                                    color = LocalContentColor.current.copy(alpha = 0.5F)
+                                )
+                            },
+                            textStyle = LocalTextStyle.current,
+                            onValueChange = {
+                                place = it
+                            },
+                            shape = RoundedCornerShape(10.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                unfocusedBorderColor = LocalContentColor.current.copy(alpha = 0.2F)
+                            )
+                        )
                         AttachmentsView(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -586,6 +610,7 @@ fun TransactionForm(
                                 account = selectedAccount,
                                 createdAt = date,
                                 note = description.ifBlank { null },
+                                place = place.ifBlank { null },
                             )
 
                             onAdd(newTransaction, attachments)

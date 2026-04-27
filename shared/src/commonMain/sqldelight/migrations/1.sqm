@@ -1,0 +1,1 @@
+ALTER TABLE TransactionDetailEntity ADD COLUMN deletedAt INTEGER;

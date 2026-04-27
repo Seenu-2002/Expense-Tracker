@@ -14,12 +14,16 @@ import com.ajay.seenu.expensetracker.domain.model.TransactionType
 import com.ajay.seenu.expensetracker.domain.usecase.DateRangeCalculatorUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.attachment.AddAttachmentUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.attachment.GetAttachmentsUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.attachment.ReplaceAttachmentsUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.AddTransactionUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.GetTransactionUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.UpdateTransactionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -45,7 +49,13 @@ class AddTransactionViewModel @Inject constructor(
     internal lateinit var addAttachmentUseCase: AddAttachmentUseCase
 
     @Inject
+    internal lateinit var replaceAttachmentsUseCase: ReplaceAttachmentsUseCase
+
+    @Inject
     internal lateinit var dateRangeCalculatorUseCase: DateRangeCalculatorUseCase
+
+    private val _events = MutableSharedFlow<AddTransactionEvent>(extraBufferCapacity = 1)
+    val events: SharedFlow<AddTransactionEvent> = _events.asSharedFlow()
 
     private val _transaction: MutableStateFlow<Transaction?> = MutableStateFlow(null)
     val transaction = _transaction.asStateFlow()
@@ -84,7 +94,8 @@ class AddTransactionViewModel @Inject constructor(
                         imageUri = attachment.imageUri
                     )
                 }
-                viewModelScope.launch {
+                _events.emit(AddTransactionEvent.TransactionSaved)
+                launch {
                     budgetMonitorService.checkBudgetExceeded(
                         transactionAmount = transaction.amount,
                         categoryId = transaction.category.id,
@@ -92,10 +103,9 @@ class AddTransactionViewModel @Inject constructor(
                     )
                 }
             } catch (exp: Exception) {
-                // FIXME: Show exception
                 Timber.e(exp, "Error adding transaction")
+                _events.emit(AddTransactionEvent.Error(exp.message ?: "Failed to save transaction"))
             }
-
         }
     }
 
@@ -106,30 +116,31 @@ class AddTransactionViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val transactionId = updateTransactionUseCase.invoke(transaction)
-                attachments.forEach { attachment ->
-                    addAttachmentUseCase.invoke(        //TODO: Update/Modify attachments for the transaction
-                        transactionId = transactionId,
-                        name = attachment.name,
-                        fileType = attachment.fileType,
-                        filePath = attachment.filePath,
-                        size = attachment.size,
-                        imageUri = attachment.imageUri
-                    )
-                }
+                replaceAttachmentsUseCase.invoke(transactionId, attachments)
+                _events.emit(AddTransactionEvent.TransactionSaved)
             } catch (exp: Exception) {
-                // FIXME: Show exception
+                Timber.e(exp, "Error updating transaction")
+                _events.emit(AddTransactionEvent.Error(exp.message ?: "Failed to update transaction"))
             }
-
         }
+    }
+
+    sealed class AddTransactionEvent {
+        data object TransactionSaved : AddTransactionEvent()
+        data class Error(val message: String) : AddTransactionEvent()
     }
 
     fun getTransaction(id: Long) {
         viewModelScope.launch {
-            getAttachmentsUseCase.invoke(id).collectLatest {
-                _attachments.emit(it)
+            launch {
+                getAttachmentsUseCase.invoke(id).collectLatest {
+                    _attachments.emit(it)
+                }
             }
-            getTransactionUseCase.invoke(id).collectLatest {
-                _transaction.emit(it)
+            launch {
+                getTransactionUseCase.invoke(id).collectLatest {
+                    _transaction.emit(it)
+                }
             }
         }
     }

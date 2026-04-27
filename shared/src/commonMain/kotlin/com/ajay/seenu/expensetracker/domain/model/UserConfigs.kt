@@ -8,7 +8,8 @@ data class UserConfigs constructor(
     val theme: Theme,
     val weekStartsFrom: DayOfWeek,
     val dateFormat: String,
-    val isAppLockEnabled: Boolean
+    val isAppLockEnabled: Boolean,
+    val currencySymbol: String = "$"
 )
 
 enum class Theme {

@@ -2,9 +2,15 @@ package com.ajay.seenu.expensetracker.data.data_source.local
 
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
+import app.cash.sqldelight.coroutines.mapToOne
 import com.ajay.seenu.expensetracker.AccountEntity
 import com.ajay.seenu.expensetracker.CategoryEntity
 import com.ajay.seenu.expensetracker.ExpenseDatabase
+import com.ajay.seenu.expensetracker.GetAllTransactionsBetweenWithDetails
+import com.ajay.seenu.expensetracker.GetAllTransactionsWithDetails
+import com.ajay.seenu.expensetracker.SearchTransactionsBetweenWithDetails
+import com.ajay.seenu.expensetracker.GetDeletedTransactionsWithDetails
+import com.ajay.seenu.expensetracker.GetOverallDataBetween
 import com.ajay.seenu.expensetracker.GetTotalAmountByCategoryAndTypeBetween
 import com.ajay.seenu.expensetracker.GetTotalExpenseByCategoryBetween
 import com.ajay.seenu.expensetracker.GetTotalTransactionPerDayByTypeBetween
@@ -110,6 +116,80 @@ class TransactionLocalDataSource constructor(
         }
     }
 
+    override fun getAllTransactionsWithDetails(
+        pageNo: Int,
+        count: Int
+    ): PaginationData<List<GetAllTransactionsWithDetails>> {
+        require(pageNo > 0) { "Page number should be greater than 0" }
+        require(count > 0) { "Count should be greater than 0" }
+
+        return queries.getAllTransactionsWithDetails((count + 1).toLong(), (pageNo - 1L) * count)
+            .executeAsList().let {
+                val hasMoreData = it.size > count
+                val data = if (hasMoreData) it.subList(0, count) else it
+                PaginationData(data, hasMoreData)
+            }
+    }
+
+    override fun getAllTransactionsWithDetailsAsFlow(
+        pageNo: Int,
+        count: Int
+    ): Flow<PaginationData<List<GetAllTransactionsWithDetails>>> {
+        require(pageNo > 0) { "Page number should be greater than 0" }
+        require(count > 0) { "Count should be greater than 0" }
+
+        return queries.getAllTransactionsWithDetails((count + 1).toLong(), (pageNo - 1L) * count)
+            .asFlow().mapToList(Dispatchers.IO).map {
+                val hasMoreData = it.size > count
+                val data = if (hasMoreData) it.subList(0, count) else it
+                PaginationData(data, hasMoreData)
+            }
+    }
+
+    override fun getAllTransactionsBetweenWithDetailsAsFlow(
+        pageNo: Int,
+        count: Int,
+        fromValue: Long,
+        toValue: Long
+    ): Flow<PaginationData<List<GetAllTransactionsBetweenWithDetails>>> {
+        require(pageNo > 0) { "Page number should be greater than 0" }
+        require(count > 0) { "Count should be greater than 0" }
+
+        return queries.getAllTransactionsBetweenWithDetails(
+            startUTCValue = fromValue,
+            endUTCValue = toValue,
+            limit = (count + 1).toLong(),
+            offset = (pageNo - 1L) * count
+        ).asFlow().mapToList(Dispatchers.IO).map {
+            val hasMoreData = it.size > count
+            val data = if (hasMoreData) it.subList(0, count) else it
+            PaginationData(data, hasMoreData)
+        }
+    }
+
+    override fun searchTransactionsBetweenWithDetailsAsFlow(
+        pageNo: Int,
+        count: Int,
+        fromValue: Long,
+        toValue: Long,
+        query: String
+    ): Flow<PaginationData<List<SearchTransactionsBetweenWithDetails>>> {
+        require(pageNo > 0) { "Page number should be greater than 0" }
+        require(count > 0) { "Count should be greater than 0" }
+
+        return queries.searchTransactionsBetweenWithDetails(
+            startUTCValue = fromValue,
+            endUTCValue = toValue,
+            query = "%$query%",
+            limit = (count + 1).toLong(),
+            offset = (pageNo - 1L) * count
+        ).asFlow().mapToList(Dispatchers.IO).map {
+            val hasMoreData = it.size > count
+            val data = if (hasMoreData) it.subList(0, count) else it
+            PaginationData(data, hasMoreData)
+        }
+    }
+
     override fun getAllTransactionsByType(
         type: TransactionTypeEntity,
         pageNo: Int,
@@ -170,6 +250,43 @@ class TransactionLocalDataSource constructor(
         return queries.getLastInsertTransactionRowId().executeAsOne()
     }
 
+    override fun softDeleteTransaction(id: Long, deletedAt: Long) {
+        queries.softDeleteTransaction(deletedAt = deletedAt, id = id)
+    }
+
+    override fun restoreTransaction(id: Long) {
+        queries.restoreTransaction(id)
+    }
+
+    override fun getDeletedTransactionsWithDetails(
+        pageNo: Int,
+        count: Int
+    ): Flow<PaginationData<List<GetDeletedTransactionsWithDetails>>> {
+        require(pageNo > 0) { "Page number should be greater than 0" }
+        require(count > 0) { "Count should be greater than 0" }
+
+        return queries.getDeletedTransactionsWithDetails(
+            limit = (count + 1).toLong(),
+            offset = (pageNo - 1L) * count
+        ).asFlow().mapToList(Dispatchers.IO).map {
+            val hasMoreData = it.size > count
+            val data = if (hasMoreData) it.subList(0, count) else it
+            PaginationData(data, hasMoreData)
+        }
+    }
+
+    override fun getDeletedTransactionsCount(): Long {
+        return queries.getDeletedTransactionsCount().executeAsOne()
+    }
+
+    override fun permanentlyDeleteTransaction(id: Long) {
+        queries.permanentlyDeleteTransaction(id)
+    }
+
+    override fun purgeOldDeletedTransactions(cutoffMs: Long) {
+        queries.purgeOldDeletedTransactions(cutoffMs)
+    }
+
     override fun deleteAllTransactions() {
         queries.deleteAllTransactions()
     }
@@ -196,6 +313,13 @@ class TransactionLocalDataSource constructor(
             startUTCValue = fromValue,
             endUTCValue = toValue
         ).executeAsOne().sum ?: 0.0
+    }
+
+    override fun getOverallDataBetweenAsFlow(startDate: Long, endDate: Long): Flow<GetOverallDataBetween> {
+        return queries.getOverallDataBetween(
+            startUTCValue = startDate,
+            endUTCValue = endDate
+        ).asFlow().mapToOne(Dispatchers.IO)
     }
 
     override fun getAllCategories(): List<CategoryEntity> {

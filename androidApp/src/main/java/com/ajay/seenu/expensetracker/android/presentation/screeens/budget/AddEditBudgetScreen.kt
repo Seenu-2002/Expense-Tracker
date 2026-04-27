@@ -59,6 +59,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ajay.seenu.expensetracker.android.R
+import com.ajay.seenu.expensetracker.android.presentation.theme.LocalCurrencySymbol
 import com.ajay.seenu.expensetracker.android.presentation.common.TransactionFieldView
 import com.ajay.seenu.expensetracker.domain.model.Category
 import com.ajay.seenu.expensetracker.domain.model.DateFilter
@@ -81,7 +82,7 @@ fun AddEditBudgetScreen(
         } ?: "")
     }
     var selectedCategory by remember { mutableStateOf(budget?.categoryId ?: categories.firstOrNull()?.id) }
-    var isRecurring by rememberSaveable { mutableStateOf(if (arg is AddEditBudgetArg.Edit) (arg.budget.isRecurring == 1L) else true) }
+    var isRecurring by rememberSaveable { mutableStateOf(if (arg is AddEditBudgetArg.Edit) arg.budget.isRecurring else true) }
     var receiveAlert by rememberSaveable { mutableStateOf(if(arg is AddEditBudgetArg.Edit) arg.budget.alertEnabled else true) }
     var showAmountError by rememberSaveable {
         mutableStateOf(false)
@@ -160,7 +161,7 @@ fun AddEditBudgetScreen(
                         value = amount,
                         innerTextField = innerTextField,
                         prefix = {
-                            Text(text = "$",
+                            Text(text = LocalCurrencySymbol.current,
                                 style = LocalTextStyle.current.copy(
                                     color = Color.White,
                                     fontSize = 60.sp

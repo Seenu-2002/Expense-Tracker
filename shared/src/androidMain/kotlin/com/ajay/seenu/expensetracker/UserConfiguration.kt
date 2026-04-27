@@ -23,6 +23,7 @@ actual class UserConfigurationsManager(private val appContext: Context) {
     private val dateFormat = stringPreferencesKey("DATE_FORMAT")
     private val userName = stringPreferencesKey("USER_NAME")
     private val userImagePath = stringPreferencesKey("USER_IMAGE_PATH")
+    private val currencySymbolKey = stringPreferencesKey("CURRENCY_SYMBOL")
     private val isUserLoggedIn = booleanPreferencesKey("isUserLoggedIn")
 
     private val dataStore = createDataStore(appContext)
@@ -76,7 +77,8 @@ actual class UserConfigurationsManager(private val appContext: Context) {
                     DayOfWeek.valueOf(startDayOfWeek)
                 } ?: DayOfWeek.SUNDAY,
                 dateFormat = it[dateFormat] ?: "dd MMM, yyyy",
-                isAppLockEnabled = it[isAppLockEnabled] ?: false
+                isAppLockEnabled = it[isAppLockEnabled] ?: false,
+                currencySymbol = it[currencySymbolKey] ?: "$"
             )
         }
     }
@@ -91,6 +93,7 @@ actual class UserConfigurationsManager(private val appContext: Context) {
             it[startDayOfWeek] = configs.weekStartsFrom.toString()
             it[dateFormat] = configs.dateFormat
             it[isAppLockEnabled] = configs.isAppLockEnabled
+            it[currencySymbolKey] = configs.currencySymbol
         }
     }
 
