@@ -5,6 +5,7 @@ import com.ajay.seenu.expensetracker.data.mapper.toDomain
 import com.ajay.seenu.expensetracker.data.mapper.toEntity
 import com.ajay.seenu.expensetracker.domain.model.Account
 import com.ajay.seenu.expensetracker.domain.model.AccountType
+import com.ajay.seenu.expensetracker.domain.model.AccountWithBalance
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
@@ -29,8 +30,16 @@ class AccountRepository constructor(
 
     suspend fun getAllAccountsAsFlow(): Flow<List<Account>> {
         return withContext(Dispatchers.IO) {
-            accountDataSource.getAllAccountsAsFlow().map {
-                it.map { entity -> entity.toDomain() }
+            accountDataSource.getAllAccountsAsFlow().map { list ->
+                list.map { it.toDomain() }
+            }
+        }
+    }
+
+    suspend fun getAllAccountsWithBalanceAsFlow(): Flow<List<AccountWithBalance>> {
+        return withContext(Dispatchers.IO) {
+            accountDataSource.getAllAccountsWithBalance().map { list ->
+                list.map { it.toDomain() }
             }
         }
     }
@@ -46,7 +55,8 @@ class AccountRepository constructor(
             accountDataSource.createAccount(
                 account.name,
                 account.type.toEntity(),
-                account.isDefault
+                account.isDefault,
+                account.initialBalance,
             )
         }
     }
@@ -57,6 +67,7 @@ class AccountRepository constructor(
                 account.id,
                 account.name,
                 account.type.toEntity(),
+                account.initialBalance,
             )
         }
     }

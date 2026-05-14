@@ -12,6 +12,7 @@ import com.ajay.seenu.expensetracker.domain.usecase.account.DeleteAccountUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.account.GetAccountUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.account.GetAccountsAsFlowUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.account.GetAccountsUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.account.GetAccountsWithBalanceAsFlowUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.account.InsertDefaultAccountsUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.account.UpdateAccountUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.attachment.AddAttachmentUseCase
@@ -202,6 +203,11 @@ object UseCaseModule {
     @Provides
     fun provideGetAccountsAsFlowUseCase(repository: AccountRepository): GetAccountsAsFlowUseCase {
         return GetAccountsAsFlowUseCase(repository)
+    }
+
+    @Provides
+    fun provideGetAccountsWithBalanceAsFlowUseCase(repository: AccountRepository): GetAccountsWithBalanceAsFlowUseCase {
+        return GetAccountsWithBalanceAsFlowUseCase(repository)
     }
 
     @Provides

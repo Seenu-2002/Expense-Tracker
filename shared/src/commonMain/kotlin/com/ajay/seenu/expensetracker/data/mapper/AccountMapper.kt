@@ -1,9 +1,11 @@
 package com.ajay.seenu.expensetracker.data.mapper
 
 import com.ajay.seenu.expensetracker.AccountEntity
+import com.ajay.seenu.expensetracker.GetAllAccountsWithBalance
 import com.ajay.seenu.expensetracker.data.model.AccountTypeEntity
 import com.ajay.seenu.expensetracker.domain.model.Account
 import com.ajay.seenu.expensetracker.domain.model.AccountType
+import com.ajay.seenu.expensetracker.domain.model.AccountWithBalance
 
 fun AccountEntity.toDomain(): Account {
     return Account(
@@ -11,6 +13,7 @@ fun AccountEntity.toDomain(): Account {
         name = name,
         isDefault = isDefault == 1L,
         type = type.toDomain(),
+        initialBalance = initialBalance,
     )
 }
 
@@ -20,6 +23,20 @@ fun Account.toEntity(): AccountEntity {
         name = name,
         isDefault = if (isDefault) 1L else 0L,
         type = type.toEntity(),
+        initialBalance = initialBalance,
+    )
+}
+
+fun GetAllAccountsWithBalance.toDomain(): AccountWithBalance {
+    return AccountWithBalance(
+        account = Account(
+            id = id,
+            name = name,
+            isDefault = isDefault == 1L,
+            type = type.toDomain(),
+            initialBalance = initialBalance,
+        ),
+        balance = balance
     )
 }
 

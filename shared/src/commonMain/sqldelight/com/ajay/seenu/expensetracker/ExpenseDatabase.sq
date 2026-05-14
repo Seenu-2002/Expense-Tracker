@@ -48,6 +48,7 @@ CREATE TABLE AccountEntity (
     name TEXT NOT NULL,
     type TEXT AS AccountTypeEntity NOT NULL,
     isDefault INTEGER DEFAULT 0 NOT NULL,
+    initialBalance REAL NOT NULL DEFAULT 0.0,
     UNIQUE (name, type) ON CONFLICT ABORT
 );
 
@@ -243,13 +244,21 @@ getAccountById:
 SELECT * FROM AccountEntity WHERE id = ?;
 
 createAccount:
-INSERT INTO AccountEntity (name, type, isDefault) VALUES (?, ?, ?);
+INSERT INTO AccountEntity (name, type, isDefault, initialBalance) VALUES (?, ?, ?, ?);
 
 updateAccount:
-UPDATE AccountEntity SET name = ?, type = ? WHERE id = :id;
+UPDATE AccountEntity SET name = ?, type = ?, initialBalance = ? WHERE id = :id;
 
 deleteAccount:
 DELETE FROM AccountEntity WHERE id = ?;
+
+getAllAccountsWithBalance:
+SELECT
+    a.id, a.name, a.type, a.isDefault, a.initialBalance,
+    a.initialBalance + COALESCE(SUM(CASE WHEN t.type = 'INCOME' THEN t.amount ELSE -t.amount END), 0) AS balance
+FROM AccountEntity a
+LEFT JOIN TransactionDetailEntity t ON t.accountId = a.id AND t.deletedAt IS NULL
+GROUP BY a.id;
 
 -- NOTE: BudgetEntity dates (startDate, endDate, createdAt, updatedAt) are stored in epoch SECONDS.
 -- TransactionDetailEntity.createdAt is stored in epoch MILLISECONDS.

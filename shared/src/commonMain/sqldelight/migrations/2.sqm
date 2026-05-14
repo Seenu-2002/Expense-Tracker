@@ -1,0 +1,1 @@
+ALTER TABLE AccountEntity ADD COLUMN initialBalance REAL NOT NULL DEFAULT 0.0;

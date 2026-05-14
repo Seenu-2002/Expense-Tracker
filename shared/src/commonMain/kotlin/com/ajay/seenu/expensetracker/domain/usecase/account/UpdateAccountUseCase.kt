@@ -7,11 +7,10 @@ class UpdateAccountUseCase constructor(
     private val accountRepository: AccountRepository
 ) {
 
-    suspend operator fun invoke(id: Long, name: String, type: AccountType) {
+    suspend operator fun invoke(id: Long, name: String, type: AccountType, initialBalance: Double) {
         val account = accountRepository.getAccountById(id)
             ?: throw IllegalArgumentException("Account with id $id not found")
-        val updatedAccount =
-            account.copy(name = name, type = type)
+        val updatedAccount = account.copy(name = name, type = type, initialBalance = initialBalance)
         accountRepository.updateAccount(updatedAccount)
     }
 
