@@ -249,14 +249,15 @@ fun PieChartLegendContainer(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        val values = TransactionType.entries.map { stringResource(it.getStringRes()) }
+        val filterableTypes = remember { TransactionType.entries.filter { it != TransactionType.TRANSFER } }
+        val values = filterableTypes.map { stringResource(it.getStringRes()) }
         SlidingSwitch(
             selectedValue = stringResource(selectedType.getStringRes()),
             values = values,
             modifier = Modifier.widthIn(max = 600.dp),
             shape = RoundedCornerShape(12.dp)
         ) { index, _ ->
-            val type = TransactionType.entries[index]
+            val type = filterableTypes[index]
             onTypeChanged(type)
         }
         val listState = rememberLazyListState()

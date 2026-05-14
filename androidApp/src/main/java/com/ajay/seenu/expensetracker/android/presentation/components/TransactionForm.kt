@@ -106,9 +106,12 @@ fun TransactionForm(
     ),
     selectedCategory: Category? = transaction?.category,
     selectedAccount: Account? = transaction?.account,
+    selectedToAccount: Account? = transaction?.toAccount,
+    categories: List<Category> = emptyList(),
     onCategoryClicked: (selectedValue: Category?) -> Unit,
     onTransactionTypeChanged: (type: TransactionType) -> Unit,
     onAccountClicked: (selectedValue: Account?) -> Unit,
+    onToAccountClicked: (selectedValue: Account?) -> Unit = {},
     onNavigateBack: () -> Unit,
     onAdd: (transaction: Transaction, attachments: List<Attachment>) -> Unit,
 ) {
@@ -249,6 +252,10 @@ fun TransactionForm(
         mutableStateOf(false)
     }
 
+    var showToAccountError by remember {
+        mutableStateOf(false)
+    }
+
     var showAmountError by remember {
         mutableStateOf(false)
     }
@@ -290,10 +297,10 @@ fun TransactionForm(
 
     val background = remember { Animatable(Color(0xFFFD3C4A)) }
     LaunchedEffect(transactionType) {
-        val color = if (transactionType == TransactionType.EXPENSE) {
-            Color(0xFFFD3C4A)
-        } else {
-            Color(0xFF00A86B)
+        val color = when (transactionType) {
+            TransactionType.EXPENSE -> Color(0xFFFD3C4A)
+            TransactionType.INCOME -> Color(0xFF00A86B)
+            TransactionType.TRANSFER -> Color(0xFF1A73E8)
         }
         background.animateTo(color, animationSpec = tween(animationDuration))
     }
@@ -486,30 +493,55 @@ fun TransactionForm(
                                 }
                             }
                         )
-                        TransactionFieldView(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 5.dp),
-                            text = selectedCategory?.label
-                                ?: stringResource(id = R.string.category),
-                            color = LocalContentColor.current.copy(alpha = selectedCategory?.label?.let { 1F }
-                                ?: 0.5F),
-                            onClick = {
-                                onCategoryClicked.invoke(selectedCategory)
-                            },
-                            isError = showCategoryError,
-                            errorView = {
-                                if (showCategoryError) {
-                                    Text(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(bottom = 10.dp),
-                                        text = "Select a valid Category", // FIXME: String resource
-                                        color = MaterialTheme.colorScheme.error
-                                    )
+                        if (transactionType == TransactionType.TRANSFER) {
+                            TransactionFieldView(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 5.dp),
+                                text = selectedToAccount?.name ?: "To Account",
+                                color = LocalContentColor.current.copy(
+                                    alpha = if (selectedToAccount != null) 1F else 0.5F
+                                ),
+                                onClick = { onToAccountClicked.invoke(selectedToAccount) },
+                                isError = showToAccountError,
+                                errorView = {
+                                    if (showToAccountError) {
+                                        Text(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(bottom = 10.dp),
+                                            text = "Select a valid destination account",
+                                            color = MaterialTheme.colorScheme.error
+                                        )
+                                    }
                                 }
-                            }
-                        )
+                            )
+                        } else {
+                            TransactionFieldView(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 5.dp),
+                                text = selectedCategory?.label
+                                    ?: stringResource(id = R.string.category),
+                                color = LocalContentColor.current.copy(alpha = selectedCategory?.label?.let { 1F }
+                                    ?: 0.5F),
+                                onClick = {
+                                    onCategoryClicked.invoke(selectedCategory)
+                                },
+                                isError = showCategoryError,
+                                errorView = {
+                                    if (showCategoryError) {
+                                        Text(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(bottom = 10.dp),
+                                            text = "Select a valid Category",
+                                            color = MaterialTheme.colorScheme.error
+                                        )
+                                    }
+                                }
+                            )
+                        }
                         OutlinedTextField(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -590,24 +622,36 @@ fun TransactionForm(
 
                     Button(
                         onClick = {
+                            val isTransfer = transactionType == TransactionType.TRANSFER
                             if (selectedAccount == null) {
                                 showAccountTypeError = true
                             }
-                            if (selectedCategory == null) {
-                                showCategoryError = true
+                            if (isTransfer) {
+                                if (selectedToAccount == null || selectedToAccount == selectedAccount) {
+                                    showToAccountError = true
+                                }
+                            } else {
+                                if (selectedCategory == null) {
+                                    showCategoryError = true
+                                }
                             }
                             if (amount.toDoubleOrNull() == null) {
                                 showAmountError = true
                             }
-                            if (selectedCategory == null || selectedAccount == null || amount.toDoubleOrNull() == null)
+
+                            val transferCategory = if (isTransfer) categories.firstOrNull() else null
+                            val hasValidCategory = if (isTransfer) transferCategory != null else selectedCategory != null
+                            val hasValidToAccount = !isTransfer || (selectedToAccount != null && selectedToAccount != selectedAccount)
+                            if (!hasValidCategory || selectedAccount == null || amount.toDoubleOrNull() == null || !hasValidToAccount)
                                 return@Button
 
                             val newTransaction = Transaction(
                                 transaction?.id ?: 212L,
                                 transactionType,
                                 amount = amount.toDoubleOrNull() ?: 0.0,
-                                category = selectedCategory,
+                                category = if (isTransfer) transferCategory!! else selectedCategory!!,
                                 account = selectedAccount,
+                                toAccount = if (isTransfer) selectedToAccount else null,
                                 createdAt = date,
                                 note = description.ifBlank { null },
                                 place = place.ifBlank { null },

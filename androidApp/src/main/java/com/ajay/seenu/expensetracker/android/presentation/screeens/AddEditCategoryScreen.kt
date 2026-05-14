@@ -37,6 +37,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.mapSaver
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -255,7 +256,8 @@ fun AddEditCategoryScreen(
                     .matchParentSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                val values = TransactionType.entries.map { stringResource(it.getStringRes()) }
+                val filterableTypes = remember { TransactionType.entries.filter { it != TransactionType.TRANSFER } }
+                val values = filterableTypes.map { stringResource(it.getStringRes()) }
                 if (arg is AddEditCategoryScreenArg.Create) {
                     val type = arg.type
                     SlidingSwitch(
@@ -264,7 +266,7 @@ fun AddEditCategoryScreen(
                         modifier = Modifier.widthIn(max = 600.dp),
                         shape = RoundedCornerShape(32.dp)
                     ) { index, _ ->
-                        transactionType = TransactionType.entries[index]
+                        transactionType = filterableTypes[index]
                     }
                 }
 

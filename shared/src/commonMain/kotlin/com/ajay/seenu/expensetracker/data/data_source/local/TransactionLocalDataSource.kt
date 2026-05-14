@@ -211,6 +211,7 @@ class TransactionLocalDataSource constructor(
         amount: Double,
         category: CategoryEntity,
         account: AccountEntity,
+        toAccountId: Long?,
         createdAt: Long,
         note: String?,
         place: String?
@@ -220,6 +221,7 @@ class TransactionLocalDataSource constructor(
             amount = amount,
             categoryId = category.id,
             accountId = account.id,
+            toAccountId = toAccountId,
             note = note,
             createdAt = createdAt,
             place = place
@@ -233,6 +235,7 @@ class TransactionLocalDataSource constructor(
         amount: Double,
         category: CategoryEntity,
         account: AccountEntity,
+        toAccountId: Long?,
         createdAt: Long,
         note: String?,
         place: String?
@@ -243,6 +246,7 @@ class TransactionLocalDataSource constructor(
             amount = amount,
             categoryId = category.id,
             accountId = account.id,
+            toAccountId = toAccountId,
             note = note,
             createdAt = createdAt,
             place = place

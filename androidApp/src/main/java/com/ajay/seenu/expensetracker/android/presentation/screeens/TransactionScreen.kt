@@ -85,12 +85,19 @@ fun TransactionScreen(
     var selectedAccount: Account? by remember {
         mutableStateOf(null)
     }
+    var selectedToAccount: Account? by remember {
+        mutableStateOf(null)
+    }
 
     var showCategoriesBottomSheet by remember {
         mutableStateOf(false)
     }
 
     var showAccountBottomSheet by remember {
+        mutableStateOf(false)
+    }
+
+    var showToAccountBottomSheet by remember {
         mutableStateOf(false)
     }
 
@@ -104,6 +111,7 @@ fun TransactionScreen(
                 transaction?.let {
                     selectedCategory = it.category
                     selectedAccount = it.account
+                    selectedToAccount = it.toAccount
                     showForm = true
                 }
             }
@@ -112,6 +120,7 @@ fun TransactionScreen(
                 transaction?.let {
                     selectedCategory = it.category
                     selectedAccount = it.account
+                    selectedToAccount = it.toAccount
                     showForm = true
                 }
             }
@@ -120,23 +129,22 @@ fun TransactionScreen(
 
     if (showForm) {
         TransactionForm(
-            modifier = Modifier
-                .fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             transactionMode = transactionMode,
             transaction = transaction,
             existingAttachments = attachments,
-            onCategoryClicked = {
-                showCategoriesBottomSheet = true
-            },
+            onCategoryClicked = { showCategoriesBottomSheet = true },
             selectedCategory = selectedCategory,
             onTransactionTypeChanged = { type ->
                 selectedCategory = null
+                selectedToAccount = null
                 viewModel.getCategories(type)
             },
             selectedAccount = selectedAccount,
-            onAccountClicked = {
-                showAccountBottomSheet = true
-            },
+            onAccountClicked = { showAccountBottomSheet = true },
+            selectedToAccount = selectedToAccount,
+            onToAccountClicked = { showToAccountBottomSheet = true },
+            categories = categories,
             onNavigateBack = onNavigateBack,
             onAdd = { newTransaction, newAttachments ->
                 if (transactionMode is TransactionMode.Edit)
@@ -167,14 +175,25 @@ fun TransactionScreen(
     if (showAccountBottomSheet) {
         AccountsBottomSheet(
             state = accountBottomSheetState,
-            onDismiss = {
-                showAccountBottomSheet = false
-            },
+            onDismiss = { showAccountBottomSheet = false },
             selectedAccount = selectedAccount,
             accountsUiModel = AccountsListUiModel(accounts = accounts)
         ) { account ->
             selectedAccount = account
             showAccountBottomSheet = false
+        }
+    }
+
+    val toAccountBottomSheetState = rememberModalBottomSheetState(true)
+    if (showToAccountBottomSheet) {
+        AccountsBottomSheet(
+            state = toAccountBottomSheetState,
+            onDismiss = { showToAccountBottomSheet = false },
+            selectedAccount = selectedToAccount,
+            accountsUiModel = AccountsListUiModel(accounts = accounts)
+        ) { account ->
+            selectedToAccount = account
+            showToAccountBottomSheet = false
         }
     }
 }

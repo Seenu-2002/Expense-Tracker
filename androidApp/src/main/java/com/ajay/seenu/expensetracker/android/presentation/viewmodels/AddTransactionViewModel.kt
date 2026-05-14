@@ -95,12 +95,14 @@ class AddTransactionViewModel @Inject constructor(
                     )
                 }
                 _events.emit(AddTransactionEvent.TransactionSaved)
-                launch {
-                    budgetMonitorService.checkBudgetExceeded(
-                        transactionAmount = transaction.amount,
-                        categoryId = transaction.category.id,
-                        range = range
-                    )
+                if (transaction.type != TransactionType.TRANSFER) {
+                    launch {
+                        budgetMonitorService.checkBudgetExceeded(
+                            transactionAmount = transaction.amount,
+                            categoryId = transaction.category.id,
+                            range = range
+                        )
+                    }
                 }
             } catch (exp: Exception) {
                 Timber.e(exp, "Error adding transaction")

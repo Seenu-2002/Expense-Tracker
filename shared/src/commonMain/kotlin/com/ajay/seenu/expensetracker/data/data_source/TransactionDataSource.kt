@@ -71,6 +71,7 @@ interface TransactionDataSource {
         amount: Double,
         category: CategoryEntity,
         account: AccountEntity,
+        toAccountId: Long?,
         createdAt: Long,
         note: String?,
         place: String?
@@ -82,6 +83,7 @@ interface TransactionDataSource {
         amount: Double,
         category: CategoryEntity,
         account: AccountEntity,
+        toAccountId: Long?,
         createdAt: Long,
         note: String?,
         place: String?

@@ -10,6 +10,7 @@ fun TransactionType.getStringRes(): Int {
     return when (this) {
         TransactionType.INCOME -> R.string.income
         TransactionType.EXPENSE -> R.string.expense
+        TransactionType.TRANSFER -> R.string.transfer
     }
 }
 
@@ -17,6 +18,7 @@ fun TransactionType.getPlaceHolderRes(): Int {
     return when (this) {
         TransactionType.INCOME -> R.string.income_format
         TransactionType.EXPENSE -> R.string.expense_format
+        TransactionType.TRANSFER -> R.string.transfer_format
     }
 }
 
@@ -24,6 +26,7 @@ fun TransactionType.getColor(): Color {
     return when (this) {
         TransactionType.INCOME -> ChartDefaults.incomeColor
         TransactionType.EXPENSE -> ChartDefaults.expenseColor
+        TransactionType.TRANSFER -> Color(0xFF1A73E8)
     }
 }
 
@@ -31,6 +34,7 @@ fun TransactionType.getIconRes(): Int {
     return when (this) {
         TransactionType.INCOME -> R.drawable.income
         TransactionType.EXPENSE -> R.drawable.expense
+        TransactionType.TRANSFER -> R.drawable.baseline_import_export_24
     }
 }
 

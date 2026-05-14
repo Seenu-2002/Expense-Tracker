@@ -15,6 +15,7 @@ class AddTransactionUseCase constructor(
             transaction.amount,
             transaction.category,
             transaction.account,
+            transaction.toAccount,
             transaction.createdAt.toEpochMilliseconds(),
             transaction.note,
             transaction.place
