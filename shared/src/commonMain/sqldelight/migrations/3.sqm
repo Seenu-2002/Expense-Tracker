@@ -1,2 +1,0 @@
-ALTER TABLE TransactionDetailEntity ADD COLUMN toAccountId INTEGER REFERENCES AccountEntity(id) ON DELETE SET NULL;
-INSERT OR IGNORE INTO CategoryEntity (label, type, iconRes, color) VALUES ('Transfer', 'TRANSFER', 0, -16777216);
