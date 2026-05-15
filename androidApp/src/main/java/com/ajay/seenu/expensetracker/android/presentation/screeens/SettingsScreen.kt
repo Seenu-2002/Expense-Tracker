@@ -213,6 +213,7 @@ fun SettingsScreen(
             scope.launch {
                 currencyBottomSheet.hide()
             }
+            showCurrencyBottomSheet = false
             viewModel.changeCurrencySymbol(viewModel.supportedCurrencySymbols[index].first)
         }
     }

@@ -1,6 +1,7 @@
 package com.ajay.seenu.expensetracker.android.util
 
-import android.icu.text.NumberFormat
+import android.icu.text.DecimalFormat
+import android.icu.text.DecimalFormatSymbols
 import com.ajay.seenu.expensetracker.domain.model.UserConfigs
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -42,10 +43,11 @@ fun formatDateHeader(inputDate: String): String {
     }
 }
 
-fun Double.asCurrency(): String {
-    val formatter = NumberFormat.getCurrencyInstance(Locale.getDefault())
-    return formatter.format(this)
-}
+private val amountFormatter = DecimalFormat("#,##0.00", DecimalFormatSymbols(Locale.getDefault()))
+
+fun Double.formatAmount(): String = amountFormatter.format(this)
+
+fun Double.asCurrency(symbol: String): String = "$symbol${formatAmount()}"
 
 fun UserConfigs.getDateFormat(): SimpleDateFormat {
     return SimpleDateFormat(dateFormat, Locale.ENGLISH)

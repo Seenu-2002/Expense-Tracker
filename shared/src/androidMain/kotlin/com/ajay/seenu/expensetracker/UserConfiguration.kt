@@ -60,6 +60,13 @@ actual class UserConfigurationsManager(private val appContext: Context) {
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    actual fun getCurrencySymbolAsFlow(): Flow<String> {
+        return dataStore.data.mapLatest {
+            it[currencySymbolKey] ?: "$"
+        }
+    }
+
     @Throws(UserNotLoggedIn::class)
     actual suspend fun getConfigs(): UserConfigs {
         if (!isUserLoggedIn()) {

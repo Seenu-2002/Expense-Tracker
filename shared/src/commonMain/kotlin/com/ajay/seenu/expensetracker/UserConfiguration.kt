@@ -1,6 +1,7 @@
 package com.ajay.seenu.expensetracker
 
 import com.ajay.seenu.expensetracker.domain.model.UserConfigs
+import kotlinx.coroutines.flow.Flow
 
 
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
@@ -15,6 +16,8 @@ expect class UserConfigurationsManager {
     suspend fun getConfigs(): UserConfigs
 
     suspend fun storeConfigs(configs: UserConfigs)
+
+    fun getCurrencySymbolAsFlow(): Flow<String>
 
 }
 

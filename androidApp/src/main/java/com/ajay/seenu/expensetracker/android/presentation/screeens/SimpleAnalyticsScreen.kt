@@ -61,6 +61,7 @@ import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.PieCha
 import com.ajay.seenu.expensetracker.android.presentation.state.Error
 import com.ajay.seenu.expensetracker.android.presentation.state.UiState
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.SimpleAnalyticsViewModel
+import com.ajay.seenu.expensetracker.android.presentation.theme.LocalCurrencySymbol
 import com.ajay.seenu.expensetracker.android.util.asCurrency
 import com.ajay.seenu.expensetracker.android.util.getColor
 import com.ajay.seenu.expensetracker.android.util.getPlaceHolderRes
@@ -210,7 +211,7 @@ fun PieChartContainer(
     onChartEvent: (event: PieChartEvent) -> Unit
 ) {
     Box(modifier = modifier) {
-        val totalLabel = chartData.sum.asCurrency()
+        val totalLabel = chartData.sum.asCurrency(LocalCurrencySymbol.current)
         val style = PieChartStyle(
             strokeWidth = 28.dp,
             highlightStrokeWidth = 16.dp,
@@ -330,7 +331,7 @@ fun AnalyticsLegendRow(
                     .background(data.color, shape)
             )
 
-            val amount = stringResource(data.category.type.getPlaceHolderRes(), data.amount.asCurrency())
+            val amount = stringResource(data.category.type.getPlaceHolderRes(), data.amount.asCurrency(LocalCurrencySymbol.current))
             val color = data.category.type.getColor()
 
             Text(
