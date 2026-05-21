@@ -223,6 +223,19 @@ SELECT categoryId, SUM(amount) AS totalAmount FROM TransactionDetailEntity WHERE
 getTotalAmountByCategoryAndTypeBetween:
 SELECT categoryId, SUM(amount) AS total FROM TransactionDetailEntity WHERE deletedAt IS NULL AND type = :type AND createdAt >= :startUTCValue AND createdAt <= :endUTCValue GROUP BY categoryId ORDER BY categoryId ASC;
 
+getIncomeAndExpensePerDayBetween:
+SELECT
+    createdAt,
+    COALESCE(SUM(CASE WHEN type = 'INCOME' THEN amount ELSE 0 END), 0) AS income,
+    COALESCE(SUM(CASE WHEN type = 'EXPENSE' THEN amount ELSE 0 END), 0) AS expense
+FROM TransactionDetailEntity
+WHERE deletedAt IS NULL
+  AND type IN ('INCOME', 'EXPENSE')
+  AND createdAt >= :startUTCValue
+  AND createdAt <= :endUTCValue
+GROUP BY createdAt
+ORDER BY createdAt ASC;
+
 getTotalExpenseByCategoryInPeriod:
 SELECT COALESCE(SUM(amount), 0) AS totalAmount
 FROM TransactionDetailEntity
