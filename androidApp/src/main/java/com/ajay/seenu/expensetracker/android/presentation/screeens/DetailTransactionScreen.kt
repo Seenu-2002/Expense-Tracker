@@ -60,6 +60,7 @@ import coil3.compose.AsyncImagePainter
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.presentation.common.PreviewThemeWrapper
 import com.ajay.seenu.expensetracker.android.presentation.theme.LocalCurrencySymbol
+import com.ajay.seenu.expensetracker.android.util.asCurrency
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.DetailTransactionViewModel
 import com.ajay.seenu.expensetracker.domain.model.Account
 import com.ajay.seenu.expensetracker.domain.model.AccountType
@@ -158,7 +159,7 @@ fun DetailTransactionView(modifier: Modifier = Modifier,
                     .padding(top = 15.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = "${LocalCurrencySymbol.current}${transaction.amount}",
+                Text(text = transaction.amount.asCurrency(LocalCurrencySymbol.current),
                     style = TextStyle(
                         fontSize = 60.sp,
                         color = Color.White

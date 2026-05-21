@@ -366,14 +366,15 @@ fun CategoryListScreenContent(
             categoriesUiData.expenseCategories
         }
 
-        val values = TransactionType.entries.map { stringResource(it.getStringRes()) }
+        val filterableTypes = remember { TransactionType.entries.filter { it != TransactionType.TRANSFER } }
+        val values = filterableTypes.map { stringResource(it.getStringRes()) }
         SlidingSwitch(
             selectedValue = stringResource(selectedType.getStringRes()),
             values = values,
             modifier = Modifier.widthIn(max = 600.dp),
             shape = RoundedCornerShape(12.dp)
         ) { index, _ ->
-            val type = TransactionType.entries[index]
+            val type = filterableTypes[index]
             Timber.d("Switching to type: $type")
             onTypeChanged(type)
         }
@@ -398,23 +399,24 @@ fun CategoryListScreenContent(
             return@Column
         }
 
-
+        val selectedTypeIndex = filterableTypes.indexOf(selectedType).coerceAtLeast(0)
         val pagerState = rememberPagerState(pageCount = {
-            2
-        }, initialPage = selectedType.ordinal)
+            filterableTypes.size
+        }, initialPage = selectedTypeIndex)
 
         LaunchedEffect(pagerState) {
             snapshotFlow { pagerState.currentPage }.collect { page ->
                 Timber.d("Current page: $page")
-                val type = TransactionType.entries[page]
+                val type = filterableTypes[page]
                 onTypeChanged(type)
             }
         }
 
         LaunchedEffect(selectedType) {
-            if (pagerState.currentPage != selectedType.ordinal) {
+            val targetPage = filterableTypes.indexOf(selectedType).coerceAtLeast(0)
+            if (pagerState.currentPage != targetPage) {
                 Timber.d("Switching to type: $selectedType")
-                pagerState.animateScrollToPage(selectedType.ordinal, animationSpec = tween(500))
+                pagerState.animateScrollToPage(targetPage, animationSpec = tween(500))
             }
         }
 

@@ -24,6 +24,8 @@
     <string name="date_format_row">%1$s   ( %2$s )</string>
     <string name="income_format">+ %1$s</string>
     <string name="expense_format">- %1$s</string>
+    <string name="transfer_format">⇄ %1$s</string>
+    <string name="transfer">Transfer</string>
     <string name="analytics">Analytics</string>
     <string name="income">Income</string>
     <string name="expense">Expense</string>

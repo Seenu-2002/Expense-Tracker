@@ -4,6 +4,7 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import com.ajay.seenu.expensetracker.AccountEntity
 import com.ajay.seenu.expensetracker.ExpenseDatabase
+import com.ajay.seenu.expensetracker.GetAllAccountsWithBalance
 import com.ajay.seenu.expensetracker.data.data_source.AccountDataSource
 import com.ajay.seenu.expensetracker.data.model.AccountTypeEntity
 import kotlinx.coroutines.Dispatchers
@@ -24,32 +25,42 @@ class AccountLocalDataSource constructor(
     }
 
     override fun getAllAccountsAsFlow(): kotlinx.coroutines.flow.Flow<List<AccountEntity>> {
-        return queries.getAllAccounts().asFlow().mapToList(
-            Dispatchers.IO
-        )
+        return queries.getAllAccounts().asFlow().mapToList(Dispatchers.IO)
+    }
+
+    override fun getAllAccountsWithBalance(): kotlinx.coroutines.flow.Flow<List<GetAllAccountsWithBalance>> {
+        return queries.getAllAccountsWithBalance().asFlow().mapToList(Dispatchers.IO)
     }
 
     override fun getAccount(id: Long): AccountEntity? {
         return queries.getAccountById(id).executeAsOneOrNull()
     }
 
-    override fun createAccount(name: String, type: AccountTypeEntity, isDefault: Boolean) {
+    override fun createAccount(
+        name: String,
+        type: AccountTypeEntity,
+        isDefault: Boolean,
+        initialBalance: Double,
+    ) {
         return queries.createAccount(
             name = name,
             type = type,
-            isDefault = if (isDefault) 1 else 0
+            isDefault = if (isDefault) 1 else 0,
+            initialBalance = initialBalance,
         )
     }
 
     override fun updateAccount(
         id: Long,
         name: String,
-        type: AccountTypeEntity
+        type: AccountTypeEntity,
+        initialBalance: Double,
     ) {
         return queries.updateAccount(
             id = id,
             name = name,
-            type = type
+            type = type,
+            initialBalance = initialBalance,
         )
     }
 

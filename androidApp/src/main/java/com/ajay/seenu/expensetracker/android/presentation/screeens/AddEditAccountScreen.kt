@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -79,6 +80,9 @@ fun AddEditAccountScreen(arg: AddEditAccountScreenArg, onNavigateBack: () -> Uni
 
     var label by remember(account) { mutableStateOf(account?.name ?: "") }
     var type by remember(account) { mutableStateOf(account?.type ?: AccountType.CASH) }
+    var initialBalance by remember(account) {
+        mutableStateOf(account?.initialBalance?.let { if (it == 0.0) "" else it.toString() } ?: "")
+    }
     val context = LocalContext.current
 
     var showTypeBottomSheet by remember { mutableStateOf(false) }
@@ -108,8 +112,10 @@ fun AddEditAccountScreen(arg: AddEditAccountScreenArg, onNavigateBack: () -> Uni
                     // TODO: Backpress dispatcher
                     IconButton(onClick = {
 
+                        val parsedBalance = initialBalance.toDoubleOrNull() ?: 0.0
                         if (isInEditMode) {
-                            if (label != account?.name || type != account.type) {
+                            if (label != account?.name || type != account?.type ||
+                                parsedBalance != account?.initialBalance) {
                                 showExitDialog = true
                             } else {
                                 onNavigateBack()
@@ -143,10 +149,12 @@ fun AddEditAccountScreen(arg: AddEditAccountScreenArg, onNavigateBack: () -> Uni
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 onClick = {
                     if (label.isNotBlank()) {
+                        val parsedBalance = initialBalance.toDoubleOrNull() ?: 0.0
                         if (arg is AddEditAccountScreenArg.Edit) {
                             val account = account!!
-                            val hasChanges =
-                                account.name != label || account.type != type
+                            val hasChanges = account.name != label ||
+                                account.type != type ||
+                                account.initialBalance != parsedBalance
 
                             if (!hasChanges) {
                                 Toast.makeText(
@@ -160,12 +168,14 @@ fun AddEditAccountScreen(arg: AddEditAccountScreenArg, onNavigateBack: () -> Uni
                             viewModel.updateAccount(
                                 id = account.id,
                                 name = label,
-                                type = type
+                                type = type,
+                                initialBalance = parsedBalance,
                             )
                         } else {
                             viewModel.createAccount(
                                 name = label,
-                                type = type
+                                type = type,
+                                initialBalance = parsedBalance,
                             )
                         }
                     } else {
@@ -228,14 +238,14 @@ fun AddEditAccountScreen(arg: AddEditAccountScreenArg, onNavigateBack: () -> Uni
                     modifier = Modifier.fillMaxSize(),
                     label = label,
                     type = type,
+                    initialBalance = initialBalance,
                     isLabelError = showLabelError,
                     onLabelChanged = {
                         label = it
                         showLabelError = false
                     },
-                    onAccountClicked = {
-                        showTypeBottomSheet = true
-                    }
+                    onInitialBalanceChanged = { initialBalance = it },
+                    onAccountClicked = { showTypeBottomSheet = true }
                 )
             }
 
@@ -354,8 +364,10 @@ fun AccountForm(
     modifier: Modifier = Modifier,
     label: String = "",
     type: AccountType = AccountType.CASH,
+    initialBalance: String = "",
     isLabelError: Boolean = false,
     onLabelChanged: (String) -> Unit = {},
+    onInitialBalanceChanged: (String) -> Unit = {},
     onAccountClicked: () -> Unit = {},
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
@@ -366,19 +378,28 @@ fun AccountForm(
             value = label,
             onValueChange = onLabelChanged,
             isError = isLabelError,
-            placeholder = {
-                Text(stringResource(R.string.account_name))
-            },
-            keyboardOptions = KeyboardOptions(
-                KeyboardCapitalization.Words
-            )
+            placeholder = { Text(stringResource(R.string.account_name)) },
+            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words)
         )
         TransactionFieldView(
-            modifier = Modifier
-                .padding(8.dp),
+            modifier = Modifier.padding(8.dp),
             text = stringResource(type.getStringRes()),
             color = LocalContentColor.current,
             onClick = onAccountClicked
+        )
+        OutlinedTextField(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth(),
+            value = initialBalance,
+            onValueChange = { value ->
+                if (value.isEmpty() || value.matches(Regex("^-?\\d*\\.?\\d*$"))) {
+                    onInitialBalanceChanged(value)
+                }
+            },
+            placeholder = { Text("Initial balance (optional)") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            singleLine = true,
         )
     }
 }

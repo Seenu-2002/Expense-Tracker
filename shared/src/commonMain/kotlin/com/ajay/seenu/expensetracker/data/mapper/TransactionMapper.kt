@@ -14,16 +14,15 @@ import kotlin.time.Instant
 @OptIn(ExperimentalTime::class)
 fun TransactionDetailEntity.toDomain(
     category: Category,
-    account: Account
+    account: Account,
+    toAccount: Account? = null,
 ): Transaction {
     require(category.id == this.categoryId) {
         "Category ID mismatch: ${category.id} != ${this.categoryId}"
     }
-
     require(account.id == this.accountId) {
         "Account ID mismatch: ${account.id} != ${this.accountId}"
     }
-
     return Transaction(
         id = this.id,
         type = this.type.toDomain(),
@@ -32,7 +31,8 @@ fun TransactionDetailEntity.toDomain(
         account = account,
         createdAt = Instant.fromEpochMilliseconds(this.createdAt),
         note = this.note,
-        place = this.place
+        place = this.place,
+        toAccount = toAccount,
     )
 }
 
@@ -51,6 +51,14 @@ fun GetAllTransactionsWithDetails.toDomain(): Transaction {
         isDefault = accountIsDefault == 1L,
         type = accountType.toDomain()
     )
+    val toAccount = toAccountName?.let {
+        Account(
+            id = toAccountId!!,
+            name = it,
+            isDefault = toAccountIsDefault == 1L,
+            type = toAccountType!!.toDomain()
+        )
+    }
     return Transaction(
         id = id,
         type = type.toDomain(),
@@ -59,7 +67,8 @@ fun GetAllTransactionsWithDetails.toDomain(): Transaction {
         account = account,
         createdAt = Instant.fromEpochMilliseconds(createdAt),
         note = note,
-        place = place
+        place = place,
+        toAccount = toAccount,
     )
 }
 
@@ -78,6 +87,14 @@ fun GetAllTransactionsBetweenWithDetails.toDomain(): Transaction {
         isDefault = accountIsDefault == 1L,
         type = accountType.toDomain()
     )
+    val toAccount = toAccountName?.let {
+        Account(
+            id = toAccountId!!,
+            name = it,
+            isDefault = toAccountIsDefault == 1L,
+            type = toAccountType!!.toDomain()
+        )
+    }
     return Transaction(
         id = id,
         type = type.toDomain(),
@@ -86,7 +103,8 @@ fun GetAllTransactionsBetweenWithDetails.toDomain(): Transaction {
         account = account,
         createdAt = Instant.fromEpochMilliseconds(createdAt),
         note = note,
-        place = place
+        place = place,
+        toAccount = toAccount,
     )
 }
 
@@ -105,6 +123,14 @@ fun GetDeletedTransactionsWithDetails.toDomain(): Transaction {
         isDefault = accountIsDefault == 1L,
         type = accountType.toDomain()
     )
+    val toAccount = toAccountName?.let {
+        Account(
+            id = toAccountId!!,
+            name = it,
+            isDefault = toAccountIsDefault == 1L,
+            type = toAccountType!!.toDomain()
+        )
+    }
     return Transaction(
         id = id,
         type = type.toDomain(),
@@ -113,7 +139,8 @@ fun GetDeletedTransactionsWithDetails.toDomain(): Transaction {
         account = account,
         createdAt = Instant.fromEpochMilliseconds(createdAt),
         note = note,
-        place = place
+        place = place,
+        toAccount = toAccount,
     )
 }
 
@@ -132,6 +159,14 @@ fun SearchTransactionsBetweenWithDetails.toDomain(): Transaction {
         isDefault = accountIsDefault == 1L,
         type = accountType.toDomain()
     )
+    val toAccount = toAccountName?.let {
+        Account(
+            id = toAccountId!!,
+            name = it,
+            isDefault = toAccountIsDefault == 1L,
+            type = toAccountType!!.toDomain()
+        )
+    }
     return Transaction(
         id = id,
         type = type.toDomain(),
@@ -140,7 +175,8 @@ fun SearchTransactionsBetweenWithDetails.toDomain(): Transaction {
         account = account,
         createdAt = Instant.fromEpochMilliseconds(createdAt),
         note = note,
-        place = place
+        place = place,
+        toAccount = toAccount,
     )
 }
 
@@ -152,9 +188,10 @@ fun Transaction.toEntity(): TransactionDetailEntity {
         amount = this.amount,
         categoryId = this.category.id,
         accountId = this.account.id,
+        toAccountId = this.toAccount?.id,
         createdAt = this.createdAt.toEpochMilliseconds(),
         note = this.note,
         place = this.place,
-        deletedAt = null
+        deletedAt = null,
     )
 }

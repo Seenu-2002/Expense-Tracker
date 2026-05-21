@@ -44,7 +44,6 @@ class AddEditAccountViewModel @Inject constructor() : ViewModel() {
                     _account.value = UiState.Failure(error = Error.AccountNotFound)
                     return@launch
                 }
-
                 _account.value = UiState.Success(account)
             } catch (e: Exception) {
                 Timber.e(e, "Error fetching account")
@@ -53,11 +52,11 @@ class AddEditAccountViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    fun createAccount(name: String, type: AccountType) {
+    fun createAccount(name: String, type: AccountType, initialBalance: Double) {
         viewModelScope.launch {
             _status.value = UiState.Loading
             try {
-                createAccountUseCase(name, type)
+                createAccountUseCase(name, type, initialBalance)
                 _status.value = UiState.Success(true)
             } catch (e: Exception) {
                 Timber.e(e, "Error creating account")
@@ -66,11 +65,11 @@ class AddEditAccountViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    fun updateAccount(id: Long, name: String, type: AccountType) {
+    fun updateAccount(id: Long, name: String, type: AccountType, initialBalance: Double) {
         viewModelScope.launch {
             _status.value = UiState.Loading
             try {
-                updateAccountUseCase(id, name, type)
+                updateAccountUseCase(id, name, type, initialBalance)
                 _status.value = UiState.Success(true)
             } catch (e: Exception) {
                 Timber.e(e, "Error updating account")

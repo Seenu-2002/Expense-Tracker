@@ -7,6 +7,7 @@ CREATE TABLE TransactionDetailEntity (
     amount REAL NOT NULL,
     categoryId INTEGER NOT NULL,
     accountId INTEGER NOT NULL,
+    toAccountId INTEGER,
     createdAt INTEGER NOT NULL,
     note TEXT,
     place TEXT,
@@ -16,7 +17,10 @@ CREATE TABLE TransactionDetailEntity (
         ON DELETE RESTRICT,
     FOREIGN KEY(accountId) REFERENCES AccountEntity(id)
         ON UPDATE CASCADE
-        ON DELETE RESTRICT
+        ON DELETE RESTRICT,
+    FOREIGN KEY(toAccountId) REFERENCES AccountEntity(id)
+        ON UPDATE CASCADE
+        ON DELETE SET NULL
 );
 CREATE INDEX transaction_time ON TransactionDetailEntity(createdAt);
 CREATE INDEX transaction_category_id ON TransactionDetailEntity(categoryId);
@@ -48,6 +52,7 @@ CREATE TABLE AccountEntity (
     name TEXT NOT NULL,
     type TEXT AS AccountTypeEntity NOT NULL,
     isDefault INTEGER DEFAULT 0 NOT NULL,
+    initialBalance REAL NOT NULL DEFAULT 0.0,
     UNIQUE (name, type) ON CONFLICT ABORT
 );
 
@@ -65,36 +70,42 @@ ORDER BY createdAt DESC LIMIT :limit OFFSET :offset;
 
 getAllTransactionsWithDetails:
 SELECT
-    t.id, t.type, t.amount, t.categoryId, t.accountId, t.createdAt, t.note, t.place,
+    t.id, t.type, t.amount, t.categoryId, t.accountId, t.toAccountId, t.createdAt, t.note, t.place,
     c.label AS categoryLabel, c.type AS categoryType, c.iconRes AS categoryIconRes, c.color AS categoryColor,
-    a.name AS accountName, a.type AS accountType, a.isDefault AS accountIsDefault
+    a.name AS accountName, a.type AS accountType, a.isDefault AS accountIsDefault,
+    ta.name AS toAccountName, ta.type AS toAccountType, ta.isDefault AS toAccountIsDefault
 FROM TransactionDetailEntity t
 INNER JOIN CategoryEntity c ON t.categoryId = c.id
 INNER JOIN AccountEntity a ON t.accountId = a.id
+LEFT JOIN AccountEntity ta ON t.toAccountId = ta.id
 WHERE t.deletedAt IS NULL
 ORDER BY t.createdAt DESC
 LIMIT :limit OFFSET :offset;
 
 getAllTransactionsBetweenWithDetails:
 SELECT
-    t.id, t.type, t.amount, t.categoryId, t.accountId, t.createdAt, t.note, t.place,
+    t.id, t.type, t.amount, t.categoryId, t.accountId, t.toAccountId, t.createdAt, t.note, t.place,
     c.label AS categoryLabel, c.type AS categoryType, c.iconRes AS categoryIconRes, c.color AS categoryColor,
-    a.name AS accountName, a.type AS accountType, a.isDefault AS accountIsDefault
+    a.name AS accountName, a.type AS accountType, a.isDefault AS accountIsDefault,
+    ta.name AS toAccountName, ta.type AS toAccountType, ta.isDefault AS toAccountIsDefault
 FROM TransactionDetailEntity t
 INNER JOIN CategoryEntity c ON t.categoryId = c.id
 INNER JOIN AccountEntity a ON t.accountId = a.id
+LEFT JOIN AccountEntity ta ON t.toAccountId = ta.id
 WHERE t.deletedAt IS NULL AND t.createdAt >= :startUTCValue AND t.createdAt <= :endUTCValue
 ORDER BY t.createdAt DESC
 LIMIT :limit OFFSET :offset;
 
 searchTransactionsBetweenWithDetails:
 SELECT
-    t.id, t.type, t.amount, t.categoryId, t.accountId, t.createdAt, t.note, t.place,
+    t.id, t.type, t.amount, t.categoryId, t.accountId, t.toAccountId, t.createdAt, t.note, t.place,
     c.label AS categoryLabel, c.type AS categoryType, c.iconRes AS categoryIconRes, c.color AS categoryColor,
-    a.name AS accountName, a.type AS accountType, a.isDefault AS accountIsDefault
+    a.name AS accountName, a.type AS accountType, a.isDefault AS accountIsDefault,
+    ta.name AS toAccountName, ta.type AS toAccountType, ta.isDefault AS toAccountIsDefault
 FROM TransactionDetailEntity t
 INNER JOIN CategoryEntity c ON t.categoryId = c.id
 INNER JOIN AccountEntity a ON t.accountId = a.id
+LEFT JOIN AccountEntity ta ON t.toAccountId = ta.id
 WHERE t.deletedAt IS NULL
   AND t.createdAt >= :startUTCValue
   AND t.createdAt <= :endUTCValue
@@ -111,12 +122,12 @@ SELECT *
 FROM TransactionDetailEntity WHERE id = :id;
 
 addTransaction:
-INSERT INTO TransactionDetailEntity(type, amount, categoryId, accountId, note, createdAt, place)
-VALUES (?,?, ?, ?, ?, ?, ?);
+INSERT INTO TransactionDetailEntity(type, amount, categoryId, accountId, toAccountId, note, createdAt, place)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
 updateTransaction:
-INSERT OR REPLACE INTO TransactionDetailEntity(id, type, amount, categoryId, accountId, note, createdAt, place)
-VALUES ( ?,?, ?, ?, ?, ?, ?, ?);
+INSERT OR REPLACE INTO TransactionDetailEntity(id, type, amount, categoryId, accountId, toAccountId, note, createdAt, place)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 getLastInsertTransactionRowId:
 SELECT last_insert_rowid();
@@ -150,12 +161,14 @@ SELECT COUNT(*) AS count FROM TransactionDetailEntity WHERE deletedAt IS NULL AN
 
 getDeletedTransactionsWithDetails:
 SELECT
-    t.id, t.type, t.amount, t.categoryId, t.accountId, t.createdAt, t.note, t.place, t.deletedAt,
+    t.id, t.type, t.amount, t.categoryId, t.accountId, t.toAccountId, t.createdAt, t.note, t.place, t.deletedAt,
     c.label AS categoryLabel, c.type AS categoryType, c.iconRes AS categoryIconRes, c.color AS categoryColor,
-    a.name AS accountName, a.type AS accountType, a.isDefault AS accountIsDefault
+    a.name AS accountName, a.type AS accountType, a.isDefault AS accountIsDefault,
+    ta.name AS toAccountName, ta.type AS toAccountType, ta.isDefault AS toAccountIsDefault
 FROM TransactionDetailEntity t
 INNER JOIN CategoryEntity c ON t.categoryId = c.id
 INNER JOIN AccountEntity a ON t.accountId = a.id
+LEFT JOIN AccountEntity ta ON t.toAccountId = ta.id
 WHERE t.deletedAt IS NOT NULL
 ORDER BY t.deletedAt DESC
 LIMIT :limit OFFSET :offset;
@@ -243,13 +256,29 @@ getAccountById:
 SELECT * FROM AccountEntity WHERE id = ?;
 
 createAccount:
-INSERT INTO AccountEntity (name, type, isDefault) VALUES (?, ?, ?);
+INSERT INTO AccountEntity (name, type, isDefault, initialBalance) VALUES (?, ?, ?, ?);
 
 updateAccount:
-UPDATE AccountEntity SET name = ?, type = ? WHERE id = :id;
+UPDATE AccountEntity SET name = ?, type = ?, initialBalance = ? WHERE id = :id;
 
 deleteAccount:
 DELETE FROM AccountEntity WHERE id = ?;
+
+getAllAccountsWithBalance:
+SELECT
+    a.id, a.name, a.type, a.isDefault, a.initialBalance,
+    a.initialBalance + COALESCE(SUM(
+        CASE
+            WHEN t.type = 'INCOME' THEN t.amount
+            WHEN t.type = 'EXPENSE' THEN -t.amount
+            WHEN t.type = 'TRANSFER' AND t.accountId = a.id THEN -t.amount
+            WHEN t.type = 'TRANSFER' AND t.toAccountId = a.id THEN t.amount
+            ELSE 0
+        END
+    ), 0) AS balance
+FROM AccountEntity a
+LEFT JOIN TransactionDetailEntity t ON (t.accountId = a.id OR t.toAccountId = a.id) AND t.deletedAt IS NULL
+GROUP BY a.id;
 
 -- NOTE: BudgetEntity dates (startDate, endDate, createdAt, updatedAt) are stored in epoch SECONDS.
 -- TransactionDetailEntity.createdAt is stored in epoch MILLISECONDS.

@@ -7,6 +7,7 @@ fun TransactionTypeEntity.toDomain(): TransactionType {
     return when (this) {
         TransactionTypeEntity.INCOME -> TransactionType.INCOME
         TransactionTypeEntity.EXPENSE -> TransactionType.EXPENSE
+        TransactionTypeEntity.TRANSFER -> TransactionType.TRANSFER
     }
 }
 
@@ -14,5 +15,6 @@ fun TransactionType.toEntity(): TransactionTypeEntity {
     return when (this) {
         TransactionType.INCOME -> TransactionTypeEntity.INCOME
         TransactionType.EXPENSE -> TransactionTypeEntity.EXPENSE
+        TransactionType.TRANSFER -> TransactionTypeEntity.TRANSFER
     }
 }

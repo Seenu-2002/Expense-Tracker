@@ -7,7 +7,7 @@ import com.ajay.seenu.expensetracker.android.presentation.state.Error
 import com.ajay.seenu.expensetracker.android.presentation.state.UiState
 import com.ajay.seenu.expensetracker.domain.model.Account
 import com.ajay.seenu.expensetracker.domain.usecase.account.DeleteAccountUseCase
-import com.ajay.seenu.expensetracker.domain.usecase.account.GetAccountsAsFlowUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.account.GetAccountsWithBalanceAsFlowUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.GetTransactionCountByAccountUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +19,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AccountsListViewModel @Inject constructor(
-    private val getAccountsUseCase: GetAccountsAsFlowUseCase,
+    private val getAccountsWithBalanceUseCase: GetAccountsWithBalanceAsFlowUseCase,
     private val deleteAccountUseCase: DeleteAccountUseCase,
     private val getTransactionCountByAccountUseCase: GetTransactionCountByAccountUseCase
 ) : ViewModel() {
@@ -34,13 +34,15 @@ class AccountsListViewModel @Inject constructor(
     fun getAccounts() {
         viewModelScope.launch {
             _accounts.value = UiState.Loading
-            getAccountsUseCase().collect {
-                try {
-                    _accounts.value = UiState.Success(AccountsListUiModel(it))
-                } catch (e: Exception) {
-                    Timber.e(e, "Error while fetching accounts")
-                    _accounts.value = UiState.Failure(error = Error.Unhandled(e))
+            try {
+                getAccountsWithBalanceUseCase().collect { accountsWithBalance ->
+                    val accounts = accountsWithBalance.map { it.account }
+                    val balances = accountsWithBalance.associate { it.account.id to it.balance }
+                    _accounts.value = UiState.Success(AccountsListUiModel(accounts, balances))
                 }
+            } catch (e: Exception) {
+                Timber.e(e, "Error while fetching accounts")
+                _accounts.value = UiState.Failure(error = Error.Unhandled(e))
             }
         }
     }

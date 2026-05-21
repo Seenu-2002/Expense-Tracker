@@ -8,8 +8,8 @@ class CreateAccountUseCase constructor(
     private val accountRepository: AccountRepository
 ) {
 
-    suspend operator fun invoke(name: String, type: AccountType) {
-        val account = Account(0L, name, type, false)
+    suspend operator fun invoke(name: String, type: AccountType, initialBalance: Double = 0.0) {
+        val account = Account(0L, name, type, false, initialBalance)
         accountRepository.createAccount(account)
     }
 

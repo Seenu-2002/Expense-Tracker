@@ -372,12 +372,16 @@ fun TransactionPreviewContent(modifier: Modifier = Modifier,
             }
         }
         var amountLabel = decimalFormat.format(transaction.amount)
-        val color = if (transaction.type == TransactionType.EXPENSE) {
-            amountLabel = "- $amountLabel"
-            LocalColors.current.expenseColor
-        } else {
-            amountLabel = "+ $amountLabel"
-            LocalColors.current.incomeColor
+        val color = when (transaction.type) {
+            TransactionType.EXPENSE -> {
+                amountLabel = "- $amountLabel"
+                LocalColors.current.expenseColor
+            }
+            TransactionType.INCOME -> {
+                amountLabel = "+ $amountLabel"
+                LocalColors.current.incomeColor
+            }
+            TransactionType.TRANSFER -> Color(0xFF1A73E8)
         }
 
         CategoryIconItem(
@@ -419,7 +423,12 @@ fun TransactionPreviewContent(modifier: Modifier = Modifier,
                     endMargin = 10.dp,
                     bias = 0F
                 )
-            }, text = transaction.account.name,
+            },
+            text = if (transaction.type == TransactionType.TRANSFER) {
+                "${transaction.account.name} → ${transaction.toAccount?.name.orEmpty()}"
+            } else {
+                transaction.account.name
+            },
             color = LocalContentColor.current.copy(alpha = 0.5F),
             fontSize = 13.sp
         )

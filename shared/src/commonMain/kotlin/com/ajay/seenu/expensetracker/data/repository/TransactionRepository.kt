@@ -94,7 +94,8 @@ class TransactionRepository constructor(
         val category = categoryRepository.getCategory(transactionEntity.categoryId)
         val account = accountRepository.getAccountById(transactionEntity.accountId)
             ?: throw IllegalArgumentException("Account not found for id: ${transactionEntity.accountId}")
-        return transactionEntity.toDomain(category, account)
+        val toAccount = transactionEntity.toAccountId?.let { accountRepository.getAccountById(it) }
+        return transactionEntity.toDomain(category, account, toAccount)
     }
 
     suspend fun addTransaction(
@@ -102,6 +103,7 @@ class TransactionRepository constructor(
         amount: Double,
         category: Category,
         account: Account,
+        toAccount: Account?,
         createdAt: Long,
         note: String?,
         place: String?
@@ -112,6 +114,7 @@ class TransactionRepository constructor(
                 amount = amount,
                 category = category.toEntity(),
                 account = account.toEntity(),
+                toAccountId = toAccount?.id,
                 createdAt = createdAt,
                 note = note,
                 place = place
@@ -125,6 +128,7 @@ class TransactionRepository constructor(
         amount: Double,
         category: Category,
         account: Account,
+        toAccount: Account?,
         createdAt: Long,
         note: String?,
         place: String?
@@ -136,6 +140,7 @@ class TransactionRepository constructor(
                 amount = amount,
                 category = category.toEntity(),
                 account = account.toEntity(),
+                toAccountId = toAccount?.id,
                 createdAt = createdAt,
                 note = note,
                 place = place

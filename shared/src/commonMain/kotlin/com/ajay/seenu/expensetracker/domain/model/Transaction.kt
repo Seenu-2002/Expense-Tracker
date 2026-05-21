@@ -13,5 +13,6 @@ data class Transaction constructor(
     val account: Account,
     val createdAt: Instant,
     val note: String? = null,
-    val place: String? = null
+    val place: String? = null,
+    val toAccount: Account? = null,
 )

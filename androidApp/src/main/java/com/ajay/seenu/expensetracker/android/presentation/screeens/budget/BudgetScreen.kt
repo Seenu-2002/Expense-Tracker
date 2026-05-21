@@ -54,6 +54,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.data.FilterPreference
 import com.ajay.seenu.expensetracker.android.presentation.theme.LocalCurrencySymbol
+import com.ajay.seenu.expensetracker.android.util.asCurrency
 import com.ajay.seenu.expensetracker.android.presentation.state.UiState
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.BudgetViewModel
 import com.ajay.seenu.expensetracker.domain.model.budget.BudgetWithSpending
@@ -275,7 +276,7 @@ fun BudgetCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                "Remaining $${String.format("%.0f", budgetWithSpending.remainingAmount.coerceAtLeast(0.0))}",
+                "Remaining ${budgetWithSpending.remainingAmount.coerceAtLeast(0.0).asCurrency(LocalCurrencySymbol.current)}",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
             )
@@ -294,8 +295,9 @@ fun BudgetCard(
 
             Spacer(modifier = Modifier.height(4.dp))
 
+            val symbol = LocalCurrencySymbol.current
             Text(
-                "${LocalCurrencySymbol.current}${String.format("%.0f", budgetWithSpending.spentAmount)} of ${LocalCurrencySymbol.current}${String.format("%.0f", budget.amount)}",
+                "${budgetWithSpending.spentAmount.asCurrency(symbol)} of ${budget.amount.asCurrency(symbol)}",
                 fontSize = 12.sp,
             )
             if (isOverBudget) {

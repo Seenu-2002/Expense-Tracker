@@ -4,6 +4,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.ajay.seenu.expensetracker.domain.model.UserConfigs
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSURL
@@ -28,6 +30,8 @@ actual class UserConfigurationsManager {
 
     actual suspend fun storeConfigs(configs: UserConfigs) {
     }
+
+    actual fun getCurrencySymbolAsFlow(): Flow<String> = flowOf("$")
 
 }
 

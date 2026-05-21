@@ -61,6 +61,7 @@ import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.PieCha
 import com.ajay.seenu.expensetracker.android.presentation.state.Error
 import com.ajay.seenu.expensetracker.android.presentation.state.UiState
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.SimpleAnalyticsViewModel
+import com.ajay.seenu.expensetracker.android.presentation.theme.LocalCurrencySymbol
 import com.ajay.seenu.expensetracker.android.util.asCurrency
 import com.ajay.seenu.expensetracker.android.util.getColor
 import com.ajay.seenu.expensetracker.android.util.getPlaceHolderRes
@@ -210,7 +211,7 @@ fun PieChartContainer(
     onChartEvent: (event: PieChartEvent) -> Unit
 ) {
     Box(modifier = modifier) {
-        val totalLabel = chartData.sum.asCurrency()
+        val totalLabel = chartData.sum.asCurrency(LocalCurrencySymbol.current)
         val style = PieChartStyle(
             strokeWidth = 28.dp,
             highlightStrokeWidth = 16.dp,
@@ -249,14 +250,15 @@ fun PieChartLegendContainer(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        val values = TransactionType.entries.map { stringResource(it.getStringRes()) }
+        val filterableTypes = remember { TransactionType.entries.filter { it != TransactionType.TRANSFER } }
+        val values = filterableTypes.map { stringResource(it.getStringRes()) }
         SlidingSwitch(
             selectedValue = stringResource(selectedType.getStringRes()),
             values = values,
             modifier = Modifier.widthIn(max = 600.dp),
             shape = RoundedCornerShape(12.dp)
         ) { index, _ ->
-            val type = TransactionType.entries[index]
+            val type = filterableTypes[index]
             onTypeChanged(type)
         }
         val listState = rememberLazyListState()
@@ -329,7 +331,7 @@ fun AnalyticsLegendRow(
                     .background(data.color, shape)
             )
 
-            val amount = stringResource(data.category.type.getPlaceHolderRes(), data.amount.asCurrency())
+            val amount = stringResource(data.category.type.getPlaceHolderRes(), data.amount.asCurrency(LocalCurrencySymbol.current))
             val color = data.category.type.getColor()
 
             Text(
