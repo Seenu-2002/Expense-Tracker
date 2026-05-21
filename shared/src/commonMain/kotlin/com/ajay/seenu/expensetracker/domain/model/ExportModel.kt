@@ -8,8 +8,12 @@ data class TransactionExport constructor(
     val amount: Double,
     val description: String?,
     val category: Long,
+    val categoryName: String = "",
+    val accountName: String = "",
     val date: String,
-    val type: TransactionType
+    val type: TransactionType,
+    val place: String? = null,
+    val toAccountName: String? = null
 )
 
 @Serializable
@@ -32,6 +36,12 @@ data class ExportResult(
     val success: Boolean,
     val data: String? = null,
     val fileName: String? = null,
+    val errorMessage: String? = null
+)
+
+data class ImportResult(
+    val success: Boolean,
+    val importedCount: Int = 0,
     val errorMessage: String? = null
 )
 

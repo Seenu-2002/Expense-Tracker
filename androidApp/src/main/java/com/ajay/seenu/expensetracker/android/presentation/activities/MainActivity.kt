@@ -54,6 +54,7 @@ import com.ajay.seenu.expensetracker.android.presentation.screeens.CategoryListS
 import com.ajay.seenu.expensetracker.android.presentation.screeens.ChangeAccountInTransactionScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.ChangeCategoryInTransactionScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.DetailTransactionScreen
+import com.ajay.seenu.expensetracker.android.presentation.screeens.ImportScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.TrashScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.TransactionScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.budget.AddEditBudgetArg
@@ -254,6 +255,9 @@ class MainActivity : AppCompatActivity() {
                     },
                     onTrashScreen = {
                         navController.navigate(Screen.Trash.route)
+                    },
+                    onImportScreen = {
+                        navController.navigate(Screen.Import.route)
                     }
                 )
             }
@@ -448,6 +452,9 @@ class MainActivity : AppCompatActivity() {
             }
             composable(Screen.Trash.route) {
                 TrashScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Screen.Import.route) {
+                ImportScreen(onNavigateBack = { navController.popBackStack() })
             }
             composable("${Screen.AddBudget.route}/{budgetId}",
                 arguments = listOf(navArgument("budgetId") { type = NavType.LongType })

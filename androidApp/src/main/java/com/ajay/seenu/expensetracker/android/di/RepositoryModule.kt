@@ -1,6 +1,7 @@
 package com.ajay.seenu.expensetracker.android.di
 
 import android.content.Context
+import com.ajay.seenu.expensetracker.android.data.ImportRepository
 import com.ajay.seenu.expensetracker.data.repository.BudgetRepository
 import com.ajay.seenu.expensetracker.DriverFactory
 import com.ajay.seenu.expensetracker.ExpenseDatabase
@@ -10,12 +11,14 @@ import com.ajay.seenu.expensetracker.data.data_source.AttachmentDateSource
 import com.ajay.seenu.expensetracker.data.data_source.BudgetDataSource
 import com.ajay.seenu.expensetracker.data.data_source.CategoryDataSource
 import com.ajay.seenu.expensetracker.data.data_source.ExportDataSource
+import com.ajay.seenu.expensetracker.data.data_source.ImportDataSource
 import com.ajay.seenu.expensetracker.data.data_source.TransactionDataSource
 import com.ajay.seenu.expensetracker.data.data_source.local.AccountLocalDataSource
 import com.ajay.seenu.expensetracker.data.data_source.local.AttachmentLocalDataSource
 import com.ajay.seenu.expensetracker.data.data_source.local.BudgetLocalDataSource
 import com.ajay.seenu.expensetracker.data.data_source.local.CategoryLocalDataSource
 import com.ajay.seenu.expensetracker.data.data_source.local.ExportLocalDataSource
+import com.ajay.seenu.expensetracker.data.data_source.local.ImportLocalDataSource
 import com.ajay.seenu.expensetracker.data.data_source.local.TransactionLocalDataSource
 import com.ajay.seenu.expensetracker.data.repository.AccountRepository
 import com.ajay.seenu.expensetracker.data.repository.AttachmentRepository
@@ -108,6 +111,21 @@ object RepositoryModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): ExpenseDatabase {
         return createDatabase(DriverFactory(context))
+    }
+
+    @Provides
+    @Singleton
+    fun provideImportLocalDataSource(database: ExpenseDatabase): ImportDataSource {
+        return ImportLocalDataSource(database)
+    }
+
+    @Provides
+    @Singleton
+    fun provideImportRepository(
+        @ApplicationContext context: Context,
+        dataSource: ImportDataSource
+    ): ImportRepository {
+        return ImportRepository(dataSource, context.contentResolver)
     }
 
 }

@@ -47,7 +47,8 @@ fun MainScreen(
     onCreateBudget: () -> Unit,
     onBudgetClick: (Long) -> Unit,
     onAccountListScreen: () -> Unit,
-    onTrashScreen: () -> Unit = {}
+    onTrashScreen: () -> Unit = {},
+    onImportScreen: () -> Unit = {}
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -132,7 +133,8 @@ fun MainScreen(
                 SettingsScreen(
                     onManageAccountsClicked = onAccountListScreen,
                     onManageCategoriesClicked = onCategoryListScreen,
-                    onTrashClicked = onTrashScreen
+                    onTrashClicked = onTrashScreen,
+                    onImportClicked = onImportScreen
                 )
             }
             composable(Screen.Budget.route) {
