@@ -51,8 +51,12 @@ class ExportLocalDataSource constructor(
                     amount = transaction.amount,
                     description = transaction.note,
                     category = transaction.category.id,
+                    categoryName = transaction.category.label,
+                    accountName = transaction.account.name,
                     date = formatDate(transaction.createdAt.toEpochMilliseconds()),
-                    type = transaction.type
+                    type = transaction.type,
+                    place = transaction.place,
+                    toAccountName = transaction.toAccount?.name
                 )
             }
 
@@ -109,8 +113,12 @@ class ExportLocalDataSource constructor(
                 amount = transaction.amount,
                 description = transaction.note,
                 category = transaction.category.id,
+                categoryName = transaction.category.label,
+                accountName = transaction.account.name,
                 date = formatDate(transaction.createdAt.toEpochMilliseconds()),
-                type = transaction.type
+                type = transaction.type,
+                place = transaction.place,
+                toAccountName = transaction.toAccount?.name
             )
         }
 
@@ -140,14 +148,18 @@ class ExportLocalDataSource constructor(
     }
 
     private fun generateCsv(transactions: List<TransactionExport>): String {
-        val header = "ID,Amount,Description,Category,Date,Type"
-        val rows = transactions.joinToString("\n") { transaction ->
-            "${transaction.id}," +
-                    "${transaction.amount}," +
-                    "\"${transaction.description?.replace("\"", "\"\"")}\"," +
-                    "\"${transaction.category}\"," +
-                    "\"${transaction.date}\"," +
-                    "\"${transaction.type}\""
+        val header = "ID,Amount,Description,CategoryId,CategoryName,AccountName,Date,Type,Place,ToAccountName"
+        val rows = transactions.joinToString("\n") { tx ->
+            "${tx.id}," +
+                    "${tx.amount}," +
+                    "\"${tx.description?.replace("\"", "\"\"") ?: ""}\"," +
+                    "${tx.category}," +
+                    "\"${tx.categoryName.replace("\"", "\"\"")}\"," +
+                    "\"${tx.accountName.replace("\"", "\"\"")}\"," +
+                    "\"${tx.date}\"," +
+                    "${tx.type}," +
+                    "\"${tx.place?.replace("\"", "\"\"") ?: ""}\"," +
+                    "\"${tx.toAccountName?.replace("\"", "\"\"") ?: ""}\""
         }
         return "$header\n$rows"
     }

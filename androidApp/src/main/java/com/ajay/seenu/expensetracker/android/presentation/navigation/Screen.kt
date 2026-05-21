@@ -17,4 +17,5 @@ sealed class Screen(val route: String) {
     data object Account : Screen("account_route")
     data object ChangeAccountInTransaction : Screen("change_account_in_transaction")
     data object Trash : Screen("trash_route")
+    data object Import : Screen("import_route")
 }
