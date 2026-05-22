@@ -11,6 +11,7 @@ import com.ajay.seenu.expensetracker.data.mapper.toEntity
 import com.ajay.seenu.expensetracker.data.model.TransactionTypeEntity
 import com.ajay.seenu.expensetracker.domain.model.Account
 import com.ajay.seenu.expensetracker.domain.model.Category
+import com.ajay.seenu.expensetracker.domain.model.DailyIncomeExpense
 import com.ajay.seenu.expensetracker.domain.model.DateRange
 import com.ajay.seenu.expensetracker.domain.model.ExpensePerDay
 import com.ajay.seenu.expensetracker.domain.model.OverallData
@@ -23,6 +24,8 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -241,6 +244,22 @@ class TransactionRepository constructor(
                 dateRange.start.toEpochMillis(),
                 dateRange.end.toEpochMillis()
             )
+        }
+    }
+
+    suspend fun getIncomeAndExpensePerDay(dateRange: DateRange): List<DailyIncomeExpense> {
+        return withContext(Dispatchers.IO) {
+            val tz = TimeZone.currentSystemDefault()
+            transactionLocalDataSource.getIncomeAndExpensePerDay(
+                dateRange.start.toEpochMillis(),
+                dateRange.end.toEpochMillis()
+            ).map { row ->
+                DailyIncomeExpense(
+                    date = Instant.fromEpochMilliseconds(row.createdAt).toLocalDateTime(tz).date,
+                    income = row.income,
+                    expense = row.expense,
+                )
+            }
         }
     }
 

@@ -19,7 +19,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+import java.util.Date
 import javax.inject.Inject
+import kotlin.time.ExperimentalTime
 
 @HiltViewModel
 class TotalExpensePerDayChartViewModel @Inject constructor(
@@ -74,11 +79,17 @@ class TotalExpensePerDayChartViewModel @Inject constructor(
                     }
                 }
                 updateExtras { extraStore ->
-                    extraStore[labelListKey] = data.map { dateFormat.format(it.date) }
+                    extraStore[labelListKey] = data.map { dateFormat.format(it.date.toJavaDate()) }
                 }
             }
             _chartState.emit(ChartState.Success)
         }
+    }
+
+    @OptIn(ExperimentalTime::class)
+    private fun LocalDate.toJavaDate(): Date {
+        val instant = this.atStartOfDayIn(TimeZone.currentSystemDefault())
+        return Date(instant.toEpochMilliseconds())
     }
 
     fun setFilter(filter: DateFilter) {

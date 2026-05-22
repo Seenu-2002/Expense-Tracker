@@ -20,7 +20,14 @@ class AnalyticsViewModel @Inject constructor(
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
-    val chartOrder: List<Charts> = Charts.entries
+    val chartOrder: List<Charts> = listOf(
+        Charts.SUMMARY_KPI,
+        Charts.TOP_SPENDING_CATEGORIES,
+        Charts.EXPENSE_BY_CATEGORY_DONUT,
+        Charts.BUDGET_HEALTH,
+        Charts.INCOME_EXPENSE_TREND,
+        Charts.TOTAL_EXPENSE_PER_DAY_BY_CATEGORY,
+    )
 
     private val _currentFilter: MutableStateFlow<DateFilter> = MutableStateFlow(DateFilter.ThisMonth)
     val currentFilter: StateFlow<DateFilter> = _currentFilter.asStateFlow()
@@ -40,6 +47,11 @@ class AnalyticsViewModel @Inject constructor(
 }
 
 enum class Charts(val label: String) {
+    SUMMARY_KPI("Summary"),
+    EXPENSE_BY_CATEGORY_DONUT("Expense by Category"),
+    INCOME_EXPENSE_TREND("Income vs Expense"),
+    TOP_SPENDING_CATEGORIES("Top Spending Categories"),
+    BUDGET_HEALTH("Budget Health"),
     TOTAL_EXPENSE_PER_DAY_BY_CATEGORY("Total Expense per day By Category"),
-    EXPENSE_BY_CATEGORY("Expense by Category")
+    EXPENSE_BY_CATEGORY("Expense by Category (bars)")
 }

@@ -33,7 +33,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.ajay.seenu.expensetracker.android.presentation.screeens.OverviewScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.SettingsScreen
-import com.ajay.seenu.expensetracker.android.presentation.screeens.SimpleAnalyticsScreen
+import com.ajay.seenu.expensetracker.android.presentation.screeens.AnalyticsScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.budget.BudgetScreen
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.BudgetViewModel
 
@@ -126,8 +126,7 @@ fun MainScreen(
                 )
             }
             composable(Screen.Analytics.route) {
-//                AnalyticsScreen(navController = navController)
-                SimpleAnalyticsScreen()
+                AnalyticsScreen(navController = navController)
             }
             composable(Screen.Settings.route) {
                 SettingsScreen(

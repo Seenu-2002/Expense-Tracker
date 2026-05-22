@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -34,15 +36,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.data.FilterPreference
-import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.ExpenseByCategoryChart
+import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.BudgetHealthSection
+import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.ExpenseByCategoryDonutSection
+import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.IncomeExpenseTrendChart
+import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.SummaryKpiSection
+import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.TopSpendingCategoriesSection
 import com.ajay.seenu.expensetracker.android.presentation.screeens.charts.TotalExpensePerDayChart
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.AnalyticsViewModel
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.Charts
@@ -83,7 +91,7 @@ fun AnalyticsScreen(navController: NavController, viewModel: AnalyticsViewModel 
         }
     }
 
-    Scaffold(topBar = {
+    Scaffold(containerColor = MaterialTheme.colorScheme.surfaceContainerLow, topBar = {
         ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
             val box = createRef()
             BadgedBox(
@@ -119,12 +127,62 @@ fun AnalyticsScreen(navController: NavController, viewModel: AnalyticsViewModel 
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(paddingValues),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(12.dp),
+            verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp),
         ) {
-            items(viewModel.chartOrder.size) {
-                when (val chartType = viewModel.chartOrder[it]) {
+            items(viewModel.chartOrder.size) { index ->
+                val cellModifier = Modifier.fillMaxWidth()
+                when (val chartType = viewModel.chartOrder[index]) {
+                    Charts.SUMMARY_KPI -> {
+                        ChartContainer(cellModifier, chartType.label) {
+                            SummaryKpiSection(
+                                modifier = Modifier.fillMaxWidth(),
+                                filter = currentFilter,
+                            )
+                        }
+                    }
+
+                    Charts.EXPENSE_BY_CATEGORY_DONUT -> {
+                        ChartContainer(cellModifier, chartType.label) {
+                            ExpenseByCategoryDonutSection(
+                                modifier = Modifier.fillMaxWidth(),
+                                filter = currentFilter,
+                            )
+                        }
+                    }
+
+                    Charts.INCOME_EXPENSE_TREND -> {
+                        ChartContainer(cellModifier, chartType.label) {
+                            IncomeExpenseTrendChart(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(260.dp),
+                                filter = currentFilter,
+                            )
+                        }
+                    }
+
+                    Charts.TOP_SPENDING_CATEGORIES -> {
+                        ChartContainer(cellModifier, chartType.label) {
+                            TopSpendingCategoriesSection(
+                                modifier = Modifier.fillMaxWidth(),
+                                filter = currentFilter,
+                            )
+                        }
+                    }
+
+                    Charts.BUDGET_HEALTH -> {
+                        ChartContainer(cellModifier, chartType.label) {
+                            BudgetHealthSection(
+                                modifier = Modifier.fillMaxWidth(),
+                                filter = currentFilter,
+                            )
+                        }
+                    }
+
                     Charts.TOTAL_EXPENSE_PER_DAY_BY_CATEGORY -> {
-                        ChartContainer(Modifier, chartType.label) {
+                        ChartContainer(cellModifier, chartType.label) {
                             TotalExpensePerDayChart(
                                 Modifier
                                     .fillMaxWidth()
@@ -135,17 +193,7 @@ fun AnalyticsScreen(navController: NavController, viewModel: AnalyticsViewModel 
                         }
                     }
 
-                    Charts.EXPENSE_BY_CATEGORY -> {
-                        ChartContainer(Modifier, chartType.label) {
-                            ExpenseByCategoryChart(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 4.dp, vertical = 2.dp)
-                                    .height(300.dp),
-                                currentFilter
-                            )
-                        }
-                    }
+                    Charts.EXPENSE_BY_CATEGORY -> Unit
                 }
             }
         }
@@ -188,14 +236,24 @@ fun AnalyticsScreen(navController: NavController, viewModel: AnalyticsViewModel 
 
 @Composable
 fun ChartContainer(modifier: Modifier = Modifier, title: String, chart: @Composable () -> Unit) {
-    Column(modifier = modifier) {
-        Text(title)
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(4.dp)
-        )
-        chart()
+    ElevatedCard(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = title,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            chart()
+        }
     }
 }
 

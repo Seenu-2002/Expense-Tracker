@@ -27,6 +27,7 @@ import com.ajay.seenu.expensetracker.domain.usecase.category.UpdateCategoryUseCa
 import com.ajay.seenu.expensetracker.domain.usecase.data_filter.GetExpenseByCategoryUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.data_filter.GetFilteredOverallDataUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.data_filter.GetFilteredTransactionsUseCase
+import com.ajay.seenu.expensetracker.domain.usecase.data_filter.GetIncomeAndExpensePerDayUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.data_filter.GetRecentTransactionsUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.data_filter.GetTotalTransactionPerDayByCategoryUseCase
 import com.ajay.seenu.expensetracker.domain.usecase.transaction.AddTransactionUseCase
@@ -183,6 +184,11 @@ object UseCaseModule {
     @Provides
     fun provideGetTotalTransactionPerDayByCategoryUseCase(repository: TransactionRepository): GetTotalTransactionPerDayByCategoryUseCase {
         return GetTotalTransactionPerDayByCategoryUseCase(repository)
+    }
+
+    @Provides
+    fun provideGetIncomeAndExpensePerDayUseCase(repository: TransactionRepository): GetIncomeAndExpensePerDayUseCase {
+        return GetIncomeAndExpensePerDayUseCase(repository)
     }
 
     @Provides
