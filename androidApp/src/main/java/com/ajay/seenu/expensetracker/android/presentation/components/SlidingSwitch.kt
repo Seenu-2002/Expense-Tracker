@@ -59,7 +59,7 @@ fun SlidingSwitch(
     var currentValue by rememberSaveable(selectedValue) {
         mutableStateOf(selectedValue)
     }
-    var width by remember { mutableFloatStateOf(0f) }
+    var width by rememberSaveable { mutableStateOf(0f) }
     val offsetAnim by animateFloatAsState(
         targetValue = (width / values.size) * values.indexOf(currentValue),
         animationSpec = tween(500),
@@ -131,7 +131,7 @@ fun SlidingSwitch(
     var currentValue by rememberSaveable {
         mutableStateOf(selectedValue)
     }
-    var width by remember { mutableFloatStateOf(0f) }
+    var width by rememberSaveable { mutableStateOf(0f) }
     val offsetAnim by animateFloatAsState(
         targetValue = (width / values.size) * values.indexOf(currentValue),
         animationSpec = tween(animationDuration),

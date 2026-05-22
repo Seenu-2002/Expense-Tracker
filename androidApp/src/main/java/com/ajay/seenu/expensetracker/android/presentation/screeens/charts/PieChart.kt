@@ -14,6 +14,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -77,8 +78,8 @@ fun PieChart(
         mutableStateOf(Offset(0F, 0F))
     }
 
-    var animationTarget by remember {
-        mutableFloatStateOf(0F)
+    var animationTarget by rememberSaveable {
+        mutableStateOf(0F)
     }
 
     val animationProgress: Float by animateFloatAsState(
@@ -93,8 +94,16 @@ fun PieChart(
         animationProgress - animationTarget + 1
     }
 
-    LaunchedEffect(data) {
-        animationTarget += 1
+    val dataSignature = remember(data) {
+        data.entries.joinToString("|") { "${it.x}=${it.y}" }
+    }
+    var lastAnimatedSignature by rememberSaveable { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(dataSignature) {
+        if (lastAnimatedSignature != dataSignature) {
+            animationTarget += 1
+            lastAnimatedSignature = dataSignature
+        }
     }
 
     Canvas(modifier.pointerInput(data) {
