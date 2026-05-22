@@ -46,94 +46,106 @@ fun SummaryKpiSection(
 
 @Composable
 private fun SummaryKpiGrid(kpi: SummaryKpi, modifier: Modifier = Modifier) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        KpiRow(
-            label = "Income",
-            amount = kpi.income,
-            accent = ChartDefaults.incomeColor,
-        )
-        KpiRow(
-            label = "Expense",
-            amount = kpi.expense,
-            accent = ChartDefaults.expenseColor,
-        )
-        KpiRow(
-            label = "Net",
-            amount = kpi.net,
-            accent = if (kpi.net >= 0.0) ChartDefaults.incomeColor else ChartDefaults.expenseColor,
-        )
-        SavingsRateRow(rate = kpi.savingsRate)
+    Column(modifier = modifier) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            KpiCard(
+                label = "Income",
+                amount = kpi.income,
+                accent = ChartDefaults.incomeColor,
+                modifier = Modifier.weight(1f),
+            )
+            KpiCard(
+                label = "Expense",
+                amount = kpi.expense,
+                accent = ChartDefaults.expenseColor,
+                modifier = Modifier.weight(1f),
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            KpiCard(
+                label = "Net",
+                amount = kpi.net,
+                accent = if (kpi.net >= 0.0) ChartDefaults.incomeColor else ChartDefaults.expenseColor,
+                modifier = Modifier.weight(1f),
+            )
+            SavingsRateCard(
+                rate = kpi.savingsRate,
+                modifier = Modifier.weight(1f),
+            )
+        }
     }
 }
 
 @Composable
-private fun KpiRow(
+private fun KpiCard(
     label: String,
     amount: Double,
     accent: Color,
+    modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(horizontal = 10.dp, vertical = 8.dp),
+            .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             modifier = Modifier
-                .size(width = 3.dp, height = 22.dp)
+                .size(width = 4.dp, height = 32.dp)
                 .background(accent, RoundedCornerShape(2.dp)),
         )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = label,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 12.sp,
-            modifier = Modifier.weight(1f),
-        )
-        Text(
-            text = amount.asCurrency(LocalCurrencySymbol.current),
-            color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 13.sp,
-        )
+        Spacer(modifier = Modifier.width(10.dp))
+        Column {
+            Text(
+                text = label,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 12.sp,
+            )
+            Text(
+                text = amount.asCurrency(LocalCurrencySymbol.current),
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 16.sp,
+            )
+        }
     }
 }
 
 @Composable
-private fun SavingsRateRow(rate: Double) {
+private fun SavingsRateCard(rate: Double, modifier: Modifier = Modifier) {
     val accent = when {
         rate >= 20.0 -> ChartDefaults.incomeColor
         rate >= 0.0 -> Color(0xFFFFA726)
         else -> ChartDefaults.expenseColor
     }
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(horizontal = 10.dp, vertical = 8.dp),
+            .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             modifier = Modifier
-                .size(width = 3.dp, height = 22.dp)
+                .size(width = 4.dp, height = 32.dp)
                 .background(accent, RoundedCornerShape(2.dp)),
         )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = "Savings rate",
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 12.sp,
-            modifier = Modifier.weight(1f),
-        )
-        Text(
-            text = "${"%.1f".format(rate)}%",
-            color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 13.sp,
-        )
+        Spacer(modifier = Modifier.width(10.dp))
+        Column {
+            Text(
+                text = "Savings rate",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 12.sp,
+            )
+            Text(
+                text = "${"%.1f".format(rate)}%",
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 16.sp,
+            )
+        }
     }
 }
 

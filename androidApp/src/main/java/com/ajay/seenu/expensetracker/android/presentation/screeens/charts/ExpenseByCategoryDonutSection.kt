@@ -47,8 +47,6 @@ import com.ajay.seenu.expensetracker.domain.model.Category
 import com.ajay.seenu.expensetracker.domain.model.DateFilter
 import com.ajay.seenu.expensetracker.domain.model.TransactionType
 
-private const val MAX_LEGEND_ROWS = 5
-
 @Composable
 fun ExpenseByCategoryDonutSection(
     modifier: Modifier = Modifier,
@@ -89,7 +87,7 @@ fun ExpenseByCategoryDonutSection(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(160.dp),
+                        .height(220.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator()
@@ -100,7 +98,7 @@ fun ExpenseByCategoryDonutSection(
                 InsufficientDataCard(
                     Modifier
                         .fillMaxWidth()
-                        .height(160.dp)
+                        .height(220.dp)
                 )
             }
 
@@ -112,14 +110,14 @@ fun ExpenseByCategoryDonutSection(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(180.dp)
+                        .height(240.dp)
                 ) {
                     val totalLabel = chartData.sum.asCurrency(LocalCurrencySymbol.current)
                     val style = PieChartStyle(
-                        strokeWidth = 22.dp,
-                        highlightStrokeWidth = 12.dp,
+                        strokeWidth = 28.dp,
+                        highlightStrokeWidth = 16.dp,
                         textStyle = TextStyle(
-                            fontSize = 16.sp,
+                            fontSize = 20.sp,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             fontWeight = FontWeight.Bold
                         )
@@ -131,7 +129,7 @@ fun ExpenseByCategoryDonutSection(
                         label = totalLabel,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(180.dp)
+                            .height(240.dp)
                             .padding(4.dp),
                         style = style,
                     ) { event ->
@@ -142,9 +140,9 @@ fun ExpenseByCategoryDonutSection(
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 DonutLegend(
-                    legendData = legendData.take(MAX_LEGEND_ROWS),
+                    legendData = legendData,
                     selectedCategory = selectedCategory,
                     onTapped = { selectedCategory = it },
                 )

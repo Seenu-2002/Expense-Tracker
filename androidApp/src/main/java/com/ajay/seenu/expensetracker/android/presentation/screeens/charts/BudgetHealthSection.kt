@@ -47,21 +47,26 @@ fun BudgetHealthSection(
         return
     }
 
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        StatLine("Budgeted", health.totalBudgeted.asCurrency(LocalCurrencySymbol.current))
-        StatLine("Spent", health.totalSpent.asCurrency(LocalCurrencySymbol.current))
-        val remainingColor = if (health.totalRemaining < 0.0) ChartDefaults.expenseColor else MaterialTheme.colorScheme.onSurface
-        StatLine(
-            label = "Remaining",
-            value = health.totalRemaining.asCurrency(LocalCurrencySymbol.current),
-            valueColor = remainingColor,
-        )
-        StatLine(
-            label = "Used",
-            value = "${"%.0f".format(health.overallUsedPercent)}%",
-        )
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            StatTile("Budgeted", health.totalBudgeted.asCurrency(LocalCurrencySymbol.current), Modifier.weight(1f))
+            StatTile("Spent", health.totalSpent.asCurrency(LocalCurrencySymbol.current), Modifier.weight(1f))
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            val remainingColor = if (health.totalRemaining < 0.0) ChartDefaults.expenseColor else MaterialTheme.colorScheme.onSurface
+            StatTile(
+                label = "Remaining",
+                value = health.totalRemaining.asCurrency(LocalCurrencySymbol.current),
+                valueColor = remainingColor,
+                modifier = Modifier.weight(1f),
+            )
+            StatTile(
+                label = "Used",
+                value = "${"%.0f".format(health.overallUsedPercent)}%",
+                modifier = Modifier.weight(1f),
+            )
+        }
 
-        Spacer(modifier = Modifier.height(2.dp))
         StatusRow(atRisk = health.atRiskCount, overBudget = health.overBudgetCount)
 
         if (health.topOffenders.isNotEmpty()) {
@@ -78,32 +83,27 @@ fun BudgetHealthSection(
 }
 
 @Composable
-private fun StatLine(
+private fun StatTile(
     label: String,
     value: String,
+    modifier: Modifier = Modifier,
     valueColor: Color = MaterialTheme.colorScheme.onSurface,
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
+    Column(
+        modifier = modifier
             .clip(RoundedCornerShape(10.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(horizontal = 10.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
+            .padding(horizontal = 12.dp, vertical = 10.dp)
     ) {
-        Text(
-            text = label,
-            fontSize = 12.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.weight(1f),
-        )
-        Text(text = value, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = valueColor)
+        Text(text = label, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(text = value, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = valueColor)
     }
 }
 
 @Composable
 private fun StatusRow(atRisk: Int, overBudget: Int) {
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         StatusChip(
             label = "At risk",
             count = atRisk,

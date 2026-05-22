@@ -12,10 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
-import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.CardDefaults
@@ -127,25 +124,14 @@ fun AnalyticsScreen(navController: NavController, viewModel: AnalyticsViewModel 
             Spacer(modifier = Modifier.width(10.dp))
         }
     }) { paddingValues ->
-        LazyVerticalStaggeredGrid(
-            columns = StaggeredGridCells.Fixed(2),
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(12.dp),
-            verticalItemSpacing = 12.dp,
-            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp),
+            verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp),
         ) {
-            items(
-                count = viewModel.chartOrder.size,
-                span = { index ->
-                    when (viewModel.chartOrder[index]) {
-                        Charts.INCOME_EXPENSE_TREND,
-                        Charts.TOTAL_EXPENSE_PER_DAY_BY_CATEGORY -> StaggeredGridItemSpan.FullLine
-                        else -> StaggeredGridItemSpan.SingleLane
-                    }
-                },
-            ) { index ->
+            items(viewModel.chartOrder.size) { index ->
                 val cellModifier = Modifier.fillMaxWidth()
                 when (val chartType = viewModel.chartOrder[index]) {
                     Charts.SUMMARY_KPI -> {
