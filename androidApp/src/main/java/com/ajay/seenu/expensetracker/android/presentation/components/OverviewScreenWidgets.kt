@@ -9,6 +9,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,8 +21,12 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBox
@@ -77,159 +83,104 @@ private fun OverviewCardPreview(@PreviewParameter(OverallDataProvider::class) da
 fun OverviewCard(
     modifier: Modifier = Modifier, data: OverallData
 ) {
+    val symbol = LocalCurrencySymbol.current
+    val net = data.income - data.expense
+    val expensePctRaw = if (data.income > 0.0) (data.expense / data.income) else 0.0
+    val expensePctLabel = decimalFormatter.format(expensePctRaw * 100)
+    val onPrimary = MaterialTheme.colorScheme.onPrimary
 
-    val expensePercentageRaw = (data.expense / data.income).let {
-        if (it == Double.POSITIVE_INFINITY) {
-            0.0
-        } else {
-            it
-        }
-    }
-    val expensePercentageLabel = decimalFormatter.format(expensePercentageRaw * 100) + " %"
-
-    ConstraintLayout(modifier = modifier) {
-        val (expense, income, progress) = createRefs()
-        Column(
-            modifier = Modifier
-                .background(
-                    shape = RoundedCornerShape(20.dp),
-                    color = LocalColors.current.incomeColor
-                )
-                .constrainAs(income) {
-                    width = Dimension.fillToConstraints
-                    top.linkTo(parent.top, 8.dp)
-                    start.linkTo(parent.start, 15.dp)
-                    end.linkTo(expense.start, 10.dp)
-                    bottom.linkTo(expense.bottom)
-                }
-                .padding(vertical = 15.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceEvenly
-        ) {
-
-            Text(modifier = Modifier.padding(bottom = 4.dp), text = "Income", fontSize = 14.sp)
+    ElevatedCard(
+        modifier = modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = onPrimary,
+        ),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)) {
             Text(
-                text = "${LocalCurrencySymbol.current} ${data.getIncomeLabel()}",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-
-        }
-
-        Column(
-            modifier = Modifier
-                .background(
-                    shape = RoundedCornerShape(20.dp),
-                    color = LocalColors.current.expenseColor
-                )
-                .constrainAs(expense) {
-                    width = Dimension.fillToConstraints
-                    top.linkTo(parent.top, 8.dp)
-                    start.linkTo(income.end, 10.dp)
-                    end.linkTo(parent.end, 15.dp)
-                }
-                .padding(vertical = 15.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceEvenly
-        ) {
-
-            Text(modifier = Modifier.padding(bottom = 4.dp), text = "Expense", fontSize = 14.sp)
-            Text(
-                text = "${LocalCurrencySymbol.current} ${data.getExpenseLabel()}",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-
-        }
-
-        ConstraintLayout(
-            modifier = Modifier
-                .constrainAs(progress) {
-                    width = Dimension.fillToConstraints
-                    top.linkTo(expense.bottom, 8.dp)
-                    start.linkTo(parent.start, 10.dp)
-                    end.linkTo(parent.end, 10.dp)
-                    bottom.linkTo(parent.bottom, 8.dp)
-                }
-                .padding(bottom = 8.dp, start = 15.dp, end = 15.dp)) {
-
-            val (progressBarBg, progressBar, marker, percentageText) = createRefs()
-            val percentage = if (expensePercentageRaw > 1) {
-                1
-            } else {
-                expensePercentageRaw
-            }.toFloat()
-
-            val color = if (percentage <= .65) {
-                LocalColors.current.incomeColor
-            } else if (percentage <= .8) {
-                LocalColors.current.averagePercentColor
-            } else {
-                LocalColors.current.expenseColor
-            }
-
-            val textColor = LocalContentColor.current
-
-            Box(
-                modifier = Modifier
-                    .constrainAs(progressBarBg) {
-                        top.linkTo(marker.bottom)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    }
-                    .fillMaxWidth()
-                    .height(2.dp)
-                    .background(shape = RoundedCornerShape(4.dp), color = Color.LightGray)
-            )
-
-            Box(
-                modifier = Modifier
-                    .constrainAs(progressBar) {
-                        top.linkTo(marker.bottom)
-                        start.linkTo(progressBarBg.start)
-                    }
-                    .fillMaxWidth(percentage)
-                    .height(2.dp)
-                    .background(shape = RoundedCornerShape(4.dp), color = color)
-            )
-
-            Canvas(
-                modifier = Modifier
-                    .width(10.dp)
-                    .height(10.dp)
-                    .constrainAs(marker) {
-                        top.linkTo(percentageText.bottom, 2.dp)
-                        start.linkTo(progressBar.end)
-                        end.linkTo(progressBar.end)
-                    }) {
-                with(Path()) {
-                    moveTo(0F, 0F)
-                    lineTo(size.width, 0F)
-                    lineTo(size.width / 2F, size.height)
-                    lineTo(0F, 0F)
-                    close()
-
-                    drawPath(path = this, color = textColor)
-                }
-            }
-
-            Text(
-                modifier = Modifier
-                    .wrapContentSize()
-                    .constrainAs(percentageText) {
-                        top.linkTo(parent.top)
-                        start.linkTo(progressBar.end)
-                        end.linkTo(progressBar.end)
-                    },
-                textAlign = TextAlign.Center,
-                text = expensePercentageLabel,
+                text = "Net Balance",
                 fontSize = 12.sp,
-                color = textColor
+                color = onPrimary.copy(alpha = 0.8f),
             )
+            Spacer(modifier = Modifier.height(2.dp))
+            Row(verticalAlignment = Alignment.Bottom) {
+                Text(
+                    text = "$symbol ${decimalFormatter.format(net)}",
+                    fontSize = 30.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = onPrimary,
+                )
+                if (data.income > 0.0) {
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Box(
+                        modifier = Modifier
+                            .padding(bottom = 4.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(onPrimary.copy(alpha = 0.15f))
+                            .padding(horizontal = 8.dp, vertical = 3.dp),
+                    ) {
+                        Text(
+                            text = "$expensePctLabel% spent",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = onPrimary,
+                        )
+                    }
+                }
+            }
 
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Row(modifier = Modifier.fillMaxWidth()) {
+                BreakdownItem(
+                    label = "Income",
+                    amount = "$symbol ${data.getIncomeLabel()}",
+                    arrow = "↑",
+                    modifier = Modifier.weight(1f),
+                )
+                BreakdownItem(
+                    label = "Expense",
+                    amount = "$symbol ${data.getExpenseLabel()}",
+                    arrow = "↓",
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
     }
+}
 
+@Composable
+private fun BreakdownItem(
+    label: String,
+    amount: String,
+    arrow: String,
+    modifier: Modifier = Modifier,
+) {
+    val onPrimary = MaterialTheme.colorScheme.onPrimary
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = arrow,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            color = onPrimary.copy(alpha = 0.85f),
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Column {
+            Text(
+                text = label,
+                fontSize = 11.sp,
+                color = onPrimary.copy(alpha = 0.75f),
+            )
+            Text(
+                text = amount,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = onPrimary,
+            )
+        }
+    }
 }
 
 val decimalFormatter = DecimalFormat("#0.##") // FIXME: Generic and user config

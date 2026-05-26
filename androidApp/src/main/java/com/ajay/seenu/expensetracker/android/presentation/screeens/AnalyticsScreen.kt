@@ -56,6 +56,7 @@ import com.ajay.seenu.expensetracker.android.presentation.viewmodels.AnalyticsVi
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.Charts
 import com.ajay.seenu.expensetracker.android.presentation.components.DateRangePickerBottomSheet
 import com.ajay.seenu.expensetracker.android.presentation.components.FilterBottomSheet
+import com.ajay.seenu.expensetracker.android.presentation.components.FilterIconButton
 import com.ajay.seenu.expensetracker.domain.model.DateFilter
 import com.ajay.seenu.expensetracker.domain.model.TransactionFilter
 import com.ajay.seenu.expensetracker.util.toLocalDate
@@ -93,35 +94,16 @@ fun AnalyticsScreen(navController: NavController, viewModel: AnalyticsViewModel 
 
     Scaffold(containerColor = MaterialTheme.colorScheme.surfaceContainerLow, topBar = {
         ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
-            val box = createRef()
-            BadgedBox(
-                modifier = Modifier
-                    .constrainAs(box) {
-                        top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom)
-                        end.linkTo(parent.end)
-                    }
-                    .padding(4.dp),
-                badge = {
-                    if (currentFilter != DateFilter.ThisMonth) {
-                        Box(
-                            modifier = Modifier
-                                .size(10.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(color = MaterialTheme.colorScheme.errorContainer)
-                        )
-                    }
-                }
-            ) {
-                Icon(
-                    modifier = Modifier.clickable {
-                        openFilterBottomSheet = true
-                    },
-                    painter = painterResource(id = R.drawable.icon_filter_list),
-                    contentDescription = "filter"
-                )
-            }
-            Spacer(modifier = Modifier.width(10.dp))
+            val (filterRef) = createRefs()
+            FilterIconButton(
+                modifier = Modifier.constrainAs(filterRef) {
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    end.linkTo(parent.end, margin = 10.dp)
+                },
+                isFiltered = currentFilter != DateFilter.ThisMonth,
+                onClick = { openFilterBottomSheet = true },
+            )
         }
     }) { paddingValues ->
         LazyColumn(
@@ -202,6 +184,7 @@ fun AnalyticsScreen(navController: NavController, viewModel: AnalyticsViewModel 
             FilterBottomSheet(
                 sheetState = sheetState,
                 filter = TransactionFilter(dateFilter = currentFilter),
+                showTypeFilter = false,
                 formatter = viewModel.getDateFormatter(),
                 onFilterSelected = { transactionFilter ->
                     openFilterBottomSheet = false
