@@ -65,7 +65,6 @@ import com.ajay.seenu.expensetracker.android.presentation.components.ChangeConfi
 import com.ajay.seenu.expensetracker.android.presentation.components.ProgressDialog
 import com.ajay.seenu.expensetracker.android.presentation.components.SlidingSwitch
 import com.ajay.seenu.expensetracker.android.presentation.state.UiState
-import com.ajay.seenu.expensetracker.android.presentation.theme.LocalColors
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.CategoriesListUiData
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.CategoryScreenViewModel
 import com.ajay.seenu.expensetracker.android.util.getStringRes
@@ -133,7 +132,7 @@ fun CategoryListScreen(
                     },
                     shape = CircleShape,
                     containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = Color.White
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Add,
@@ -298,11 +297,13 @@ fun SwipeableCategoryRow(
                 Icon(
                     modifier = Modifier
                         .padding(end = 15.dp),
-                    imageVector = Icons.Default.Delete, contentDescription = "Delete"
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = MaterialTheme.colorScheme.onErrorContainer,
                 )
             }
             alignment = Alignment.CenterEnd
-            color = LocalColors.current.expenseColor
+            color = MaterialTheme.colorScheme.errorContainer
         }
 
         SwipeToDismissBoxValue.StartToEnd -> {
@@ -311,11 +312,12 @@ fun SwipeableCategoryRow(
                     modifier = Modifier
                         .padding(start = 15.dp),
                     painter = painterResource(id = R.drawable.edit_note),
-                    contentDescription = "Clone"
+                    contentDescription = "Clone",
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
                 )
             }
             alignment = Alignment.CenterStart
-            color = Color.Blue.copy(alpha = 0.3f)
+            color = MaterialTheme.colorScheme.secondaryContainer
         }
     }
 

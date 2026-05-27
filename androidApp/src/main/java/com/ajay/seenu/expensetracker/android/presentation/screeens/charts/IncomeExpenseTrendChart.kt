@@ -12,8 +12,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.ajay.seenu.expensetracker.android.presentation.common.ChartDefaults
 import com.ajay.seenu.expensetracker.android.presentation.common.rememberMarker
+import com.ajay.seenu.expensetracker.android.presentation.theme.AppTheme
 import com.ajay.seenu.expensetracker.android.presentation.screeens.InsufficientDataCard
 import com.ajay.seenu.expensetracker.android.presentation.screeens.Loader
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.chart_viewmodels.IncomeExpenseTrendViewModel
@@ -79,8 +79,8 @@ fun IncomeExpenseTrendChart(
         }
     )
 
-    val incomeColor = ChartDefaults.incomeColor
-    val expenseColor = ChartDefaults.expenseColor
+    val incomeColor = AppTheme.colors.income
+    val expenseColor = AppTheme.colors.expense
 
     val incomeLine = rememberLineSpec(shader = DynamicShader.color(incomeColor))
     val expenseLine = rememberLineSpec(shader = DynamicShader.color(expenseColor))

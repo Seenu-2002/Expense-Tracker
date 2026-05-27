@@ -467,7 +467,7 @@ fun UserInfo(modifier: Modifier = Modifier, name: String, userImagePath: String?
                     .padding(8.dp)
                     .size(120.dp)
                     .clip(RoundedCornerShape(60.dp)),
-                painter = ColorPainter(Color.Red),
+                painter = ColorPainter(MaterialTheme.colorScheme.surfaceVariant),
                 contentDescription = "User Image"
             )
         }

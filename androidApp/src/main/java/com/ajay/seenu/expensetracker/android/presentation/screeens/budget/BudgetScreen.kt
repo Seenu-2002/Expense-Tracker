@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.data.FilterPreference
+import com.ajay.seenu.expensetracker.android.presentation.theme.AppTheme
 import com.ajay.seenu.expensetracker.android.presentation.theme.LocalCurrencySymbol
 import com.ajay.seenu.expensetracker.android.util.asCurrency
 import com.ajay.seenu.expensetracker.android.presentation.state.UiState
@@ -247,7 +248,7 @@ fun BudgetCard(
                         modifier = Modifier
                             .size(14.dp)
                             .clip(CircleShape)
-                            .background(if (isOverBudget) MaterialTheme.colorScheme.error else Orange)
+                            .background(if (isOverBudget) MaterialTheme.colorScheme.error else AppTheme.colors.warning)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
@@ -267,7 +268,7 @@ fun BudgetCard(
                         Text(
                             "!",
                             fontSize = 10.sp,
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onError,
                         )
                     }
                 }
@@ -289,7 +290,7 @@ fun BudgetCard(
                     .fillMaxWidth()
                     .height(8.dp)
                     .clip(RoundedCornerShape(4.dp)),
-                color = if (isOverBudget) MaterialTheme.colorScheme.error else Orange,
+                color = if (isOverBudget) MaterialTheme.colorScheme.error else AppTheme.colors.warning,
                 trackColor = LocalContentColor.current.copy(alpha = 0.1F)
             )
 

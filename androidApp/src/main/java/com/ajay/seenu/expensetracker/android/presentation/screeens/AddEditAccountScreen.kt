@@ -200,7 +200,7 @@ fun AddEditAccountScreen(arg: AddEditAccountScreenArg, onNavigateBack: () -> Uni
                     Icon(
                         painter = painterResource(R.drawable.check),
                         contentDescription = null,
-                        tint = Color.White
+                        tint = MaterialTheme.colorScheme.onPrimary
                     )
                 })
         }

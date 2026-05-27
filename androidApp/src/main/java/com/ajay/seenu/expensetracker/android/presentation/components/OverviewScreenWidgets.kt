@@ -55,7 +55,7 @@ import androidx.constraintlayout.compose.Dimension
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.presentation.common.PreviewThemeWrapper
 import com.ajay.seenu.expensetracker.android.presentation.screeens.CategoryIconItem
-import com.ajay.seenu.expensetracker.android.presentation.theme.LocalColors
+import com.ajay.seenu.expensetracker.android.presentation.theme.AppTheme
 import com.ajay.seenu.expensetracker.android.presentation.theme.LocalCurrencySymbol
 import com.ajay.seenu.expensetracker.domain.model.Account
 import com.ajay.seenu.expensetracker.domain.model.AccountType
@@ -258,11 +258,13 @@ fun TransactionPreviewRow(
                 Icon(
                     modifier = Modifier
                         .padding(end = 15.dp),
-                    imageVector = Icons.Default.Delete, contentDescription = "Delete"
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = MaterialTheme.colorScheme.onErrorContainer,
                 )
             }
             alignment = Alignment.CenterEnd
-            color = LocalColors.current.expenseColor
+            color = MaterialTheme.colorScheme.errorContainer
         }
 
         SwipeToDismissBoxValue.StartToEnd -> {
@@ -271,11 +273,12 @@ fun TransactionPreviewRow(
                     modifier = Modifier
                         .padding(start = 15.dp),
                     painter = painterResource(id = R.drawable.baseline_content_copy_24),
-                    contentDescription = "Clone"
+                    contentDescription = "Clone",
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
                 )
             }
             alignment = Alignment.CenterStart
-            color = Color.Blue.copy(alpha = 0.3f)
+            color = MaterialTheme.colorScheme.secondaryContainer
         }
     }
     SwipeToDismissBox(
@@ -326,13 +329,13 @@ fun TransactionPreviewContent(modifier: Modifier = Modifier,
         val color = when (transaction.type) {
             TransactionType.EXPENSE -> {
                 amountLabel = "- $amountLabel"
-                LocalColors.current.expenseColor
+                AppTheme.colors.expense
             }
             TransactionType.INCOME -> {
                 amountLabel = "+ $amountLabel"
-                LocalColors.current.incomeColor
+                AppTheme.colors.income
             }
-            TransactionType.TRANSFER -> Color(0xFF1A73E8)
+            TransactionType.TRANSFER -> AppTheme.colors.transfer
         }
 
         CategoryIconItem(

@@ -106,7 +106,7 @@ fun AddEditBudgetScreen(
                     if (arg is AddEditBudgetArg.Edit)
                         stringResource(R.string.edit_budget) else
                         stringResource(R.string.create_budget),
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimary,
                 )
             },
             navigationIcon = {
@@ -114,7 +114,7 @@ fun AddEditBudgetScreen(
                     Icon(
                         Icons.Default.ArrowBack,
                         contentDescription = "Back",
-                        tint = Color.White
+                        tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             },
@@ -133,7 +133,7 @@ fun AddEditBudgetScreen(
         ) {
             Text(
                 "How much do you want to spend?",
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onPrimary,
                 fontSize = 18.sp,
                 textAlign = TextAlign.Center
             )
@@ -145,7 +145,7 @@ fun AddEditBudgetScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 textStyle = TextStyle(
                     fontSize = 60.sp,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onPrimary
                 ),
                 singleLine = true,
                 onValueChange = { newValue ->
@@ -163,7 +163,7 @@ fun AddEditBudgetScreen(
                         prefix = {
                             Text(text = LocalCurrencySymbol.current,
                                 style = LocalTextStyle.current.copy(
-                                    color = Color.White,
+                                    color = MaterialTheme.colorScheme.onPrimary,
                                     fontSize = 60.sp
                                 )
                             )
@@ -339,7 +339,7 @@ fun AddEditBudgetScreen(
                             Text(
                                 "${(it.value * 100).roundToInt()}%",
                                 fontSize = 12.sp,
-                                color = Color.White,
+                                color = MaterialTheme.colorScheme.onPrimary,
                             )
                         }
                     }
@@ -372,7 +372,7 @@ fun AddEditBudgetScreen(
             ) {
                 Text(
                     "Continue",
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Medium
                 )

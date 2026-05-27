@@ -104,7 +104,7 @@ fun MainScreen(
                     onClick = onAddTransaction,
                     shape = CircleShape,
                     containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = Color.White
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
                     Icon(imageVector = Icons.Filled.Add, contentDescription = "Add transaction")
                 }

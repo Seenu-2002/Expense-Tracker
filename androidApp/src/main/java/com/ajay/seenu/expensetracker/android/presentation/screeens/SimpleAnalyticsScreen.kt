@@ -312,9 +312,10 @@ fun AnalyticsLegendRow(
 
     val shape = RoundedCornerShape(6.dp)
 
+    val selectedBackground = MaterialTheme.colorScheme.surfaceVariant
     Column(modifier.let {
         if (isSelected) {
-            modifier.background(Color.DarkGray, shape)
+            modifier.background(selectedBackground, shape)
         } else {
             modifier
         }
@@ -356,7 +357,7 @@ fun AnalyticsLegendRow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(6.dp)
-                    .background(Color.LightGray, shape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant, shape)
             )
             Spacer(
                 modifier = Modifier
