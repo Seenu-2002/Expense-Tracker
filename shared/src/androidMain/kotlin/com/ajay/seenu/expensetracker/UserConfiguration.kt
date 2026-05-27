@@ -56,7 +56,7 @@ actual class UserConfigurationsManager(private val appContext: Context) {
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getDateFormat(): Flow<String> {
         return dataStore.data.mapLatest {
-            it[dateFormat] ?: "dd MMM, yyyy"
+            it[dateFormat] ?: "dd MMM yyyy"
         }
     }
 
@@ -83,7 +83,7 @@ actual class UserConfigurationsManager(private val appContext: Context) {
                 weekStartsFrom = it[startDayOfWeek]?.let { startDayOfWeek ->
                     DayOfWeek.valueOf(startDayOfWeek)
                 } ?: DayOfWeek.SUNDAY,
-                dateFormat = it[dateFormat] ?: "dd MMM, yyyy",
+                dateFormat = it[dateFormat] ?: "dd MMM yyyy",
                 isAppLockEnabled = it[isAppLockEnabled] ?: false,
                 currencySymbol = it[currencySymbolKey] ?: "$"
             )

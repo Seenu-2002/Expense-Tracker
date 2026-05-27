@@ -107,7 +107,7 @@ fun OverviewScreen(
     var openDateRangePicker by rememberSaveable { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    val formatter = remember { SimpleDateFormat("dd MMM, yyyy", Locale.ENGLISH) }
+    val formatter = remember { SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH) }
     val context = LocalContext.current
 
     BackHandler(enabled = isSearchActive) {

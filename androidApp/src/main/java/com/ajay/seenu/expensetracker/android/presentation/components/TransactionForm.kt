@@ -102,7 +102,7 @@ fun TransactionForm(
     transaction: Transaction? = null,
     existingAttachments: List<Attachment>? = null,  //TODO: must be shown in edit mode
     formatter: SimpleDateFormat = SimpleDateFormat(
-        "dd MMM, yyyy",
+        "dd MMM yyyy",
         Locale.ENGLISH
     ),
     selectedCategory: Category? = transaction?.category,

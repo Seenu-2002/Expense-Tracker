@@ -409,7 +409,7 @@ fun SelectedDateTextPreview() {
             locale = Locale.ENGLISH
         ),
         formatter = SimpleDateFormat(
-            "dd MMM, yyyy",
+            "dd MMM yyyy",
             Locale.ENGLISH
         )
     )

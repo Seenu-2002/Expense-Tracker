@@ -43,7 +43,7 @@ class TotalExpensePerDayChartViewModel @Inject constructor(
     private val _dataSetLabels: MutableStateFlow<List<String>> = MutableStateFlow(emptyList())
     val dataSetLabels: StateFlow<List<String>> = _dataSetLabels.asStateFlow()
 
-    private val _updatedDateFormat: MutableStateFlow<String> = MutableStateFlow("dd MMM, yyyy")
+    private val _updatedDateFormat: MutableStateFlow<String> = MutableStateFlow("dd MMM yyyy")
     val updatedDateFormat = _updatedDateFormat.asStateFlow()
 
     private lateinit var filter: DateFilter
