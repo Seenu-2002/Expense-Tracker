@@ -111,7 +111,7 @@ fun AccountsListScreen(
                     onClick = onCreateAccount,
                     shape = CircleShape,
                     containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = Color.White
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Add,

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -38,7 +39,7 @@ fun TransactionFieldView(modifier: Modifier = Modifier,
                 }
                 .border(
                     width = 1.dp,
-                    color = if (isError) Color(0xFFFD3C4A) else LocalContentColor.current.copy(alpha = 0.2F),
+                    color = if (isError) MaterialTheme.colorScheme.error else LocalContentColor.current.copy(alpha = 0.2F),
                     shape = RoundedCornerShape(10.dp)
                 )
                 .padding(15.dp),

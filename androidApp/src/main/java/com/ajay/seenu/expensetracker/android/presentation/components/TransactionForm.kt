@@ -73,6 +73,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.FileProvider
 import com.ajay.seenu.expensetracker.android.R
+import com.ajay.seenu.expensetracker.android.presentation.theme.AppTheme
 import com.ajay.seenu.expensetracker.android.presentation.theme.LocalCurrencySymbol
 import com.ajay.seenu.expensetracker.android.presentation.common.PreviewThemeWrapper
 import com.ajay.seenu.expensetracker.android.presentation.common.TransactionFieldView
@@ -101,7 +102,7 @@ fun TransactionForm(
     transaction: Transaction? = null,
     existingAttachments: List<Attachment>? = null,  //TODO: must be shown in edit mode
     formatter: SimpleDateFormat = SimpleDateFormat(
-        "dd MMM, yyyy",
+        "dd MMM yyyy",
         Locale.ENGLISH
     ),
     selectedCategory: Category? = transaction?.category,
@@ -277,7 +278,7 @@ fun TransactionForm(
                         }
                         .padding(vertical = 6.dp, horizontal = 8.dp),
                     text = "Ok",
-                    color = Color.Blue
+                    color = MaterialTheme.colorScheme.primary
                 )
             }, dismissButton = {
                 Text(
@@ -288,19 +289,32 @@ fun TransactionForm(
                         }
                         .padding(vertical = 6.dp, horizontal = 8.dp),
                     text = "Cancel",
-                    color = Color.Red
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }) {
             DatePicker(state = datePickerState)
         }
     }
 
-    val background = remember { Animatable(Color(0xFFFD3C4A)) }
-    LaunchedEffect(transactionType) {
+    val expenseColor = AppTheme.colors.expense
+    val incomeColor = AppTheme.colors.income
+    val transferColor = AppTheme.colors.transfer
+    val initialBackground = when (transactionType) {
+        TransactionType.EXPENSE -> expenseColor
+        TransactionType.INCOME -> incomeColor
+        TransactionType.TRANSFER -> transferColor
+    }
+    val onHeroColor = when (transactionType) {
+        TransactionType.EXPENSE -> AppTheme.colors.onExpense
+        TransactionType.INCOME -> AppTheme.colors.onIncome
+        TransactionType.TRANSFER -> AppTheme.colors.onTransfer
+    }
+    val background = remember { Animatable(initialBackground) }
+    LaunchedEffect(transactionType, expenseColor, incomeColor, transferColor) {
         val color = when (transactionType) {
-            TransactionType.EXPENSE -> Color(0xFFFD3C4A)
-            TransactionType.INCOME -> Color(0xFF00A86B)
-            TransactionType.TRANSFER -> Color(0xFF1A73E8)
+            TransactionType.EXPENSE -> expenseColor
+            TransactionType.INCOME -> incomeColor
+            TransactionType.TRANSFER -> transferColor
         }
         background.animateTo(color, animationSpec = tween(animationDuration))
     }
@@ -344,7 +358,7 @@ fun TransactionForm(
                             Text(
                                 modifier = Modifier.padding(horizontal = 4.dp),
                                 text = "Add Transaction",
-                                color = Color.White
+                                color = onHeroColor
                             ) // TODO("string resource")
                         }, navigationIcon = {
                             Icon(
@@ -358,7 +372,7 @@ fun TransactionForm(
                                     .padding(8.dp),
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Back",
-                                tint = Color.White
+                                tint = onHeroColor
                             )
                         })
                     }
@@ -385,7 +399,7 @@ fun TransactionForm(
                             modifier = Modifier
                                 .width(125.dp)
                                 .clip(RoundedCornerShape(10.dp))
-                                .background(color = Color.White)
+                                .background(color = onHeroColor.copy(alpha = 0.15f))
                                 .padding(horizontal = 5.dp),
                             selectedValue = transactionType,
                             values = TransactionType.entries,
@@ -395,7 +409,7 @@ fun TransactionForm(
                                 transactionType = it
                             },
                             containerColor = Color.Transparent,
-                            sliderColor = Color.LightGray,
+                            sliderColor = onHeroColor.copy(alpha = 0.35f),
                             animationDuration = animationDuration,
                         )
                     }
@@ -403,7 +417,7 @@ fun TransactionForm(
                     Text(
                         text = stringResource(id = R.string.amount),
                         modifier = Modifier.padding(start = 20.dp),
-                        color = Color.White
+                        color = onHeroColor
                     )
                     OutlinedTextField(
                         modifier = Modifier.fillMaxWidth(),
@@ -412,7 +426,7 @@ fun TransactionForm(
                             Text(
                                 text = LocalCurrencySymbol.current,
                                 style = LocalTextStyle.current.copy(
-                                    color = Color.White,
+                                    color = onHeroColor,
                                     fontSize = 60.sp
                                 )
                             )
@@ -420,7 +434,7 @@ fun TransactionForm(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         textStyle = TextStyle(
                             fontSize = 60.sp,
-                            color = Color.White
+                            color = onHeroColor
                         ),
                         onValueChange = {
                             amount = it

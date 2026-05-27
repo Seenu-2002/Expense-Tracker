@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.ajay.seenu.expensetracker.android.presentation.common.ChartDefaults
+import com.ajay.seenu.expensetracker.android.presentation.theme.AppTheme
 import com.ajay.seenu.expensetracker.android.presentation.theme.LocalCurrencySymbol
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.chart_viewmodels.SummaryKpi
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.chart_viewmodels.SummaryKpiViewModel
@@ -51,13 +51,13 @@ private fun SummaryKpiGrid(kpi: SummaryKpi, modifier: Modifier = Modifier) {
             KpiCard(
                 label = "Income",
                 amount = kpi.income,
-                accent = ChartDefaults.incomeColor,
+                accent = AppTheme.colors.income,
                 modifier = Modifier.weight(1f),
             )
             KpiCard(
                 label = "Expense",
                 amount = kpi.expense,
-                accent = ChartDefaults.expenseColor,
+                accent = AppTheme.colors.expense,
                 modifier = Modifier.weight(1f),
             )
         }
@@ -66,7 +66,7 @@ private fun SummaryKpiGrid(kpi: SummaryKpi, modifier: Modifier = Modifier) {
             KpiCard(
                 label = "Net",
                 amount = kpi.net,
-                accent = if (kpi.net >= 0.0) ChartDefaults.incomeColor else ChartDefaults.expenseColor,
+                accent = if (kpi.net >= 0.0) AppTheme.colors.income else AppTheme.colors.expense,
                 modifier = Modifier.weight(1f),
             )
             SavingsRateCard(
@@ -116,9 +116,9 @@ private fun KpiCard(
 @Composable
 private fun SavingsRateCard(rate: Double, modifier: Modifier = Modifier) {
     val accent = when {
-        rate >= 20.0 -> ChartDefaults.incomeColor
-        rate >= 0.0 -> Color(0xFFFFA726)
-        else -> ChartDefaults.expenseColor
+        rate >= 20.0 -> AppTheme.colors.income
+        rate >= 0.0 -> AppTheme.colors.warning
+        else -> AppTheme.colors.expense
     }
     Row(
         modifier = modifier

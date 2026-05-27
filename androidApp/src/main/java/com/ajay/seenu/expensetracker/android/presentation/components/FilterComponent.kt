@@ -64,6 +64,7 @@ fun FilterBottomSheet(
     filter: TransactionFilter,
     categories: List<Category> = emptyList(),
     accounts: List<Account> = emptyList(),
+    showTypeFilter: Boolean = true,
     formatter: SimpleDateFormat,
     onFilterSelected: (TransactionFilter) -> Unit,
     onCustomDateRequested: () -> Unit = {},
@@ -147,37 +148,39 @@ fun FilterBottomSheet(
                 )
             }
 
-            HorizontalDivider(modifier = Modifier.padding(top = 8.dp))
+            if (showTypeFilter) {
+                HorizontalDivider(modifier = Modifier.padding(top = 8.dp))
 
-            // --- Type section ---
-            FilterSectionHeader("Type")
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                FilterChip(
-                    selected = filter.type == null,
-                    onClick = { onFilterSelected(filter.copy(type = null)) },
-                    label = { Text("All") }
-                )
-                FilterChip(
-                    selected = filter.type == TransactionType.INCOME,
-                    onClick = {
-                        val newType = if (filter.type == TransactionType.INCOME) null else TransactionType.INCOME
-                        onFilterSelected(filter.copy(type = newType))
-                    },
-                    label = { Text("Income") }
-                )
-                FilterChip(
-                    selected = filter.type == TransactionType.EXPENSE,
-                    onClick = {
-                        val newType = if (filter.type == TransactionType.EXPENSE) null else TransactionType.EXPENSE
-                        onFilterSelected(filter.copy(type = newType))
-                    },
-                    label = { Text("Expense") }
-                )
+                // --- Type section ---
+                FilterSectionHeader("Type")
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChip(
+                        selected = filter.type == null,
+                        onClick = { onFilterSelected(filter.copy(type = null)) },
+                        label = { Text("All") }
+                    )
+                    FilterChip(
+                        selected = filter.type == TransactionType.INCOME,
+                        onClick = {
+                            val newType = if (filter.type == TransactionType.INCOME) null else TransactionType.INCOME
+                            onFilterSelected(filter.copy(type = newType))
+                        },
+                        label = { Text("Income") }
+                    )
+                    FilterChip(
+                        selected = filter.type == TransactionType.EXPENSE,
+                        onClick = {
+                            val newType = if (filter.type == TransactionType.EXPENSE) null else TransactionType.EXPENSE
+                            onFilterSelected(filter.copy(type = newType))
+                        },
+                        label = { Text("Expense") }
+                    )
+                }
             }
 
             // --- Category section ---
@@ -406,7 +409,7 @@ fun SelectedDateTextPreview() {
             locale = Locale.ENGLISH
         ),
         formatter = SimpleDateFormat(
-            "dd MMM, yyyy",
+            "dd MMM yyyy",
             Locale.ENGLISH
         )
     )

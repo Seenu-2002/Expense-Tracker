@@ -19,7 +19,7 @@ inline fun <T> Iterable<T>.sumOf(selector: (T) -> Float): Float {
 
 fun formatDateHeader(inputDate: String): String {
     // TODO: User data format configuration
-    val formatter = SimpleDateFormat("dd MMM, yyyy", Locale.getDefault())
+    val formatter = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
     val parsedDate = formatter.parse(inputDate) ?: return inputDate
 
     val calendar = Calendar.getInstance()

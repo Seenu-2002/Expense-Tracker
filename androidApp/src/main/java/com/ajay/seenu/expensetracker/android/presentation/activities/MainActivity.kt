@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -63,9 +62,7 @@ import com.ajay.seenu.expensetracker.android.presentation.screeens.budget.Budget
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.BudgetViewModel
 import com.ajay.seenu.expensetracker.android.presentation.screeens.budget.AddEditBudgetScreen
 import com.ajay.seenu.expensetracker.android.presentation.screeens.budget.DeleteBudgetDialog
-import com.ajay.seenu.expensetracker.android.presentation.theme.AppDefaults
 import com.ajay.seenu.expensetracker.android.presentation.theme.ExpenseTrackerTheme
-import com.ajay.seenu.expensetracker.android.presentation.theme.LocalColors
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.MainViewModel
 import com.ajay.seenu.expensetracker.android.security.BiometricPromptManager
 import com.ajay.seenu.expensetracker.domain.model.Theme
@@ -111,92 +108,81 @@ class MainActivity : AppCompatActivity() {
                 Theme.SYSTEM_THEME -> isSystemInDarkTheme()
             }
             ExpenseTrackerTheme(darkTheme = isDarkThemeEnabled, currencySymbol = currencySymbol) {
-                val appColors = AppDefaults.colors()
-                CompositionLocalProvider(
-                    LocalColors provides appColors
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
                 ) {
-                    Surface(
-                        modifier = Modifier.fillMaxSize(),
-                        color = MaterialTheme.colorScheme.background
-                    ) {
-                        if (isAppLockEnabled) {
-                            val biometricResult by promptManager.promptResults.collectAsState(
-                                initial = null
-                            )
-                            val enrollLauncher = rememberLauncherForActivityResult(
-                                contract = ActivityResultContracts.StartActivityForResult(),
-                                onResult = {
-                                    println("Activity result: $it")
-                                }
-                            )
-                            LaunchedEffect(biometricResult) {
-                                if (biometricResult is BiometricPromptManager.BiometricResult.AuthenticationNotSet) {
-                                    if (Build.VERSION.SDK_INT >= 30) {
-                                        val enrollIntent =
-                                            Intent(Settings.ACTION_BIOMETRIC_ENROLL).apply {
-                                                putExtra(
-                                                    Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
-                                                    BIOMETRIC_STRONG or DEVICE_CREDENTIAL
-                                                )
-                                            }
-                                        enrollLauncher.launch(enrollIntent)
-                                    }
+                    if (isAppLockEnabled) {
+                        val biometricResult by promptManager.promptResults.collectAsState(
+                            initial = null
+                        )
+                        val enrollLauncher = rememberLauncherForActivityResult(
+                            contract = ActivityResultContracts.StartActivityForResult(),
+                            onResult = {
+                                println("Activity result: $it")
+                            }
+                        )
+                        LaunchedEffect(biometricResult) {
+                            if (biometricResult is BiometricPromptManager.BiometricResult.AuthenticationNotSet) {
+                                if (Build.VERSION.SDK_INT >= 30) {
+                                    val enrollIntent =
+                                        Intent(Settings.ACTION_BIOMETRIC_ENROLL).apply {
+                                            putExtra(
+                                                Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
+                                                BIOMETRIC_STRONG or DEVICE_CREDENTIAL
+                                            )
+                                        }
+                                    enrollLauncher.launch(enrollIntent)
                                 }
                             }
-                            val lifecycleOwner = LocalLifecycleOwner.current
-
-                            DisposableEffect(lifecycleOwner) {
-                                val observer = LifecycleEventObserver { _, event ->
-                                    if (event == Lifecycle.Event.ON_RESUME) {
-                                        promptManager.showBiometricPrompt(
-                                            title = "Unlock Expense Tracker",
-                                            description = "Authenticate to access your financial data"
-                                        )
-                                    }
-                                }
-                                lifecycleOwner.lifecycle.addObserver(observer)
-                                onDispose {
-                                    lifecycleOwner.lifecycle.removeObserver(observer)
-                                }
-                            }
-//                            LaunchedEffect(Unit) {
-//                                promptManager.showBiometricPrompt(
-//                                    title = "Sample prompt",
-//                                    description = "Sample prompt description"
-//                                )
-//                            }
-
-                            biometricResult?.let { result ->
-                                when (result) {
-                                    is BiometricPromptManager.BiometricResult.AuthenticationError -> {
-                                        Timber.tag("Biometric").e(result.error)
-                                    }
-
-                                    BiometricPromptManager.BiometricResult.AuthenticationFailed -> {
-                                        Timber.tag("Biometric").e("Authentication failed")
-                                        finish()
-                                    }
-
-                                    BiometricPromptManager.BiometricResult.AuthenticationNotSet -> {
-                                        Timber.tag("Biometric").d("Authentication not set")
-                                    }
-
-                                    BiometricPromptManager.BiometricResult.AuthenticationSuccess -> {
-                                        App()
-                                    }
-
-                                    BiometricPromptManager.BiometricResult.FeatureUnavailable -> {
-                                        Timber.tag("Biometric").d("Feature unavailable")
-                                    }
-
-                                    BiometricPromptManager.BiometricResult.HardwareUnavailable -> {
-                                        Timber.tag("Biometric").d("Hardware unavailable")
-                                    }
-                                }
-                            }
-                        } else {
-                            App()
                         }
+                        val lifecycleOwner = LocalLifecycleOwner.current
+
+                        DisposableEffect(lifecycleOwner) {
+                            val observer = LifecycleEventObserver { _, event ->
+                                if (event == Lifecycle.Event.ON_RESUME) {
+                                    promptManager.showBiometricPrompt(
+                                        title = "Unlock Expense Tracker",
+                                        description = "Authenticate to access your financial data"
+                                    )
+                                }
+                            }
+                            lifecycleOwner.lifecycle.addObserver(observer)
+                            onDispose {
+                                lifecycleOwner.lifecycle.removeObserver(observer)
+                            }
+                        }
+
+                        biometricResult?.let { result ->
+                            when (result) {
+                                is BiometricPromptManager.BiometricResult.AuthenticationError -> {
+                                    Timber.tag("Biometric").e(result.error)
+                                }
+
+                                BiometricPromptManager.BiometricResult.AuthenticationFailed -> {
+                                    Timber.tag("Biometric").e("Authentication failed")
+                                    finish()
+                                }
+
+                                BiometricPromptManager.BiometricResult.AuthenticationNotSet -> {
+                                    Timber.tag("Biometric").d("Authentication not set")
+                                }
+
+                                BiometricPromptManager.BiometricResult.AuthenticationSuccess -> {
+                                    App()
+                                }
+
+                                BiometricPromptManager.BiometricResult.FeatureUnavailable -> {
+                                    Timber.tag("Biometric").d("Feature unavailable")
+                                }
+
+                                BiometricPromptManager.BiometricResult.HardwareUnavailable -> {
+                                    Timber.tag("Biometric").d("Hardware unavailable")
+                                }
+                            }
+                        }
+                    } else {
+                        App()
                     }
                 }
             }

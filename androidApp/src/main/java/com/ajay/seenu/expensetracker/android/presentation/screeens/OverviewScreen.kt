@@ -68,6 +68,7 @@ import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.data.FilterPreference
 import com.ajay.seenu.expensetracker.android.presentation.components.DateRangePickerBottomSheet
 import com.ajay.seenu.expensetracker.android.presentation.components.FilterBottomSheet
+import com.ajay.seenu.expensetracker.android.presentation.components.FilterIconButton
 import com.ajay.seenu.expensetracker.android.presentation.components.OverviewCard
 import com.ajay.seenu.expensetracker.android.presentation.components.TransactionPreviewRow
 import com.ajay.seenu.expensetracker.android.presentation.state.UiState
@@ -106,7 +107,7 @@ fun OverviewScreen(
     var openDateRangePicker by rememberSaveable { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    val formatter = remember { SimpleDateFormat("dd MMM, yyyy", Locale.ENGLISH) }
+    val formatter = remember { SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH) }
     val context = LocalContext.current
 
     BackHandler(enabled = isSearchActive) {
@@ -212,28 +213,12 @@ fun OverviewScreen(
                         contentDescription = "search"
                     )
                     Spacer(modifier = Modifier.width(10.dp))
-                    BadgedBox(
-                        badge = {
-                            val isFiltered = currentFilter.dateFilter != DateFilter.ThisMonth ||
-                                    currentFilter.hasActiveFilters
-                            if (isFiltered) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(10.dp)
-                                        .clip(RoundedCornerShape(10.dp))
-                                        .background(color = MaterialTheme.colorScheme.error)
-                                )
-                            }
-                        }
-                    ) {
-                        Icon(
-                            modifier = Modifier
-                                .size(30.dp)
-                                .clickable { openFilterBottomSheet = true },
-                            painter = painterResource(id = R.drawable.icon_filter_list),
-                            contentDescription = "filter"
-                        )
-                    }
+                    val isFiltered = currentFilter.dateFilter != DateFilter.ThisMonth ||
+                            currentFilter.hasActiveFilters
+                    FilterIconButton(
+                        isFiltered = isFiltered,
+                        onClick = { openFilterBottomSheet = true },
+                    )
                     Spacer(modifier = Modifier.width(10.dp))
                 }
             }

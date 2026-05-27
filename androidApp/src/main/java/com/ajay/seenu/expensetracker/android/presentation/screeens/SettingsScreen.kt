@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -148,6 +149,7 @@ fun SettingsScreen(
         )
         ListBottomSheet(
             state = weekStartsFromBottomSheet,
+            title = "Week starts from",
             items = options,
             selectedItem = stringResource(weekStartsFromStringRes),
             onDismiss = {
@@ -167,10 +169,15 @@ fun SettingsScreen(
                 context.getString(R.string.date_format_row, it.first, it.second)
             }
         }
+        val selectedDateFormatRow = remember(configs.dateFormat) {
+            val index = viewModel.supportedDateFormats.indexOfFirst { it.first == configs.dateFormat }
+            if (index >= 0) dateFormats[index] else null
+        }
         ListBottomSheet(
             state = dateFormatBottomSheet,
+            title = "Date format",
             items = dateFormats,
-            selectedItem = configs.dateFormat,
+            selectedItem = selectedDateFormatRow,
             onDismiss = {
                 showDateFormatBottomSheet = false
             }) { index, option ->
@@ -189,6 +196,7 @@ fun SettingsScreen(
         )
         ListBottomSheet(
             state = themeBottomSheet,
+            title = "Theme",
             items = options,
             selectedItem = stringResource(themeStringRes),
             onDismiss = {
@@ -206,6 +214,7 @@ fun SettingsScreen(
         val options = remember { viewModel.supportedCurrencySymbols.map { it.second } }
         ListBottomSheet(
             state = currencyBottomSheet,
+            title = "Currency",
             items = options,
             selectedItem = viewModel.supportedCurrencySymbols.find { it.first == configs.currencySymbol }?.second ?: configs.currencySymbol,
             onDismiss = {
@@ -467,7 +476,7 @@ fun UserInfo(modifier: Modifier = Modifier, name: String, userImagePath: String?
                     .padding(8.dp)
                     .size(120.dp)
                     .clip(RoundedCornerShape(60.dp)),
-                painter = ColorPainter(Color.Red),
+                painter = ColorPainter(MaterialTheme.colorScheme.surfaceVariant),
                 contentDescription = "User Image"
             )
         }
@@ -715,34 +724,65 @@ fun SettingsRowContainer(
 fun ListBottomSheet(
     modifier: Modifier = Modifier,
     state: SheetState,
+    title: String,
     items: List<String>,
     selectedItem: String?,
     onDismiss: (() -> Unit)? = null,
     onClick: (Int, String) -> Unit,
 ) {
-    ModalBottomSheet(onDismissRequest = {
-        onDismiss?.invoke()
-    }, sheetState = state) {
-        LazyColumn(modifier = modifier.fillMaxWidth()) {
-            items(items.size) {
-                val text = items[it]
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            onClick(it, text)
-                        }
-                        .padding(8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = text
-                    )
-                    if (text == selectedItem) {
-                        Icon(
-                            imageVector = Icons.Filled.Check,
-                            contentDescription = ""
+    ModalBottomSheet(
+        onDismissRequest = { onDismiss?.invoke() },
+        sheetState = state,
+    ) {
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 16.dp),
+        ) {
+            Text(
+                text = title,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                items(items.size) { index ->
+                    val text = items[index]
+                    val isSelected = text == selectedItem
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(
+                                if (isSelected) MaterialTheme.colorScheme.secondaryContainer
+                                else Color.Transparent
+                            )
+                            .clickable { onClick(index, text) }
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = text,
+                            modifier = Modifier.weight(1f),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer
+                            else MaterialTheme.colorScheme.onSurface,
+                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
                         )
+                        if (isSelected) {
+                            Icon(
+                                imageVector = Icons.Filled.Check,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                modifier = Modifier.size(18.dp),
+                            )
+                        }
                     }
                 }
             }

@@ -1,8 +1,10 @@
 package com.ajay.seenu.expensetracker.android.util
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
 import com.ajay.seenu.expensetracker.android.R
-import com.ajay.seenu.expensetracker.android.presentation.common.ChartDefaults
+import com.ajay.seenu.expensetracker.android.presentation.theme.AppTheme
 import com.ajay.seenu.expensetracker.domain.model.AccountType
 import com.ajay.seenu.expensetracker.domain.model.TransactionType
 
@@ -22,11 +24,13 @@ fun TransactionType.getPlaceHolderRes(): Int {
     }
 }
 
+@Composable
+@ReadOnlyComposable
 fun TransactionType.getColor(): Color {
     return when (this) {
-        TransactionType.INCOME -> ChartDefaults.incomeColor
-        TransactionType.EXPENSE -> ChartDefaults.expenseColor
-        TransactionType.TRANSFER -> Color(0xFF1A73E8)
+        TransactionType.INCOME -> AppTheme.colors.income
+        TransactionType.EXPENSE -> AppTheme.colors.expense
+        TransactionType.TRANSFER -> AppTheme.colors.transfer
     }
 }
 

@@ -32,7 +32,7 @@ class AnalyticsViewModel @Inject constructor(
     private val _currentFilter: MutableStateFlow<DateFilter> = MutableStateFlow(DateFilter.ThisMonth)
     val currentFilter: StateFlow<DateFilter> = _currentFilter.asStateFlow()
 
-    private val _updatedDateFormat: MutableStateFlow<String> = MutableStateFlow("dd MMM, yyyy")
+    private val _updatedDateFormat: MutableStateFlow<String> = MutableStateFlow("dd MMM yyyy")
 
     fun setFilter(filter: DateFilter) {
         FilterPreference.setCurrentFilter(context, filter)

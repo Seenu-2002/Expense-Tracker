@@ -72,7 +72,7 @@ fun EnhancedCreateBudgetScreen(
                     title = {
                         Text(
                             "Create Budget",
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onPrimary,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Medium
                         )
@@ -82,7 +82,7 @@ fun EnhancedCreateBudgetScreen(
                             Icon(
                                 Icons.Default.ArrowBack,
                                 contentDescription = "Back",
-                                tint = Color.White
+                                tint = MaterialTheme.colorScheme.onPrimary
                             )
                         }
                     },
@@ -102,7 +102,7 @@ fun EnhancedCreateBudgetScreen(
                 ) {
                     Text(
                         "How much do you want to spend?",
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         fontSize = 18.sp,
                         textAlign = TextAlign.Center
                     )
@@ -115,7 +115,7 @@ fun EnhancedCreateBudgetScreen(
                     ) {
                         Text(
                             "${amount.ifEmpty { "0" }}",
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onPrimary,
                             fontSize = 64.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -155,7 +155,7 @@ fun EnhancedCreateBudgetScreen(
                     ) {
                         Text(
                             "Continue",
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onPrimary,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Medium
                         )
@@ -186,7 +186,7 @@ fun NumberPad(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
     ) {
         Column(
@@ -240,7 +240,7 @@ fun NumberPad(
             ) {
                 Text(
                     "Done",
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium
                 )

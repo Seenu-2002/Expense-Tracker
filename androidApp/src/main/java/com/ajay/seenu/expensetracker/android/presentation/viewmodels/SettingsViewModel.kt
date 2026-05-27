@@ -34,7 +34,7 @@ class SettingsViewModel @Inject constructor(
         null,
         Theme.SYSTEM_THEME,
         DayOfWeek.MONDAY,
-        "dd MMM, yyyy",
+        "dd MMM yyyy",
         isAppLockEnabled = false
     )
 

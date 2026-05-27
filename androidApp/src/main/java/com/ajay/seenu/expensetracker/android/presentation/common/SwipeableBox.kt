@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.ajay.seenu.expensetracker.android.R
-import com.ajay.seenu.expensetracker.android.presentation.theme.LocalColors
+import androidx.compose.material3.MaterialTheme
 
 
 @Composable
@@ -59,11 +59,13 @@ fun SwipeableBox(
                 Icon(
                     modifier = Modifier
                         .padding(end = 15.dp),
-                    imageVector = Icons.Default.Delete, contentDescription = "Delete"
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = MaterialTheme.colorScheme.onErrorContainer,
                 )
             }
             alignment = Alignment.CenterEnd
-            color = LocalColors.current.expenseColor
+            color = MaterialTheme.colorScheme.errorContainer
         }
 
         SwipeToDismissBoxValue.StartToEnd -> {
@@ -72,11 +74,12 @@ fun SwipeableBox(
                     modifier = Modifier
                         .padding(start = 15.dp),
                     painter = painterResource(id = R.drawable.edit_note),
-                    contentDescription = "Clone"
+                    contentDescription = "Clone",
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
                 )
             }
             alignment = Alignment.CenterStart
-            color = Color.Blue.copy(alpha = 0.3f)
+            color = MaterialTheme.colorScheme.secondaryContainer
         }
     }
 

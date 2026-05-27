@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ajay.seenu.expensetracker.android.presentation.theme.AppTheme
 import com.ajay.seenu.expensetracker.android.presentation.theme.LocalCurrencySymbol
 import com.ajay.seenu.expensetracker.android.util.asCurrency
 import com.ajay.seenu.expensetracker.domain.model.budget.BudgetWithSpending
@@ -100,7 +101,7 @@ fun BudgetDetailScreen(
                     modifier = Modifier
                         .size(14.dp)
                         .clip(CircleShape)
-                        .background(if (isOverBudget) MaterialTheme.colorScheme.error else Orange)
+                        .background(if (isOverBudget) MaterialTheme.colorScheme.error else AppTheme.colors.warning)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
@@ -133,7 +134,7 @@ fun BudgetDetailScreen(
                     .fillMaxWidth()
                     .height(8.dp)
                     .clip(RoundedCornerShape(4.dp)),
-                color = Orange,
+                color = AppTheme.colors.warning,
                 trackColor = LocalContentColor.current.copy(alpha = 0.3f)
             )
 

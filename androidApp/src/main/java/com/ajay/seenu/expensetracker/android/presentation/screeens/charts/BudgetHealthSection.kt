@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.ajay.seenu.expensetracker.android.presentation.common.ChartDefaults
+import com.ajay.seenu.expensetracker.android.presentation.theme.AppTheme
 import com.ajay.seenu.expensetracker.android.presentation.theme.LocalCurrencySymbol
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.chart_viewmodels.BudgetHealthViewModel
 import com.ajay.seenu.expensetracker.android.util.asCurrency
@@ -53,7 +53,7 @@ fun BudgetHealthSection(
             StatTile("Spent", health.totalSpent.asCurrency(LocalCurrencySymbol.current), Modifier.weight(1f))
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-            val remainingColor = if (health.totalRemaining < 0.0) ChartDefaults.expenseColor else MaterialTheme.colorScheme.onSurface
+            val remainingColor = if (health.totalRemaining < 0.0) AppTheme.colors.expense else MaterialTheme.colorScheme.onSurface
             StatTile(
                 label = "Remaining",
                 value = health.totalRemaining.asCurrency(LocalCurrencySymbol.current),
@@ -107,12 +107,12 @@ private fun StatusRow(atRisk: Int, overBudget: Int) {
         StatusChip(
             label = "At risk",
             count = atRisk,
-            tint = if (atRisk > 0) Color(0xFFFFA726) else MaterialTheme.colorScheme.onSurfaceVariant,
+            tint = if (atRisk > 0) AppTheme.colors.warning else MaterialTheme.colorScheme.onSurfaceVariant,
         )
         StatusChip(
             label = "Over budget",
             count = overBudget,
-            tint = if (overBudget > 0) ChartDefaults.expenseColor else MaterialTheme.colorScheme.onSurfaceVariant,
+            tint = if (overBudget > 0) AppTheme.colors.expense else MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
@@ -139,7 +139,7 @@ private fun StatusChip(label: String, count: Int, tint: Color) {
 private fun OffenderRow(row: BudgetWithSpending) {
     val percentText = "${"%.0f".format(row.percentageUsed)}%"
     val isOver = row.isOverBudget
-    val tint = if (isOver) ChartDefaults.expenseColor else Color(0xFFFFA726)
+    val tint = if (isOver) AppTheme.colors.expense else AppTheme.colors.warning
     val symbol = if (isOver) "!" else "⚠"
 
     Column(modifier = Modifier.fillMaxWidth()) {

@@ -10,8 +10,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ajay.seenu.expensetracker.android.R
-import com.ajay.seenu.expensetracker.android.presentation.common.ChartDefaults
 import com.ajay.seenu.expensetracker.android.presentation.common.rememberMarker
+import com.ajay.seenu.expensetracker.android.presentation.theme.AppTheme
 import com.ajay.seenu.expensetracker.android.presentation.screeens.InsufficientDataCard
 import com.ajay.seenu.expensetracker.android.presentation.screeens.Loader
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.chart_viewmodels.ExpenseByCategoryChartViewModel
@@ -64,10 +64,11 @@ fun ExpenseByCategoryChart(
                 valueFormatter = CartesianValueFormatter { value, chartValues, _ ->
                     chartValues.model.extraStore[viewModel.labelListKey][value.toInt()]
                 })
+        val expenseColor = AppTheme.colors.expense
         val layer = rememberColumnCartesianLayer(
             columnProvider = ColumnCartesianLayer.ColumnProvider.series(
                 rememberLineComponent(
-                    color = ChartDefaults.expenseColor,
+                    color = expenseColor,
                     thickness = 32.dp
                 )
             )

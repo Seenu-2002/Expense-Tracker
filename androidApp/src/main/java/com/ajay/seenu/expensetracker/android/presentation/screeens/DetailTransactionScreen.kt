@@ -59,6 +59,7 @@ import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
 import com.ajay.seenu.expensetracker.android.R
 import com.ajay.seenu.expensetracker.android.presentation.common.PreviewThemeWrapper
+import com.ajay.seenu.expensetracker.android.presentation.theme.AppTheme
 import com.ajay.seenu.expensetracker.android.presentation.theme.LocalCurrencySymbol
 import com.ajay.seenu.expensetracker.android.util.asCurrency
 import com.ajay.seenu.expensetracker.android.presentation.viewmodels.DetailTransactionViewModel
@@ -115,14 +116,22 @@ fun DetailTransactionView(modifier: Modifier = Modifier,
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
+        val heroBackground = when (transaction.type) {
+            TransactionType.EXPENSE -> AppTheme.colors.expense
+            TransactionType.INCOME -> AppTheme.colors.income
+            TransactionType.TRANSFER -> AppTheme.colors.transfer
+        }
+        val onHero = when (transaction.type) {
+            TransactionType.EXPENSE -> AppTheme.colors.onExpense
+            TransactionType.INCOME -> AppTheme.colors.onIncome
+            TransactionType.TRANSFER -> AppTheme.colors.onTransfer
+        }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(0.3F)
                 .background(
-                    color = if (transaction.type == TransactionType.EXPENSE)
-                        Color(0xFFFD3C4A)
-                    else Color(0xFF00A86B),
+                    color = heroBackground,
                     shape = RoundedCornerShape(
                         topStart = 0.dp,
                         topEnd = 0.dp,
@@ -144,14 +153,14 @@ fun DetailTransactionView(modifier: Modifier = Modifier,
                             }
                         )
                         .padding(8.dp),
-                    tint = Color.White,
+                    tint = onHero,
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back"
                 )
                 Text(
                     modifier = Modifier.padding(horizontal = 4.dp),
                     text = "Detail Transaction",
-                    style = MaterialTheme.typography.titleLarge.copy(color = Color.White),
+                    style = MaterialTheme.typography.titleLarge.copy(color = onHero),
                 )
             }
             Column(
@@ -162,12 +171,12 @@ fun DetailTransactionView(modifier: Modifier = Modifier,
                 Text(text = transaction.amount.asCurrency(LocalCurrencySymbol.current),
                     style = TextStyle(
                         fontSize = 60.sp,
-                        color = Color.White
+                        color = onHero
                     )
                 )
                 Text(text = date,
                     modifier = Modifier.padding(top = 10.dp),
-                    color = Color.White)
+                    color = onHero)
             }
         }
         Column(modifier = Modifier.fillMaxWidth()
@@ -178,7 +187,7 @@ fun DetailTransactionView(modifier: Modifier = Modifier,
                 .padding(horizontal = 20.dp)
                 .clip(RoundedCornerShape(10.dp))
                 .background(color = MaterialTheme.colorScheme.background)
-                .border(width = 0.5.dp, color = Color.LightGray, shape = RoundedCornerShape(10.dp))
+                .border(width = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant, shape = RoundedCornerShape(10.dp))
                 .padding(horizontal = 10.dp)) {
                 Column(modifier = Modifier.weight(1f)
                     .padding(vertical = 10.dp),
@@ -219,11 +228,12 @@ fun DetailTransactionView(modifier: Modifier = Modifier,
             }
 
             val pathEffect = PathEffect.dashPathEffect(floatArrayOf(30f, 20f), 0f)
+            val dividerColor = MaterialTheme.colorScheme.outlineVariant
             Canvas(Modifier.fillMaxWidth().height(1.dp)
                 .padding(horizontal = 15.dp)) {
 
                 drawLine(
-                    color = Color.Gray,
+                    color = dividerColor,
                     start = Offset(0f, 0f),
                     end = Offset(size.width, 0f),
                     pathEffect = pathEffect
